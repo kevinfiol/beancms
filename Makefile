@@ -1,38 +1,42 @@
-REDBEAN=./vendor/redbean.com
+PORT=8081
+HOST=127.0.0.1
 
-.PHONY: download run clean
+REDBEAN=vendor/redbean.com
+BUILD=bin/redbean.com
+
+.PHONY: download run clean stop
 
 # download all dependencies
 download:
+	curl -o ${REDBEAN} https://redbean.dev/redbean-3.0.0.com && chmod +x ${REDBEAN}
 	${REDBEAN} -i scripts.lua --get-deps
 
 add:
-	cp -f ${REDBEAN} bin/redbean.com
-	cd src/ && ../vendor/zip.com -r ../bin/redbean.com `ls -A`
+	cp -f ${REDBEAN} ${BUILD}
+	cd src/ && ../vendor/zip.com -r ../${BUILD} `ls -A`
 
 run: add
-	./bin/redbean.com -vv -p 8080 -l 127.0.0.1
+	${BUILD} -vv -p ${PORT} -l ${HOST}
 
-start:
-	./bin/redbean.com -vv -d -L ./bin/app.log -P ./bin/app.pid -p 8080 -l 127.0.0.1
-
+start: add
+	@(test ! -f ./bin/redbean.pid && \
+		${BUILD} -vv -d -L ./bin/redbean.log -P ./bin/redbean.pid -p 8080 -l 127.0.0.1 \
+	|| echo "Redbean is already running at $$(cat ./bin/redbean.pid)")
 stop:
-	kill -HUP $$(cat ./bin/app.pid)
+	@(test -f ./bin/redbean.pid && \
+		kill -TERM $$(cat ./bin/redbean.pid) && \
+		rm ./bin/redbean.pid \
+	|| true)
+
+restart: stop add start
+
+watch:
+	make stop
+	make start && \
+	trap 'make stop' EXIT INT TERM && \
+	watchexec -p -w src make restart
 
 clean:
-	rm vendor/redbean.com
-	rm vendor/unzip.com
-	rm vendor/zip.com
-
-
-# 	@(test ! -f ${PROJECT}.pid && \
-# 		./${REDBEAN} -vv -d -L ${PROJECT}.log -P ${PROJECT}.pid && \
-# 		printf "started $$(cat ${PROJECT}.pid)\n") \
-# 		|| echo "already running $$(cat ${PROJECT}.pid)"
-
-
-# 		@(test ! -f ${PROJECT}.pid && \
-# 		./${REDBEAN} -vv -d -L ${PROJECT}.log -P ${PROJECT}.pid && \
-# 		printf "started $$(cat ${PROJECT}.pid)") \
-# 		|| kill -HUP $$(cat ${PROJECT}.pid) && \
-# 		printf "restarted $$(cat ${PROJECT}.pid)\n"
+	rm ${REDBEAN}
+	rm ./vendor/unzip.com
+	rm ./vendor/zip.com

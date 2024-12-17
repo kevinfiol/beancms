@@ -1,2 +1,4 @@
 bin/*.com
 vendor/*.com
+bin/*.pid
+bin/*.log
