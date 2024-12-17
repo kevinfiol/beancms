@@ -22,6 +22,7 @@ start: add
 	@(test ! -f ./bin/redbean.pid && \
 		${BUILD} -vv -d -L ./bin/redbean.log -P ./bin/redbean.pid -p 8080 -l 127.0.0.1 \
 	|| echo "Redbean is already running at $$(cat ./bin/redbean.pid)")
+
 stop:
 	@(test -f ./bin/redbean.pid && \
 		kill -TERM $$(cat ./bin/redbean.pid) && \

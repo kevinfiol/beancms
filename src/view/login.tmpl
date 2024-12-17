@@ -1,0 +1,26 @@
+{% function block.content() %}
+  <h1>Login</h1>
+
+  <section>
+    <form action="/login" method="post">
+      <div>
+        <input type="text" name="username" id="username" placeholder="Username" required>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+      </div>
+
+      {% if error_message then %}
+        <figure class="error">
+          {%& error_message %}
+        </figure>
+      {% end %}
+
+      <div>
+        <button type="submit">
+          Submit
+        </button>
+      </div>
+    </form>
+  </section>
+{% end %}
+
+{% render('layout') %}
