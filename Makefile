@@ -1,11 +1,13 @@
+REDBEAN=./vendor/redbean.com
+
 .PHONY: download run clean
 
 # download all dependencies
 download:
-	./scripts.com -i scripts.lua --get-deps
+	${REDBEAN} -i scripts.lua --get-deps
 
-add: vendor/zip.com vendor/redbean.com
-	cp -f vendor/redbean.com bin/redbean.com
+add:
+	cp -f ${REDBEAN} bin/redbean.com
 	cd src/ && ../vendor/zip.com -r ../bin/redbean.com `ls -A`
 
 run: add

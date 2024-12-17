@@ -21,7 +21,6 @@ end
 function get_deps()
   download('https://redbean.dev/zip.com', 'vendor/zip.com')
   download('https://redbean.dev/unzip.com', 'vendor/unzip.com')
-  download('https://redbean.dev/redbean-3.0.0.com', 'vendor/redbean.com')
 end
 
 local tasks = {

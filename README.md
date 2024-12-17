@@ -1,3 +1,3 @@
 ```bash
-curl -o scripts.com https://redbean.dev/redbean-tiny-2.2.com && chmod +x ./scripts.com
+curl -o ./vendor/redbean.com https://redbean.dev/redbean-3.0.0.com && chmod +x ./vendor/redbean.com
 ```
