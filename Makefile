@@ -2,6 +2,8 @@ PORT=8081
 HOST=127.0.0.1
 
 REDBEAN=vendor/redbean.com
+ZIP=vendor/zip.com
+UNZIP=vendor/unzip.com
 BUILD=bin/redbean.com
 
 .PHONY: download run clean stop
@@ -9,21 +11,20 @@ BUILD=bin/redbean.com
 # download all dependencies
 download:
 	curl -o ${REDBEAN} https://redbean.dev/redbean-3.0.0.com && chmod +x ${REDBEAN}
-	${REDBEAN} -i scripts.lua --get-deps
+	curl -o ${ZIP} https://redbean.dev/zip.com && chmod +x ${ZIP}
+	curl -o ${UNZIP} https://redbean.dev/unzip.com && chmod +x ${UNZIP}
 
 add:
 	cp -f ${REDBEAN} ${BUILD}
-	cd src/ && ../vendor/zip.com -r ../${BUILD} `ls -A`
+	cd src/ && ../${ZIP} -r ../${BUILD} `ls -A`
 
 run: add
 	${BUILD} -vv -p ${PORT} -l ${HOST}
 
 start: add
-	${REDBEAN} -i scripts.lua --start
-
-# 	@(test ! -f ./bin/redbean.pid && \
-# 		${BUILD} -vv -d -L ./bin/redbean.log -P ./bin/redbean.pid -p 8080 -l 127.0.0.1 \
-# 	|| echo "Redbean is already running at $$(cat ./bin/redbean.pid)")
+	@(test ! -f ./bin/redbean.pid && \
+		${BUILD} -vv -d -L ./bin/redbean.log -P ./bin/redbean.pid -p 8080 -l 127.0.0.1 \
+	|| echo "Redbean is already running at $$(cat ./bin/redbean.pid)")
 
 stop:
 	@(test -f ./bin/redbean.pid && \
@@ -41,5 +42,5 @@ watch:
 
 clean:
 	rm ${REDBEAN}
-	rm ./vendor/unzip.com
-	rm ./vendor/zip.com
+	rm ${ZIP}
+	rm ${UNZIP}
