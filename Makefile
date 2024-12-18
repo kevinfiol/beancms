@@ -1,10 +1,16 @@
+# constants
 PORT=8081
 HOST=127.0.0.1
 
+# vendor
 REDBEAN=vendor/redbean.com
 ZIP=vendor/zip.com
 UNZIP=vendor/unzip.com
+
+# build
 BUILD=bin/redbean.com
+PID_FILE=bin/redbean.pid
+LOG_FILE=bin/redbean.log
 
 .PHONY: download run clean stop
 
@@ -23,13 +29,13 @@ run: add
 
 start: add
 	@(test ! -f ./bin/redbean.pid && \
-		${BUILD} -vv -d -L ./bin/redbean.log -P ./bin/redbean.pid -p 8080 -l 127.0.0.1 \
-	|| echo "Redbean is already running at $$(cat ./bin/redbean.pid)")
+		${BUILD} -vv -d -L ${LOG_FILE} -P ${PID_FILE} -p ${PORT} -l ${HOST} \
+	|| echo "Redbean is already running at $$(cat ${PID_FILE})")
 
 stop:
-	@(test -f ./bin/redbean.pid && \
-		kill -TERM $$(cat ./bin/redbean.pid) && \
-		rm ./bin/redbean.pid \
+	@(test -f ${PID_FILE} && \
+		kill -TERM $$(cat ${PID_FILE}) && \
+		rm ${PID_FILE} \
 	|| true)
 
 restart: stop add start
@@ -44,3 +50,6 @@ clean:
 	rm ${REDBEAN}
 	rm ${ZIP}
 	rm ${UNZIP}
+	rm ${BUILD}
+	rm ${LOG_FILE}
+	rm ${PID_FILE}
