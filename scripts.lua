@@ -42,8 +42,10 @@ function start()
   if is_running() then
     local fd = unix.open(PID_FILE, unix.O_RDONLY)
     local pid = unix.read(fd)
-    print("Redbean is already running at PID " .. pid)
+    print("redbean.com is already running at PID " .. pid)
+
     unix.close(fd)
+    unix.exit(1)
   end
 
   local cmd = string.format(
@@ -52,25 +54,41 @@ function start()
   )
 
   local prog = assert(unix.commandv(BUILD))
-  local ok, err = unix.execve(prog, {
-    '-vv', '-d',
-    '-L', LOG_FILE,
-    '-P', PID_FILE,
-    '-p', PORT,
-    '-l', HOST
-  })
 
-  print('HELOOOOOOO NURSE')
-  -- print(cmd)
-  -- local ok, err = unix.execve(cmd)
-  print(ok)
-  print(err)
+  print('here')
+  -- local ok, err = unix.execve(prog, {
+  --   prog,
+  --   '-vv', '-d',
+  --   '-L', LOG_FILE,
+  --   '-P', PID_FILE,
+  --   '-p', PORT,
+  --   '-l', HOST
+  -- })
+
+  -- print(ok)
+  -- print(err)
+end
+
+function stop()
+  if not is_running() then
+    print('redbean.com is not running')
+    unix.exit(0)
+  end
+
+  local fd = unix.open(PID_FILE, unix.O_RDONLY)
+  local pid = unix.read(fd)
+  unix.kill(pid, unix.SIGTERM)
+  unix.unlink(PID_FILE)
 end
 
 local tasks = {
   ['--get-deps'] = get_deps,
-  ['--start'] = start
+  ['--start'] = start,
+  ['--stop'] = stop
 }
 
 local fn = tasks[arg[1]]
-if fn then fn() end
+if fn then
+  fn()
+  unix.exit(0)
+end
