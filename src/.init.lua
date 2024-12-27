@@ -1,27 +1,30 @@
 require 'global'
-local fm = require 'lib.fullmoon'
+local moon = require 'lib.fullmoon'
+local db = require 'db'
 
 -- helper functions
-fm.get = function (route, handler)
-  return fm.setRoute({route, method = 'GET'}, handler)
+moon.get = function (route, handler)
+  return moon.setRoute({route, method = 'GET'}, handler)
 end
 
-fm.post = function (route, handler)
-  return fm.setRoute({route, method = 'POST'}, handler)
+moon.post = function (route, handler)
+  return moon.setRoute({route, method = 'POST'}, handler)
 end
 
-fm.setTemplate({ '/view/', tmpl = 'fmt' })
+moon.setTemplate({ '/view/', tmpl = 'fmt' })
 
-fm.get('/static/*', fm.serveAsset)
-fm.get('/', fm.serveContent('home'))
-fm.get('/login', fm.serveContent('login'))
+moon.get('/static/*', moon.serveAsset)
+moon.get('/', moon.serveContent('home'))
+moon.get('/login', moon.serveContent('login'))
 
-fm.post('/login', function (r)
-  p(r.body)
+moon.post('/login', function (r)
+  local username = r.params.username
+  local password = r.params.password
+  db.createUser(username, password)
   return 'hello'
 end)
 
-fm.run()
+moon.run()
 
 -- app.post('/login', async (c) => {
 --   const form = await c.req.formData();
