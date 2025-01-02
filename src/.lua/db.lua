@@ -2,7 +2,7 @@ local sql = require 'sqlite'
 
 return {
   createUser = function (username, hashed, salt)
-    sql:execute(
+    return sql:execute(
       [[
         insert into user (username, hashed, salt)
         values(?, ?, ?)

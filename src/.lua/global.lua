@@ -2,6 +2,12 @@ local inspect = require 'lib.inspect'
 
 f = require 'lib.f-strings'
 
-p = function (t)
-  Log(kLogDebug, inspect(t))
+local log = function (level)
+  return function (message) Log(level, inspect(message)) end
 end
+
+LogDebug = log(kLogDebug)
+LogWarn = log(kLogWarn)
+LogDebug = log(kLogError)
+LogFatal = log(kLogFatal)
+p = LogDebug

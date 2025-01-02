@@ -34,14 +34,19 @@ moon.post('/register', function (r)
 
   if password ~= confirm then
     -- redirect back to register page with error
-    return moon.serveRedirect('/register')
+    return moon.serveRedirect(303, '/register?error=password_mismatch')
   end
 
   local salt = GetRandomBytes(16)
   local hashed = argon2.hash_encoded(password, salt, { m_cost = 65536 })
 
   local ok, err = db.createUser(username, hashed, salt)
-  p({ ok = ok, err = err })
+
+  if not ok then
+    LogError(f"Could not register user {username}")
+    LogError(err)
+  end
+
   return 'hello'
 end)
 
