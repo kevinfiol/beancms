@@ -2,7 +2,7 @@ local moon = require 'lib.fullmoon'
 
 local SCHEMA = [[
   create table if not exists user (
-    username text default "",
+    username text not null unique,
     hashed text not null,
     salt text not null
   );

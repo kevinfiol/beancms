@@ -2,6 +2,7 @@ local sql = require 'sqlite'
 
 return {
   createUser = function (username, hashed, salt)
+    -- wrap this in a pcall because it could fail
     return sql:execute(
       [[
         insert into user (username, hashed, salt)

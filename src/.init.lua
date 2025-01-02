@@ -42,6 +42,8 @@ moon.post('/register', function (r)
 
   local ok, err = db.createUser(username, hashed, salt)
 
+  p({ ok, err })
+
   if not ok then
     LogError(f"Could not register user {username}")
     LogError(err)
