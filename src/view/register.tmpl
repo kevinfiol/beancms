@@ -1,12 +1,13 @@
 {% function block.content() %}
 <main>
-  <h1>Login</h1>
+  <h1>Register</h1>
 
   <section>
-    <form action="/login" method="post">
+    <form action="/register" method="post" id="register-form">
       <div>
         <input type="text" name="username" id="username" placeholder="Username" required>
-        <input type="password" name="password" id="password" placeholder="Password" required>
+        <input type="password" name="password" id="password" placeholder="Password" minlength="7" required>
+        <input type="password" name="confirm" id="confirm" placeholder="Confirm Password" minlength="7" required>
       </div>
 
       {% if error_message then %}
@@ -17,7 +18,7 @@
 
       <div>
         <button type="submit">
-          Login
+          Register
         </button>
       </div>
     </form>

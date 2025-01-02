@@ -1,14 +1,27 @@
 local sql = require 'sqlite'
 
 return {
-  createUser = function (username, hashed)
+  createUser = function (username, hashed, salt)
     sql:execute(
       [[
-        insert into user (username, hashed)
-        values(?, ?)
+        insert into user (username, hashed, salt)
+        values(?, ?, ?)
       ]],
-      username, hashed
+      username, hashed, salt
     )
+  end,
+
+  validateUser = function (username, password)
+    local result = sql:fetchOne(
+      [[
+        select hashed
+        from user
+        where username = ?
+      ]],
+      username
+    )
+
+    return argon2.verify(result.hashed, password)
   end
 }
 

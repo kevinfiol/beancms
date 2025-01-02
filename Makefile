@@ -46,10 +46,15 @@ watch:
 	trap 'make stop' EXIT INT TERM && \
 	watchexec -p -w src make restart
 
-clean:
-	rm ${REDBEAN}
-	rm ${ZIP}
-	rm ${UNZIP}
-	rm ${BUILD}
-	rm ${LOG_FILE}
-	rm ${PID_FILE}
+clean_db:
+	rm -f bin/cms.db
+	rm -f bin/cms.db-shm
+	rm -f bin/cms.db-wal
+
+clean: clean_db
+	rm -f ${REDBEAN}
+	rm -f ${ZIP}
+	rm -f ${UNZIP}
+	rm -f ${BUILD}
+	rm -f ${LOG_FILE}
+	rm -f ${PID_FILE}
