@@ -22,9 +22,12 @@ moon.post('/login', function (r)
   local username = r.params.username
   local password = r.params.password
   local ok, err = db.validateUser(username, password)
-  p({ok, err})
-  -- db.createUser(username, password)
-  return 'hello'
+
+  if not ok then
+    return moon.serveRedirect(303, f'/login?error={err}')
+  end
+
+  return moon.serveRedirect(302, '/login')
 end)
 
 moon.post('/register', function (r)
@@ -42,14 +45,13 @@ moon.post('/register', function (r)
 
   local ok, err = db.createUser(username, hashed, salt)
 
-  p({ ok, err })
-
   if not ok then
-    LogError(f"Could not register user {username}")
+    LogError(f'Could not register user: {username}')
     LogError(err)
+    return moon.serveRedirect(303, '/register?error=user_exists')
   end
 
-  return 'hello'
+  return moon.serveRedirect(302, '/')
 end)
 
 moon.run()

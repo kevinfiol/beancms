@@ -2,14 +2,17 @@ local sql = require 'sqlite'
 
 return {
   createUser = function (username, hashed, salt)
-    -- wrap this in a pcall because it could fail
-    return sql:execute(
-      [[
-        insert into user (username, hashed, salt)
-        values(?, ?, ?)
-      ]],
-      username, hashed, salt
-    )
+    local ok, err = pcall(function ()
+      return sql:execute(
+        [[
+          insert into user (username, hashed, salt)
+          values(?, ?, ?)
+        ]],
+        username, hashed, salt
+      )
+    end)
+
+    return ok, err
   end,
 
   validateUser = function (username, password)
@@ -22,7 +25,13 @@ return {
       username
     )
 
-    return argon2.verify(result.hashed, password)
+    if result.hashed == nil then
+      -- user doesn't exist
+      return false, 'user'
+    end
+
+    local ok, err = argon2.verify(result.hashed, password)
+    return ok, ok and nil or 'password'
   end
 }
 

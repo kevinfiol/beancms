@@ -8,6 +8,6 @@ end
 
 LogDebug = log(kLogDebug)
 LogWarn = log(kLogWarn)
-LogDebug = log(kLogError)
+LogError = log(kLogError)
 LogFatal = log(kLogFatal)
 p = LogDebug
