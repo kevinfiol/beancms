@@ -40,7 +40,7 @@ moon.get('/register', function (r)
     error_message = 'Passwords must match'
   end
 
-  return moon.serveContent('register', { error_message = error })
+  return moon.serveContent('register', { error_message = error_message })
 end)
 
 moon.post('/login', function (r)
