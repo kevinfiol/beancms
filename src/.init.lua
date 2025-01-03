@@ -23,7 +23,30 @@ moon.get('/static/*', moon.serveAsset)
 --   return false
 -- end)
 
-moon.get('/', moon.serveContent('home'))
+local function checkSession (r)
+  local token = r.cookies[constant.SESSION_TOKEN_NAME]
+  local is_valid_session = token ~= nil and (session.get(token) ~= nil)
+
+  p({ token = token, is_valid_session = is_valid_session })
+  p(session.entries())
+
+  if is_valid_session then
+    return true, nil
+  elseif token then
+    session.delete(token)
+  end
+
+  -- invalidate user's expired token
+  r.cookies[constant.SESSION_TOKEN_NAME] = false
+
+  return false, 'Unauthorized'
+end
+
+moon.get('/', function (r)
+  local is_valid_session, err = checkSession(r)
+
+  return moon.serveContent('home', { logged_in = is_valid_session })
+end)
 
 moon.get('/login', function (r)
   local error = r.params.error or nil
@@ -74,6 +97,7 @@ moon.post('/login', function (r)
     samesite = 'Strict',
   }
 
+  p(session.entries())
   return moon.serveRedirect(302, '/')
 end)
 
@@ -169,3 +193,38 @@ moon.run()
 --   // set cookie with session token
 --   return c.redirect('/');
 -- });
+
+-- app.on(
+--   ['GET', 'POST'],
+--   ['/', '/add', '/delete/*', '/api/*'],
+--   async (c, next) => {
+--     const token = await getSignedCookie(c, SESSION_SECRET, ACCESS_TOKEN_NAME);
+--     const isValidToken = token && SESSION.get(token) && v4.validate(token);
+
+--     if (isValidToken) {
+--       return next();
+--     } else if (token) {
+--       SESSION.delete(token);
+--     }
+
+--     deleteCookie(c, ACCESS_TOKEN_NAME);
+
+--     if (c.req.method === 'GET') {
+--       const { data: isInit } = database.checkInitialized();
+--       if (isInit) return c.redirect('/login');
+
+--       const query = c.req.query('init');
+--       const error = query === 'confirm_error'
+--         ? 'Passwords do not match.'
+--         : query === 'init_error'
+--         ? 'Could not initialize user. Check system logs.'
+--         : '';
+
+--       const html = Initialize({ error });
+--       return c.html(html);
+--     }
+
+--     c.status(401);
+--     return c.text('Unauthorized');
+--   },
+-- );

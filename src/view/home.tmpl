@@ -2,6 +2,10 @@
 <main>
   <h1>Welcome</h1>
 
+  {% if logged_in then %}
+    <p>you are logged in</p>
+  {% end %}
+
   <p>This is Bean CMS, a space for reading and writing text which you can use as a blog, a pastebin, or a notepad.</p>
 
   <a href="/login">Login</a>

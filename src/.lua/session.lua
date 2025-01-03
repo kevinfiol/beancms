@@ -21,13 +21,17 @@ return {
 
   get = function (token)
     if sessions[token] ~= nil then
-      local expiry = sessions[token]
+      local expiry = sessions[token].expiry
       local current_time_seconds = unix.clock_gettime()
-      if expiry > current_time_seconds then
+      if current_time_seconds > expiry then
         sessions[token] = nil
       end
     end
 
     return sessions[token]
+  end,
+
+  entries = function ()
+    return sessions
   end
 }
