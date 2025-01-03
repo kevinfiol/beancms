@@ -1,4 +1,5 @@
 local sql = require 'sqlite'
+local constant = require 'constants'
 
 return {
   createUser = function (username, hashed, salt)
@@ -27,11 +28,11 @@ return {
 
     if result.hashed == nil then
       -- user doesn't exist
-      return false, 'user'
+      return false, constant.USER_DOES_NOT_EXIST
     end
 
     local ok, err = argon2.verify(result.hashed, password)
-    return ok, ok and nil or 'password'
+    return ok, (ok and nil or constant.WRONG_PASSWORD)
   end
 }
 

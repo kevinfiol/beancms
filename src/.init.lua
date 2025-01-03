@@ -1,6 +1,7 @@
 require 'global'
 local moon = require 'lib.fullmoon'
 local db = require 'db'
+local constant = require 'constants'
 
 -- helper functions
 moon.get = function (route, handler)
@@ -15,8 +16,32 @@ moon.setTemplate({ '/view/', tmpl = 'fmt' })
 
 moon.get('/static/*', moon.serveAsset)
 moon.get('/', moon.serveContent('home'))
-moon.get('/login', moon.serveContent('login'))
-moon.get('/register', moon.serveContent('register'))
+
+moon.get('/login', function (r)
+  local error = r.params.error or nil
+  local error_message = nil
+
+  if error == constant.WRONG_PASSWORD then
+    error_message = 'Invalid Password'
+  elseif error == constant.USER_DOES_NOT_EXIST then
+    error_message = 'User does not exist'
+  end
+
+  return moon.serveContent('login', { error_message = error_message })
+end)
+
+moon.get('/register', function (r)
+  local error = r.params.error or nil
+  local error_message = nil
+
+  if error == constant.USER_EXISTS then
+    error_message = 'User already exists'
+  elseif error == constant.PASSWORD_MISMATCH then
+    error_message = 'Passwords must match'
+  end
+
+  return moon.serveContent('register', { error_message = error })
+end)
 
 moon.post('/login', function (r)
   local username = r.params.username
@@ -35,20 +60,22 @@ moon.post('/register', function (r)
   local password = r.params.password
   local confirm = r.params.confirm
 
+  local password_mismatch = constant.PASSWORD_MISMATCH
+  local user_exists = constant.USER_EXISTS
+
   if password ~= confirm then
     -- redirect back to register page with error
-    return moon.serveRedirect(303, '/register?error=password_mismatch')
+    return moon.serveRedirect(303, f'/register?error={password_mismatch}')
   end
 
   local salt = GetRandomBytes(16)
   local hashed = argon2.hash_encoded(password, salt, { m_cost = 65536 })
 
   local ok, err = db.createUser(username, hashed, salt)
-
   if not ok then
     LogError(f'Could not register user: {username}')
     LogError(err)
-    return moon.serveRedirect(303, '/register?error=user_exists')
+    return moon.serveRedirect(303, f'/register?error={user_exists}')
   end
 
   return moon.serveRedirect(302, '/')
