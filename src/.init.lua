@@ -17,18 +17,9 @@ end
 moon.setTemplate({ '/view/', tmpl = 'fmt' })
 moon.get('/static/*', moon.serveAsset)
 
--- middleware
--- moon.setRoute({'/', '/login', '/register', method = 'GET'}, function (r)
---   p('HAAAAAAAA YOU PASSED THROUGH HERE FIRST')
---   return false
--- end)
-
 local function checkSession (r)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
   local is_valid_session = token ~= nil and (session.get(token) ~= nil)
-
-  p({ token = token, is_valid_session = is_valid_session })
-  p(session.entries())
 
   if is_valid_session then
     return true, nil
@@ -43,8 +34,7 @@ local function checkSession (r)
 end
 
 moon.get('/', function (r)
-  local is_valid_session, err = checkSession(r)
-
+  local is_valid_session = checkSession(r)
   return moon.serveContent('home', { logged_in = is_valid_session })
 end)
 
@@ -61,6 +51,17 @@ moon.get('/login', function (r)
   end
 
   return moon.serveContent('login', { error_message = error_message })
+end)
+
+moon.get('/logout', function (r)
+  local token = r.cookies[constant.SESSION_TOKEN_NAME]
+
+  if token then
+    r.cookies[constant.SESSION_TOKEN_NAME] = false
+    session.delete(token)
+  end
+
+  return moon.serveRedirect(302, '/')
 end)
 
 moon.get('/register', function (r)
@@ -97,7 +98,6 @@ moon.post('/login', function (r)
     samesite = 'Strict',
   }
 
-  p(session.entries())
   return moon.serveRedirect(302, '/')
 end)
 
