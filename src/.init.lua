@@ -1,4 +1,5 @@
 require 'global'
+local _ = require 'lib.lume'
 local moon = require 'lib.fullmoon'
 local db = require 'db'
 local constant = require 'constants'
@@ -84,10 +85,18 @@ moon.get('/register', function (r)
   elseif error == constant.PASSWORD_MISMATCH then
     moon.setStatus(401)
     error_message = 'Passwords must match'
+  elseif error == constant.INVALID_USERNAME then
+    moon.setStatus(401)
+    error_message = 'Invalid or reserved username'
   end
 
   return moon.serveContent('register', { error_message = error_message })
 end)
+
+-- moon.get('/:username', function (r)
+--   local username = r.params.username
+--   return f'hello {username}'
+-- end)
 
 moon.post('/login', function (r)
   local username = r.params.username
@@ -112,16 +121,18 @@ moon.post('/login', function (r)
 end)
 
 moon.post('/register', function (r)
-  local username = r.params.username
+  local username = _.trim(r.params.username)
   local password = r.params.password
   local confirm = r.params.confirm
 
   local password_mismatch = constant.PASSWORD_MISMATCH
   local user_exists = constant.USER_EXISTS
+  local invalid_username = constant.INVALID_USERNAME
 
   if password ~= confirm then
-    -- redirect back to register page with error
     return moon.serveRedirect(303, f'/register?error={password_mismatch}')
+  elseif _.find(constant.RESERVED_USERNAMES, username) then
+    return moon.serveRedirect(303, f'/register?error={invalid_username}')
   end
 
   local salt = GetRandomBytes(16)
