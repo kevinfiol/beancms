@@ -39,6 +39,11 @@ moon.get('/', function (r)
 end)
 
 moon.get('/login', function (r)
+  local is_valid_session = checkSession(r)
+  if is_valid_session then
+    return moon.serveRedirect(303, '/')
+  end
+
   local error = r.params.error or nil
   local error_message = nil
 
@@ -65,6 +70,11 @@ moon.get('/logout', function (r)
 end)
 
 moon.get('/register', function (r)
+  local is_valid_session = checkSession(r)
+  if is_valid_session then
+    return moon.serveRedirect(303, '/')
+  end
+
   local error = r.params.error or nil
   local error_message = nil
 
