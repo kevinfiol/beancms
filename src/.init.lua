@@ -39,7 +39,7 @@ moon.get('/', function (r)
   return moon.serveContent('home', { logged_in = is_valid_session })
 end)
 
-moon.get('/login', function (r)
+moon.get('/a/login', function (r)
   local is_valid_session = checkSession(r)
   if is_valid_session then
     return moon.serveRedirect(303, '/')
@@ -59,7 +59,7 @@ moon.get('/login', function (r)
   return moon.serveContent('login', { error_message = error_message })
 end)
 
-moon.get('/logout', function (r)
+moon.get('/a/logout', function (r)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
 
   if token then
@@ -70,7 +70,7 @@ moon.get('/logout', function (r)
   return moon.serveRedirect(302, '/')
 end)
 
-moon.get('/register', function (r)
+moon.get('/a/register', function (r)
   local is_valid_session = checkSession(r)
   if is_valid_session then
     return moon.serveRedirect(303, '/')
@@ -93,18 +93,18 @@ moon.get('/register', function (r)
   return moon.serveContent('register', { error_message = error_message })
 end)
 
--- moon.get('/:username', function (r)
---   local username = r.params.username
---   return 'hello ' .. username
--- end)
+moon.get('/:username', function (r)
+  local username = r.params.username
+  return 'hello ' .. username
+end)
 
-moon.post('/login', function (r)
+moon.post('/a/login', function (r)
   local username = r.params.username
   local password = r.params.password
   local ok, err = db.validateUser(username, password)
 
   if not ok then
-    return moon.serveRedirect(303, f'/login?error={err}')
+    return moon.serveRedirect(303, f'/a/login?error={err}')
   end
 
   -- create session and set cookie
@@ -120,19 +120,21 @@ moon.post('/login', function (r)
   return moon.serveRedirect(302, '/')
 end)
 
-moon.post('/register', function (r)
+moon.post('/a/register', function (r)
   local username = _.trim(r.params.username)
   local password = r.params.password
   local confirm = r.params.confirm
+
+  p({ username = username })
 
   local password_mismatch = constant.PASSWORD_MISMATCH
   local user_exists = constant.USER_EXISTS
   local invalid_username = constant.INVALID_USERNAME
 
   if password ~= confirm then
-    return moon.serveRedirect(303, f'/register?error={password_mismatch}')
+    return moon.serveRedirect(303, f'/a/register?error={password_mismatch}')
   elseif _.find(constant.RESERVED_USERNAMES, username) then
-    return moon.serveRedirect(303, f'/register?error={invalid_username}')
+    return moon.serveRedirect(303, f'/a/register?error={invalid_username}')
   end
 
   local salt = GetRandomBytes(16)
@@ -142,7 +144,7 @@ moon.post('/register', function (r)
   if not ok then
     LogError(f'Could not register user: {username}')
     LogError(err)
-    return moon.serveRedirect(303, f'/register?error={user_exists}')
+    return moon.serveRedirect(303, f'/a/register?error={user_exists}')
   end
 
   return moon.serveRedirect(302, '/')
