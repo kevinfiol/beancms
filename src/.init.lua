@@ -108,9 +108,10 @@ moon.post('/a/login', function (r)
   end
 
   -- create session and set cookie
-  local token = session.new()
+  local token = session.new(constant.SESSION_MAX_AGE)
   r.cookies[constant.SESSION_TOKEN_NAME] = {
     token,
+    path = '/',
     secure = true,
     httponly = true,
     maxage = constant.SESSION_MAX_AGE,
@@ -124,8 +125,6 @@ moon.post('/a/register', function (r)
   local username = _.trim(r.params.username)
   local password = r.params.password
   local confirm = r.params.confirm
-
-  p({ username = username })
 
   local password_mismatch = constant.PASSWORD_MISMATCH
   local user_exists = constant.USER_EXISTS

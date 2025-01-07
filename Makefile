@@ -12,7 +12,7 @@ BUILD=bin/redbean.com
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log
 
-.PHONY: download run clean stop
+.PHONY: download run clean clean_db stop logs watch
 
 # download all dependencies
 download:
@@ -45,6 +45,9 @@ watch:
 	make start && \
 	trap 'make stop' EXIT INT TERM && \
 	watchexec -p -w src make restart
+
+logs:
+	tail -f ${LOG_FILE}
 
 clean_db:
 	rm -f bin/cms.db
