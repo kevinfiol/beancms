@@ -17,3 +17,19 @@ figure.error {
   padding: 18px;
   border: 1px solid black;
 }
+
+/* editor */
+.editor {
+  font-family: serif;
+  line-height: 1.25em;
+  font-size: 1em;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  resize: none;
+  overflow: hidden;
+}
