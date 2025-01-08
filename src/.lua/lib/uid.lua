@@ -32,15 +32,12 @@ local function uid(len)
       local random_idx = math.floor(math.random() * 256)
       BUFFER = BUFFER .. HEX[random_idx]
     end
-
-    print(BUFFER)
-    print('new buffer')
   end
 
   -- extract substring
   local result = BUFFER:sub(IDX + 1, (IDX) + tmp)
-
   -- shift index by one
   IDX = IDX + 1
+
   return result
 end
