@@ -41,3 +41,5 @@ local function uid(len)
 
   return result
 end
+
+return uid
