@@ -50,17 +50,21 @@ return {
       return false, constant.USER_DOES_NOT_EXIST
     end
 
-    return ok, result
+    return true, result
   end,
 
   getPostId = function ()
+    local ok = true
     local post_id = uid()
     local retry = true
     local retries = 0
     local exists = true
 
     while exists and retry do
-      local row = sql:fetchOne([[ select rowid from post where post_id = ? ]], post_id)
+      local row = sql:fetchOne(
+        [[ select rowid from post where post_id = ? ]],
+        post_id
+      )
 
       if row and row.rowid ~= nil then
         if retries > 10 then
@@ -76,6 +80,7 @@ return {
       end
     end
 
+    p({ ok = ok, post_id = post_id })
     return ok, ok and post_id or 'Could not generate post id'
   end,
 

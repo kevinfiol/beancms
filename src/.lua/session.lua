@@ -1,15 +1,24 @@
 local lru = require 'lib.lru'
 
-local MAX_LENGTH = 1000
+local MAX_LENGTH = 5000
 local cache = lru.new(MAX_LENGTH)
 
 return {
-  new = function (max_age)
+  new = function (username, max_age)
+    if not username then
+      LogWarn('No username provided to new session')
+      return nil
+    end
+
     max_age = max_age or 31536000 -- 1 year
     local token = UuidV4()
     local current_time_seconds = unix.clock_gettime()
 
-    cache:set(token, { expiry = current_time_seconds + max_age })
+    cache:set(token, {
+      expiry = current_time_seconds + max_age,
+      username = username
+    })
+
     return token
   end,
 

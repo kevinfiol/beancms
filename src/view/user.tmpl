@@ -2,12 +2,21 @@
 <main>
   <h1>{%& username %}</h1>
 
-  <a href="/{%& username %}/{%& new_post_id %}">
-    Write
-  </a>
+  {% if has_user_access then %}
+    <nav>
+      <a href="/{%& username %}/{%& new_post_id %}">
+        Write
+      </a>
 
+      <a href="/a/logout">
+        Logout
+      </a>
+    </nav>
+  {% end %}
+
+  <h2>Posts</h2>
   <ul>
-    {% for _, post in posts do %}
+    {% for _, post in pairs(posts) do %}
       <li>
         <a href="/{%& username %}/{%& post.title or post.post_id %}">
           {%& post.title or post.post_id %}

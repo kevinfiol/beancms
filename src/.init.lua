@@ -17,26 +17,31 @@ end
 -- set templates and static asset paths
 moon.setTemplate({ '/view/', tmpl = 'fmt' })
 moon.get('/static/*', moon.serveAsset)
+moon.get("/favicon.ico", moon.serveAsset)
 
-local function checkSession (r)
+local function checkSession (r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
-  local is_valid_session = token ~= nil and (session.get(token) ~= nil)
+  local user_session = session.get(token)
 
-  if is_valid_session then
-    return true, nil
+  local result = { is_valid = false, user_access = false }
+  result.is_valid = user_session ~= nil
+  result.user_access = user_session and user_session.username == username
+
+  if result.is_valid then
+    return result, nil
   elseif token then
     session.delete(token)
   end
 
   -- invalidate user's expired token
   r.cookies[constant.SESSION_TOKEN_NAME] = false
-
-  return false, 'Unauthorized'
+  return result, 'Unauthorized'
 end
 
-local function setSessionCookie (r)
+local function setSessionCookie (r, username)
   -- create session and set cookie
-  local token = session.new(constant.SESSION_MAX_AGE)
+  local token = session.new(username, constant.SESSION_MAX_AGE)
+
   r.cookies[constant.SESSION_TOKEN_NAME] = {
     token,
     path = '/',
@@ -50,13 +55,15 @@ local function setSessionCookie (r)
 end
 
 moon.get('/', function (r)
-  local is_valid_session = checkSession(r)
-  return moon.serveContent('home', { logged_in = is_valid_session })
+  local user_session = checkSession(r)
+  return moon.serveContent('home', { logged_in = user_session.is_valid })
 end)
 
 moon.get('/a/login', function (r)
-  local is_valid_session = checkSession(r)
-  if is_valid_session then
+  local user_session = checkSession(r)
+
+  if user_session.is_valid then
+    -- already active session, so redirect
     return moon.serveRedirect(303, '/')
   end
 
@@ -86,8 +93,9 @@ moon.get('/a/logout', function (r)
 end)
 
 moon.get('/a/register', function (r)
-  local is_valid_session = checkSession(r)
-  if is_valid_session then
+  local user_session = checkSession(r)
+  if user_session.is_valid then
+    -- already active session, so redirect
     return moon.serveRedirect(303, '/')
   end
 
@@ -111,24 +119,38 @@ end)
 moon.get('/:username', function (r)
   local username = _.trim(r.params.username)
   local ok, user = db.getUser(username)
+  local new_post_id = ''
 
   if not ok then
     moon.setStatus(404)
     return 'User does not exist'
   end
 
-  local is_valid_session = checkSession(r) -- sessions need to be per user, maybe split session cache to be user -> session_id -> etc
+  local user_session = checkSession(r, username)
+  local has_user_access = user_session.is_valid and user_session.user_access
 
-  local ok, new_post_id = 
+  if has_user_access then
+    local ok, result = db.getPostId()
+
+    if not ok then
+      LogError(result)
+      moon.setStatus(500)
+      return 'An error occurred'
+    end
+
+    new_post_id = result
+  end
 
   return moon.serveContent('user', {
     username = user.username,
-
+    new_post_id = new_post_id,
+    has_user_access = has_user_access,
+    posts = {}
   })
 end)
 
 moon.post('/a/login', function (r)
-  local username = r.params.username
+  local username = _.trim(r.params.username)
   local password = r.params.password
   local ok, err = db.validateUser(username, password)
 
@@ -136,8 +158,8 @@ moon.post('/a/login', function (r)
     return moon.serveRedirect(303, f'/a/login?error={err}')
   end
 
-  setSessionCookie(r)
-  return moon.serveRedirect(302, '/')
+  setSessionCookie(r, username)
+  return moon.serveRedirect(302, f'/{username}')
 end)
 
 moon.post('/a/register', function (r)
@@ -165,8 +187,8 @@ moon.post('/a/register', function (r)
     return moon.serveRedirect(303, f'/a/register?error={user_exists}')
   end
 
-  setSessionCookie(r)
-  return moon.serveRedirect(302, '/')
+  setSessionCookie(r, username)
+  return moon.serveRedirect(302, f'/{username}')
 end)
 
 moon.get('/a/test', function (r)
