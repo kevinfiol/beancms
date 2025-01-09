@@ -1,15 +1,20 @@
 {% function block.content() %}
 <main>
-  <h1>Welcome</h1>
+  <h1>{%& username %}</h1>
 
-  <p>This is Bean CMS, a space for reading and writing text which you can use as a blog, a pastebin, or a notepad.</p>
+  <a href="/{%& username %}/{%& new_post_id %}">
+    Write
+  </a>
 
-  {% if not logged_in then %}
-    <a href="/login">Login</a>
-    <a href="/register">Register</a>
-  {% else %}
-    <a href="/logout">Logout</a>
-  {% end %}
+  <ul>
+    {% for _, post in posts do %}
+      <li>
+        <a href="/{%& username %}/{%& post.title or post.post_id %}">
+          {%& post.title or post.post_id %}
+        </a>
+      </li>
+    {% end %}
+  </ul>
 </main>
 {% end %}
 

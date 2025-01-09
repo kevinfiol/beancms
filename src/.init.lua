@@ -109,8 +109,22 @@ moon.get('/a/register', function (r)
 end)
 
 moon.get('/:username', function (r)
-  local username = r.params.username
-  return 'hello ' .. username
+  local username = _.trim(r.params.username)
+  local ok, user = db.getUser(username)
+
+  if not ok then
+    moon.setStatus(404)
+    return 'User does not exist'
+  end
+
+  local is_valid_session = checkSession(r) -- sessions need to be per user, maybe split session cache to be user -> session_id -> etc
+
+  local ok, new_post_id = 
+
+  return moon.serveContent('user', {
+    username = user.username,
+
+  })
 end)
 
 moon.post('/a/login', function (r)

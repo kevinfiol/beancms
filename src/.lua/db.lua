@@ -36,7 +36,24 @@ return {
     return ok, (ok and nil or constant.WRONG_PASSWORD)
   end,
 
-  createPost = function (username, content)
+  getUser = function (username)
+    local result = sql:fetchOne(
+      [[
+        select username, user_id
+        from user
+        where username = ?
+      ]],
+      username
+    )
+
+    if result.user_id == nil then
+      return false, constant.USER_DOES_NOT_EXIST
+    end
+
+    return ok, result
+  end,
+
+  getPostId = function ()
     local post_id = uid()
     local retry = true
     local retries = 0
@@ -48,6 +65,7 @@ return {
       if row and row.rowid ~= nil then
         if retries > 10 then
           retry = false
+          ok = false
         else
           retries = retries + 1
         end
@@ -58,6 +76,10 @@ return {
       end
     end
 
+    return ok, ok and post_id or 'Could not generate post id'
+  end,
+
+  createPost = function (post_id, title, username, content)
     local ok, result = pcall(function ()
       return sql:execute(
         [[
@@ -66,10 +88,10 @@ return {
             from user
             where username = ?
           )
-          insert into post (post_id, user_id, content)
-          select ?, user_id, ? from user_info
+          insert into post (user_id, post_id, title, content)
+          select user_id, ?, ?, ? from user_info
         ]],
-        username, post_id, content
+        username, post_id, title, content
       )
     end)
 
