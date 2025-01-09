@@ -34,6 +34,21 @@ local function checkSession (r)
   return false, 'Unauthorized'
 end
 
+local function setSessionCookie (r)
+  -- create session and set cookie
+  local token = session.new(constant.SESSION_MAX_AGE)
+  r.cookies[constant.SESSION_TOKEN_NAME] = {
+    token,
+    path = '/',
+    secure = true,
+    httponly = true,
+    maxage = constant.SESSION_MAX_AGE,
+    samesite = 'Strict',
+  }
+
+  return r
+end
+
 moon.get('/', function (r)
   local is_valid_session = checkSession(r)
   return moon.serveContent('home', { logged_in = is_valid_session })
@@ -107,17 +122,7 @@ moon.post('/a/login', function (r)
     return moon.serveRedirect(303, f'/a/login?error={err}')
   end
 
-  -- create session and set cookie
-  local token = session.new(constant.SESSION_MAX_AGE)
-  r.cookies[constant.SESSION_TOKEN_NAME] = {
-    token,
-    path = '/',
-    secure = true,
-    httponly = true,
-    maxage = constant.SESSION_MAX_AGE,
-    samesite = 'Strict',
-  }
-
+  setSessionCookie(r)
   return moon.serveRedirect(302, '/')
 end)
 
@@ -146,7 +151,18 @@ moon.post('/a/register', function (r)
     return moon.serveRedirect(303, f'/a/register?error={user_exists}')
   end
 
+  setSessionCookie(r)
   return moon.serveRedirect(302, '/')
+end)
+
+moon.get('/a/test', function (r)
+  local ok = db.createPost('kevin', 'hooheeehaahaa')
+
+  if ok then
+    p('successfully created post')
+  end
+
+  return 'test'
 end)
 
 moon.run()

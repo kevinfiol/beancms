@@ -1,9 +1,10 @@
 local sql = require 'sqlite'
 local constant = require 'constants'
+local uid = require 'lib.uid'
 
 return {
   createUser = function (username, hashed, salt)
-    local ok, err = pcall(function ()
+    local ok, result = pcall(function ()
       return sql:execute(
         [[
           insert into user (username, hashed, salt)
@@ -13,7 +14,7 @@ return {
       )
     end)
 
-    return ok, err
+    return ok, result
   end,
 
   validateUser = function (username, password)
@@ -33,9 +34,49 @@ return {
 
     local ok, err = argon2.verify(result.hashed, password)
     return ok, (ok and nil or constant.WRONG_PASSWORD)
+  end,
+
+  createPost = function (username, content)
+    local post_id = uid()
+    local retry = true
+    local retries = 0
+    local exists = true
+
+    while exists and retry do
+      local row = sql:fetchOne([[ select rowid from post where post_id = ? ]], post_id)
+
+      if row and row.rowid ~= nil then
+        if retries > 10 then
+          retry = false
+        else
+          retries = retries + 1
+        end
+
+        post_id = uid()
+        p('exists... making new id')
+      else
+        exists = false
+      end
+    end
+
+    local ok, result = pcall(function ()
+      return sql:execute(
+        [[
+          with user_info as (
+            select user_id
+            from user
+            where username = ?
+          )
+          insert into post (post_id, user_id, content)
+          select ?, user_id, ? from user_info
+        ]],
+        username, post_id, content
+      )
+    end)
+
+    return ok, result
   end
 }
-
 
 -- export function createUser(hashed: string) {
 --   let ok = true;

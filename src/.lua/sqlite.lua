@@ -2,9 +2,19 @@ local moon = require 'lib.fullmoon'
 
 local SCHEMA = [[
   create table if not exists user (
+    user_id integer primary key,
     username text not null unique,
     hashed text not null,
     salt text not null
+  );
+
+  create table if not exists post (
+    post_id text primary key,
+    user_id integer not null,
+    content blob,
+    created_time text not null default CURRENT_TIMESTAMP,
+    modified_time text not null default CURRENT_TIMESTAMP,
+    foreign key (user_id) references user(user_id)
   );
 ]]
 
