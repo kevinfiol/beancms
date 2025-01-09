@@ -11,6 +11,7 @@ local SCHEMA = [[
   create table if not exists post (
     post_id text primary key,
     user_id integer not null,
+    title text default '',
     content blob,
     created_time text not null default CURRENT_TIMESTAMP,
     modified_time text not null default CURRENT_TIMESTAMP,

@@ -53,7 +53,6 @@ return {
         end
 
         post_id = uid()
-        p('exists... making new id')
       else
         exists = false
       end
