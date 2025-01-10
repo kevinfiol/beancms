@@ -18,7 +18,7 @@ return {
   end,
 
   validateUser = function (username, password)
-    local result = sql:fetchOne(
+    local result, err = sql:fetchOne(
       [[
         select hashed
         from user
@@ -27,7 +27,9 @@ return {
       username
     )
 
-    if result.hashed == nil then
+    if err then
+      return false, err
+    elseif result.hashed == nil then
       -- user doesn't exist
       return false, constant.USER_DOES_NOT_EXIST
     end
@@ -37,7 +39,7 @@ return {
   end,
 
   getUser = function (username)
-    local result = sql:fetchOne(
+    local result, err = sql:fetchOne(
       [[
         select username, user_id
         from user
@@ -46,7 +48,9 @@ return {
       username
     )
 
-    if result.user_id == nil then
+    if err then
+      return false, err
+    elseif result.user_id == nil then
       return false, constant.USER_DOES_NOT_EXIST
     end
 
@@ -80,8 +84,47 @@ return {
       end
     end
 
-    p({ ok = ok, post_id = post_id })
     return ok, ok and post_id or 'Could not generate post id'
+  end,
+
+  getPost = function (username, post_title)
+    local result, err = sql:fetchOne(
+      [[
+        select p.rowid, p.*
+        from post p
+        join user u on p.user_id = u.user_id
+        where u.username = ? and p.title = ?
+      ]],
+      username, post_title
+    )
+
+    if err then
+      return false, err
+    elseif result == nil or (result and result.rowid == nil) then
+      return false, constant.POST_DOES_NOT_EXIST
+    end
+
+    return true, result
+  end,
+
+  getPosts = function (username)
+    local result, err = sql:fetchAll(
+      [[
+        select p.rowid, p.*
+        from post p
+        join user u on p.user_id = u.user_id
+        where u.username = ?
+      ]],
+      username
+    )
+
+    if err then
+      return false, err
+    elseif result == nil then
+      return false, 'Could not retrieve rows'
+    end
+
+    return true, result
   end,
 
   createPost = function (post_id, title, username, content)
@@ -99,6 +142,11 @@ return {
         username, post_id, title, content
       )
     end)
+
+    if result ~= 1 then
+      ok = false
+      result = 'Post creation failed. No rows inserted'
+    end
 
     return ok, result
   end

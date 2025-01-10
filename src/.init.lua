@@ -116,8 +116,19 @@ moon.get('/a/register', function (r)
   return moon.serveContent('register', { error_message = error_message })
 end)
 
-moon.get('/:username', function (r)
-  local username = _.trim(r.params.username)
+moon.get('/a/test', function (r)
+  local id = 'wahfosdfjaosdf'
+  local ok, result = db.createPost(id, id, 'kevin', 'hooheeehaahaa')
+
+  if ok then
+    p('successfully created post')
+  end
+
+  return 'test'
+end)
+
+moon.get('/:_username(/)', function (r)
+  local username = _.trim(r.params._username)
   local ok, user = db.getUser(username)
   local new_post_id = ''
 
@@ -128,6 +139,7 @@ moon.get('/:username', function (r)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
+  local ok, posts = db.getPosts(username)
 
   if has_user_access then
     local ok, result = db.getPostId()
@@ -145,7 +157,34 @@ moon.get('/:username', function (r)
     username = user.username,
     new_post_id = new_post_id,
     has_user_access = has_user_access,
-    posts = {}
+    posts = posts
+  })
+end)
+
+moon.get('/:_username/:post_title(/)', function (r)
+  local username = _.trim(r.params._username)
+  local post_title = _.trim(r.params.post_title)
+  p({ username = username, post_title = post_title })
+
+  local user_session = checkSession(r, username)
+  local has_user_access = user_session.is_valid and user_session.user_access
+  
+  local ok, result = db.getPost(username, post_title)
+  if not ok then
+    -- post does not exist
+    -- if not authorized, return 404
+    if not has_user_access then
+      moon.setStatus(404)
+      return 'Post does not exist'
+    end
+
+    -- else show the editor
+    return moon.serveContent('editor')
+  end
+
+  -- otherwise, we can render the post content
+  return moon.serveContent('post', {
+    post_content = result.content
   })
 end)
 
@@ -189,16 +228,6 @@ moon.post('/a/register', function (r)
 
   setSessionCookie(r, username)
   return moon.serveRedirect(302, f'/{username}')
-end)
-
-moon.get('/a/test', function (r)
-  local ok = db.createPost('kevin', 'hooheeehaahaa')
-
-  if ok then
-    p('successfully created post')
-  end
-
-  return 'test'
 end)
 
 moon.run()
