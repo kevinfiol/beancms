@@ -13,14 +13,14 @@
       placeholder="Click here to start writing..."
       rows="10"
       maxlength="10000"
-    ></textarea>
+    >{%& post_content %}</textarea>
   </main>
   <script>
     const USERNAME = '{%& username %}';
     const POST_ID = '{%& post_id %}';
 
     const Editor = document.getElementById('editor');
-    const State = { slug: '{%& post_title or post_id or '' %}' };
+    const State = { slug: '{%& post_title or post_id or '' %}', saveController: undefined };
 
     function modifyUrl(slug) {
       const newUrl = `/${USERNAME}/${slug}/edit`;
@@ -57,7 +57,7 @@
       return s.replace(/^\s+|\s+$/g, '');
     }
 
-    const setTitle = debounce((content) => {
+    const setTitle = debounce(async(content) => {
       const trimmed = trimContent(content);
       const firstLine = trimmed.split('\n')[0];
       const slug = (createSlug(firstLine) || POST_ID).slice(0, 50);
@@ -67,10 +67,57 @@
       modifyUrl(slug);
     });
 
-    const saveChanges = debounce((content) => {
+    const saveChanges = debounce(async (content) => {
       const trimmed = trimContent(content);
-      console.log('SAVE CHANGES!');
+
+      if (State.saveController) {
+        State.saveController.abort();
+      }
+
+      State.saveController = new AbortController();
+
+      try {
+        const res = fetch(`/${USERNAME}/${POST_ID}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_content: trimmed, post_title: State.slug }),
+          signal: State.saveController.signal
+        });
+
+        // const result = await res.text();
+        // console.log(result);
+      } catch (e) {
+        if (e.name === 'AbortError') { console.log('aborted old request'); }
+        else console.error('save error: ', e);
+      }
     });
+
+const debouncedPostRequest = debounce(async (url, data) => {
+  // Abort the previous request if any
+  if (debouncedPostRequest.controller) {
+    debouncedPostRequest.controller.abort();
+  }
+
+  // Create a new AbortController for the current request
+  debouncedPostRequest.controller = new AbortController();
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      signal: debouncedPostRequest.controller.signal,
+    });
+    const result = await response.json();
+    console.log('Response:', result);
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Request canceled:', error.message);
+    } else {
+      console.error('Fetch error:', error);
+    }
+  }
+}, 500); // Adjust debounce time as needed
 
     // enable tabs in editor
     Editor.addEventListener('keydown', (e) => {

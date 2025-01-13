@@ -259,4 +259,32 @@ moon.post('/a/register', function (r)
   return moon.serveRedirect(302, f'/{username}')
 end)
 
+moon.post('/:_username/:post_id', function (r)
+  local username = _.trim(r.params._username)
+  local post_id = _.trim(r.params.post_id)
+
+  local body = DecodeJson(r.body)
+  local post_content = body.post_content
+  local post_title = body.post_title
+
+  local user_session = checkSession(r, username)
+  local has_user_access = user_session.is_valid and user_session.user_access
+
+  -- if not has_user_access then
+  --   moon.setStatus(401)
+  --   return 'Unauthorized'
+  -- end
+
+  p({ post_id, post_title, username, post_content })
+
+  local ok, result = db.createPost(post_id, post_title, username, post_content)
+
+  if not ok then
+    moon.setStatus(500)
+    return 'ERROR'
+  end
+
+  return 'OK'
+end)
+
 moon.run()

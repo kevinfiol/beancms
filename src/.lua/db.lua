@@ -131,26 +131,33 @@ return {
     local ok, result = pcall(function ()
       return sql:execute(
         [[
-          with user_info as (
-            select user_id
-            from user
-            where username = ?
-          )
           insert into post (user_id, post_id, title, content)
-          select user_id, ?, ?, ? from user_info
+          select user.user_id, ?, ?, ?
+          from user
+          where user.username = ?
+          on conflict(post_id) do update set
+            title = excluded.title,
+            content = excluded.content
         ]],
-        username, post_id, title, content
+        post_id, title, content, username
       )
     end)
 
+    p({ ok = ok, result = result })
+
     if result ~= 1 then
       ok = false
-      result = 'Post creation failed. No rows inserted'
+      result = 'Post creation/update failed. No rows inserted/updated'
     end
 
     return ok, result
   end
 }
+
+-- INSERT INTO users (username, email)
+-- VALUES ('john_doe', 'john@example.com')
+-- ON CONFLICT(username) DO UPDATE SET email = excluded.email;
+
 
 -- export function createUser(hashed: string) {
 --   let ok = true;
