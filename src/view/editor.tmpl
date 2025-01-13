@@ -92,33 +92,6 @@
       }
     });
 
-const debouncedPostRequest = debounce(async (url, data) => {
-  // Abort the previous request if any
-  if (debouncedPostRequest.controller) {
-    debouncedPostRequest.controller.abort();
-  }
-
-  // Create a new AbortController for the current request
-  debouncedPostRequest.controller = new AbortController();
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      signal: debouncedPostRequest.controller.signal,
-    });
-    const result = await response.json();
-    console.log('Response:', result);
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      console.log('Request canceled:', error.message);
-    } else {
-      console.error('Fetch error:', error);
-    }
-  }
-}, 500); // Adjust debounce time as needed
-
     // enable tabs in editor
     Editor.addEventListener('keydown', (e) => {
       const editor = e.target;
