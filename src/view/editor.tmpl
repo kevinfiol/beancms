@@ -4,17 +4,108 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="/static/main.css">
-  <title>bean cms</title>
-  <script>
-    // js helpers
-    window.$ = document.querySelector.bind(document);
-    window.$$ = document.querySelector.bind(document);
-  </script>
+  <title>{%& post_title or post_id %}</title>
 </head>
 <body>
   <main>
-    EDITOR
-    <textarea class="editor"></textarea>
+    <textarea 
+      id="editor"
+      placeholder="Click here to start writing..."
+      rows="10"
+      maxlength="10000"
+    ></textarea>
   </main>
+  <script>
+    const USERNAME = '{%& username %}';
+    const POST_ID = '{%& post_id %}';
+
+    const Editor = document.getElementById('editor');
+    const State = { slug: '{%& post_title or post_id or '' %}' };
+
+    function modifyUrl(slug) {
+      const newUrl = `/${USERNAME}/${slug}/edit`;
+      history.replaceState(null, '', newUrl);
+    }
+
+    function debounce(callback, wait = 500) {
+      let timer;
+
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => callback(...args), wait);
+      };
+    }
+
+    function createSlug(text = '') {
+      const lines = text.split('\n');
+
+      for (let i = 0; i < lines.length; i++) {
+        const slug = lines[i].toString().toLowerCase()
+          .replace(/\s+/g, '-') // Replace spaces with -
+          .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+          .replace(/\-\-+/g, '-') // Replace multiple - with single -
+          .replace(/^-+/, '') // Trim - from start of text
+          .replace(/-+$/, ''); // Trim - from end of text
+
+        if (slug.length > 0) return slug;
+      }
+
+      return '';
+    }
+
+    function trimContent(s) {
+      return s.replace(/^\s+|\s+$/g, '');
+    }
+
+    const setTitle = debounce((content) => {
+      const trimmed = trimContent(content);
+      const firstLine = trimmed.split('\n')[0];
+      const slug = (createSlug(firstLine) || POST_ID).slice(0, 50);
+
+      document.title = slug;
+      State.slug = slug;
+      modifyUrl(slug);
+    });
+
+    const saveChanges = debounce((content) => {
+      const trimmed = trimContent(content);
+      console.log('SAVE CHANGES!');
+    });
+
+    // enable tabs in editor
+    Editor.addEventListener('keydown', (e) => {
+      const editor = e.target;
+
+      if (e.keyCode === 9 || e.which === 9 || e.key === 'Tab') {
+        e.preventDefault();
+        const originalStart = editor.selectionStart;
+
+        editor.value =
+          editor.value.substring(0, editor.selectionStart) +
+          '\t' +
+          editor.value.substring(editor.selectionEnd);
+
+        editor.selectionEnd = originalStart + 1;
+      }
+
+      // save changes
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveChanges(editor.value);
+      }
+    });
+
+    // auto-expand editor
+    Editor.addEventListener('input', (e) => {
+      const editor = e.target;
+      setTitle(editor.value);
+      if (e.inputType === 'insertText') return;
+
+      if (editor.style.height !== editor.scrollHeight + 'px') {
+        editor.style.height = 'inherit';
+        editor.style.height = editor.scrollHeight + 'px';
+      }
+    });
+  </script>
 </body>
 </html>

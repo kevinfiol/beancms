@@ -18,8 +18,12 @@ figure.error {
   border: 1px solid black;
 }
 
+main {
+  text-rendering: optimizeLegibility;
+}
+
 /* editor */
-.editor {
+#editor {
   font-family: serif;
   line-height: 1.25em;
   font-size: 1em;

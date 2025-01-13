@@ -4,6 +4,7 @@ local moon = require 'lib.fullmoon'
 local db = require 'db'
 local constant = require 'constants'
 local session = require 'session'
+local util = require 'util'
 
 -- helper functions
 moon.get = function (route, handler)
@@ -164,13 +165,12 @@ end)
 moon.get('/:_username/:post_title(/)', function (r)
   local username = _.trim(r.params._username)
   local post_title = _.trim(r.params.post_title)
-  p({ username = username, post_title = post_title })
 
-  local user_session = checkSession(r, username)
-  local has_user_access = user_session.is_valid and user_session.user_access
-  
   local ok, result = db.getPost(username, post_title)
   if not ok then
+    local user_session = checkSession(r, username)
+    local has_user_access = user_session.is_valid and user_session.user_access
+
     -- post does not exist
     -- if not authorized, return 404
     if not has_user_access then
@@ -178,13 +178,42 @@ moon.get('/:_username/:post_title(/)', function (r)
       return 'Post does not exist'
     end
 
-    -- else show the editor
-    return moon.serveContent('editor')
+    -- else redirect user to edit route
+    return moon.serveRedirect(302, f'/{username}/{post_title}/edit')
   end
 
   -- otherwise, we can render the post content
   return moon.serveContent('post', {
+    post_title = post_title,
+    post_id = result.post_id,
     post_content = result.content
+  })
+end)
+
+moon.get('/:_username/:post_title/edit(/)', function (r)
+  local username = _.trim(r.params._username)
+  local post_title = _.trim(r.params.post_title)
+
+  local post_id = util.normalizePostId(post_title)
+  local post_content = ''
+  local user_session = checkSession(r, username)
+  local has_user_access = user_session.is_valid and user_session.user_access
+
+  -- if not has_user_access then
+  --   return moon.serveRedirect(303, f'/{username}/{post_title}')
+  -- end
+
+  local ok, result = db.getPost(username, post_title)
+  if ok then
+    post_id = result.post_id
+    post_content = result.content
+  end
+
+  return moon.serveContent('editor', {
+    username = username,
+    post_title = post_title,
+    post_id = post_id,
+    post_content = post_content
   })
 end)
 
@@ -231,103 +260,3 @@ moon.post('/a/register', function (r)
 end)
 
 moon.run()
-
--- app.post('/login', async (c) => {
---   const form = await c.req.formData();
-
---   const password = form.get('password') as string;
---   const { data: hashed } = database.getHashedPassword();
---   const isValid = verify(password, hashed);
-
---   if (!isValid) {
---     const html = Login({ error: 'Invalid password' });
---     c.status(500);
---     return c.html(html);
---   }
-
---   // store token in memory
---   const sessionToken = crypto.randomUUID();
---   SESSION.set(sessionToken, true);
-
---   // set cookie
---   await setSignedCookie(c, ACCESS_TOKEN_NAME, sessionToken, SESSION_SECRET, {
---     secure: true,
---     httpOnly: true,
---     sameSite: 'Strict',
---     expires: new Date(Date.now() + SESSION_MAX_AGE),
---   });
-
---   return c.redirect('/');
--- });
-
--- app.post('/init', async (c) => {
---   const form = await c.req.formData();
-
---   const password = form.get('password') as string;
---   const confirm = form.get('confirm') as string;
-
---   if (password !== confirm) {
---     return c.redirect('/?init=confirm_error', 302);
---   }
-
---   const hashed = hash(password);
---   const { error } = database.createUser(hashed);
-
---   if (error) {
---     console.error(error);
---     return c.redirect('/?init=init_error', 302);
---   }
-
---   // store token in memory
---   const sessionToken = crypto.randomUUID();
---   SESSION.set(sessionToken, true);
-
---   // set cookie
---   await setSignedCookie(c, ACCESS_TOKEN_NAME, sessionToken, SESSION_SECRET, {
---     secure: true,
---     httpOnly: true,
---     sameSite: 'Strict',
---     expires: new Date(Date.now() + SESSION_MAX_AGE),
---   });
-
---   // set init flag
---   database.initialize();
-
---   // set cookie with session token
---   return c.redirect('/');
--- });
-
--- app.on(
---   ['GET', 'POST'],
---   ['/', '/add', '/delete/*', '/api/*'],
---   async (c, next) => {
---     const token = await getSignedCookie(c, SESSION_SECRET, ACCESS_TOKEN_NAME);
---     const isValidToken = token && SESSION.get(token) && v4.validate(token);
-
---     if (isValidToken) {
---       return next();
---     } else if (token) {
---       SESSION.delete(token);
---     }
-
---     deleteCookie(c, ACCESS_TOKEN_NAME);
-
---     if (c.req.method === 'GET') {
---       const { data: isInit } = database.checkInitialized();
---       if (isInit) return c.redirect('/login');
-
---       const query = c.req.query('init');
---       const error = query === 'confirm_error'
---         ? 'Passwords do not match.'
---         : query === 'init_error'
---         ? 'Could not initialize user. Check system logs.'
---         : '';
-
---       const html = Initialize({ error });
---       return c.html(html);
---     }
-
---     c.status(401);
---     return c.text('Unauthorized');
---   },
--- );
