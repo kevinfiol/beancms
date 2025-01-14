@@ -22,6 +22,12 @@
     const Editor = document.getElementById('editor');
     const State = { slug: '{%& post_title or post_id or '' %}', saveController: undefined };
 
+    // initial autoexpand
+    if (Editor.style.height !== Editor.scrollHeight + 'px') {
+      Editor.style.height = 'inherit';
+      Editor.style.height = Editor.scrollHeight + 'px';
+    }
+
     function modifyUrl(slug) {
       const newUrl = `/${USERNAME}/${slug}/edit`;
       history.replaceState(null, '', newUrl);
@@ -83,9 +89,6 @@
           body: JSON.stringify({ post_content: trimmed, post_title: State.slug }),
           signal: State.saveController.signal
         });
-
-        // const result = await res.text();
-        // console.log(result);
       } catch (e) {
         if (e.name === 'AbortError') { console.log('aborted old request'); }
         else console.error('save error: ', e);

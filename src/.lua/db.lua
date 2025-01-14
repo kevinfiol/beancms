@@ -104,13 +104,16 @@ return {
       return false, constant.POST_DOES_NOT_EXIST
     end
 
+    p({ content_before_inflate = result.content })
+    result.content = Inflate(result.content, result.content_size)
+    p({ content_after_inflate = result.content })
     return true, result
   end,
 
   getPosts = function (username)
     local result, err = sql:fetchAll(
       [[
-        select p.rowid, p.*
+        select p.title, p.post_id
         from post p
         join user u on p.user_id = u.user_id
         where u.username = ?
@@ -128,22 +131,23 @@ return {
   end,
 
   createPost = function (post_id, title, username, content)
+    local content_size = #content
+
     local ok, result = pcall(function ()
       return sql:execute(
         [[
-          insert into post (user_id, post_id, title, content)
-          select user.user_id, ?, ?, ?
+          insert into post (user_id, post_id, title, content, content_size)
+          select user.user_id, ?, ?, ?, ?
           from user
           where user.username = ?
           on conflict(post_id) do update set
             title = excluded.title,
-            content = excluded.content
+            content = excluded.content,
+            content_size = ?
         ]],
-        post_id, title, content, username
+        post_id, title, Deflate(content, 4), content_size, username, content_size
       )
     end)
-
-    p({ ok = ok, result = result })
 
     if result ~= 1 then
       ok = false
@@ -153,37 +157,3 @@ return {
     return ok, result
   end
 }
-
--- INSERT INTO users (username, email)
--- VALUES ('john_doe', 'john@example.com')
--- ON CONFLICT(username) DO UPDATE SET email = excluded.email;
-
-
--- export function createUser(hashed: string) {
---   let ok = true;
---   let error = undefined;
-
---   try {
---     const insert = db.prepare(`
---       insert into user (hashed)
---       values(:hashed)
---     `);
-
---     const changes = insert.run({ hashed });
---     if (changes !== 1) throw Error('Unable to create user');
---   } catch (e) {
---     error = e;
---     ok = false;
---   }
-
---   return { ok, error };
--- }
-
--- function risky_function()
---     error("Something went wrong!")
--- end
-
--- local status, err = pcall(risky_function)
--- if not status then
---     print("Error: " .. err)
--- end

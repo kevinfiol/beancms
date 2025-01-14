@@ -5,6 +5,7 @@ local db = require 'db'
 local constant = require 'constants'
 local session = require 'session'
 local util = require 'util'
+local markdown = require 'lib.markdown'
 
 -- helper functions
 moon.get = function (route, handler)
@@ -186,7 +187,7 @@ moon.get('/:_username/:post_title(/)', function (r)
   return moon.serveContent('post', {
     post_title = post_title,
     post_id = result.post_id,
-    post_content = result.content
+    post_content = markdown(EscapeHtml(result.content))
   })
 end)
 
@@ -274,8 +275,6 @@ moon.post('/:_username/:post_id', function (r)
   --   moon.setStatus(401)
   --   return 'Unauthorized'
   -- end
-
-  p({ post_id, post_title, username, post_content })
 
   local ok, result = db.createPost(post_id, post_title, username, post_content)
 

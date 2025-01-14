@@ -13,6 +13,7 @@ local SCHEMA = [[
     user_id integer not null,
     title text default '',
     content blob,
+    content_size number,
     created_time text not null default CURRENT_TIMESTAMP,
     modified_time text not null default CURRENT_TIMESTAMP,
     foreign key (user_id) references user(user_id)
