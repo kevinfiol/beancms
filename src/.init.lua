@@ -163,15 +163,15 @@ moon.get('/:_username(/)', function (r)
   })
 end)
 
-moon.get('/:_username/:post_title(/)', function (r)
+moon.get('/:_username/:slug(/)', function (r)
   local username = _.trim(r.params._username)
-  local post_title = _.trim(r.params.post_title)
+  local slug = _.trim(r.params.slug)
 
-  local ok, result = db.getPost(username, post_title)
+  local user_session = checkSession(r, username)
+  local has_user_access = user_session.is_valid and user_session.user_access
+
+  local ok, result = db.getPost(username, slug)
   if not ok then
-    local user_session = checkSession(r, username)
-    local has_user_access = user_session.is_valid and user_session.user_access
-
     -- post does not exist
     -- if not authorized, return 404
     if not has_user_access then
@@ -180,41 +180,44 @@ moon.get('/:_username/:post_title(/)', function (r)
     end
 
     -- else redirect user to edit route
-    return moon.serveRedirect(302, f'/{username}/{post_title}/edit')
+    return moon.serveRedirect(302, f'/{username}/{slug}/edit')
   end
 
   -- otherwise, we can render the post content
   return moon.serveContent('post', {
-    post_title = post_title,
-    post_id = result.post_id,
-    post_content = markdown(EscapeHtml(result.content))
+    slug = slug,
+    username = username,
+    has_user_access = has_user_access,
+    content = markdown(EscapeHtml(result.content))
   })
 end)
 
-moon.get('/:_username/:post_title/edit(/)', function (r)
+moon.get('/:_username/:slug/edit(/)', function (r)
   local username = _.trim(r.params._username)
-  local post_title = _.trim(r.params.post_title)
+  local slug = _.trim(r.params.slug)
 
-  local post_id = util.normalizePostId(post_title)
-  local post_content = ''
+  local post_id = util.normalizePostId(slug)
+  local content = ''
+
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
 
   -- if not has_user_access then
-  --   return moon.serveRedirect(303, f'/{username}/{post_title}')
+  --   return moon.serveRedirect(303, f'/{username}/{slug}')
   -- end
 
-  local ok, result = db.getPost(username, post_title)
+  local ok, result = db.getPost(username, slug)
   if ok then
     post_id = result.post_id
-    post_content = result.content
+    content = result.content
   end
 
   return moon.serveContent('editor', {
     username = username,
-    post_title = post_title,
+    slug = slug,
+    title = result.title,
     post_id = post_id,
-    post_content = post_content
+    content = content
   })
 end)
 
@@ -265,8 +268,10 @@ moon.post('/:_username/:post_id', function (r)
   local post_id = _.trim(r.params.post_id)
 
   local body = DecodeJson(r.body)
-  local post_content = body.post_content
-  local post_title = body.post_title
+
+  local content = body.content
+  local title = body.title
+  local slug = body.slug
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
@@ -276,7 +281,7 @@ moon.post('/:_username/:post_id', function (r)
   --   return 'Unauthorized'
   -- end
 
-  local ok, result = db.createPost(post_id, post_title, username, post_content)
+  local ok, result = db.createPost(post_id, title, slug, username, content)
 
   if not ok then
     moon.setStatus(500)

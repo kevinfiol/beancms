@@ -87,15 +87,16 @@ return {
     return ok, ok and post_id or 'Could not generate post id'
   end,
 
-  getPost = function (username, post_title)
+  getPost = function (username, slug)
     local result, err = sql:fetchOne(
       [[
         select p.rowid, p.*
         from post p
         join user u on p.user_id = u.user_id
-        where u.username = ? and p.title = ?
+        where u.username = :username
+        and (p.slug = :slug or p.post_id = :slug)
       ]],
-      username, post_title
+      { username = username, slug = slug }
     )
 
     if err then
@@ -104,16 +105,14 @@ return {
       return false, constant.POST_DOES_NOT_EXIST
     end
 
-    p({ content_before_inflate = result.content })
     result.content = Inflate(result.content, result.content_size)
-    p({ content_after_inflate = result.content })
     return true, result
   end,
 
   getPosts = function (username)
     local result, err = sql:fetchAll(
       [[
-        select p.title, p.post_id
+        select p.title, p.post_id, p.slug
         from post p
         join user u on p.user_id = u.user_id
         where u.username = ?
@@ -130,22 +129,33 @@ return {
     return true, result
   end,
 
-  createPost = function (post_id, title, username, content)
+  createPost = function (post_id, title, slug, username, content)
     local content_size = #content
 
     local ok, result = pcall(function ()
       return sql:execute(
         [[
-          insert into post (user_id, post_id, title, content, content_size)
-          select user.user_id, ?, ?, ?, ?
+          insert into post
+            (user_id, post_id, title, slug, content, content_size)
+          select
+            user.user_id, :post_id, :title, :slug, :content, :content_size
           from user
-          where user.username = ?
+          where
+            user.username = :username
           on conflict(post_id) do update set
             title = excluded.title,
+            slug = excluded.slug,
             content = excluded.content,
-            content_size = ?
+            content_size = :content_size
         ]],
-        post_id, title, Deflate(content, 4), content_size, username, content_size
+        {
+          post_id = post_id,
+          title = title,
+          slug = slug,
+          content = Deflate(content, 4),
+          content_size = content_size,
+          username = username
+        }
       )
     end)
 

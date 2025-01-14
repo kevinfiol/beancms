@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="/static/main.css">
-  <title>{%& post_title or post_id %}</title>
+  <title>{%& title or slug or post_id %}</title>
 </head>
 <body>
   <main>
@@ -13,24 +13,27 @@
       placeholder="Click here to start writing..."
       rows="10"
       maxlength="10000"
-    >{%& post_content %}</textarea>
+    >{%& content %}</textarea>
   </main>
   <script>
     const USERNAME = '{%& username %}';
     const POST_ID = '{%& post_id %}';
+    const SLUG = '{%& slug or post_id or '' %}';
+    const TITLE = '{%& title or slug or post_id or '' %}';
 
     const Editor = document.getElementById('editor');
-    const State = { slug: '{%& post_title or post_id or '' %}', saveController: undefined };
+
+    const State = {
+      slug: SLUG,
+      title: TITLE,
+      saveController: undefined,
+      saving: false
+    };
 
     // initial autoexpand
     if (Editor.style.height !== Editor.scrollHeight + 'px') {
       Editor.style.height = 'inherit';
       Editor.style.height = Editor.scrollHeight + 'px';
-    }
-
-    function modifyUrl(slug) {
-      const newUrl = `/${USERNAME}/${slug}/edit`;
-      history.replaceState(null, '', newUrl);
     }
 
     function debounce(callback, wait = 500) {
@@ -40,6 +43,11 @@
         clearTimeout(timer);
         timer = setTimeout(() => callback(...args), wait);
       };
+    }
+
+    function modifyUrl(slug) {
+      const newUrl = `/${USERNAME}/${slug}/edit`;
+      history.replaceState(null, '', newUrl);
     }
 
     function createSlug(text = '') {
@@ -59,41 +67,52 @@
       return '';
     }
 
-    function trimContent(s) {
-      return s.replace(/^\s+|\s+$/g, '');
-    }
-
-    const setTitle = debounce(async(content) => {
-      const trimmed = trimContent(content);
+    const setTitle = debounce(async (content) => {
+      const trimmed = content.trim();
       const firstLine = trimmed.split('\n')[0];
-      const slug = (createSlug(firstLine) || POST_ID).slice(0, 50);
+      const title = firstLine.slice(0, 50).trim().replace(/#/g, ''); // remove MD #s
+      const slug = (createSlug(title) || POST_ID);
 
-      document.title = slug;
+      State.title = title;
       State.slug = slug;
+
+      document.title = title;
       modifyUrl(slug);
     });
 
-    const saveChanges = debounce(async (content) => {
-      const trimmed = trimContent(content);
+    const saveChanges = async (content) => {
+      const trimmed = content.trim();
 
       if (State.saveController) {
         State.saveController.abort();
       }
 
+      Editor.setAttribute('disabled', true);
+      State.saving = true;
       State.saveController = new AbortController();
 
       try {
-        const res = fetch(`/${USERNAME}/${POST_ID}`, {
+        await fetch(`/${USERNAME}/${POST_ID}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_content: trimmed, post_title: State.slug }),
-          signal: State.saveController.signal
+          signal: State.saveController.signal,
+          body: JSON.stringify({
+            content: trimmed,
+            title: State.title,
+            slug: State.slug
+          })
         });
+
+        // redirect
+        window.location.replace(`/${USERNAME}/${State.slug}`);
       } catch (e) {
         if (e.name === 'AbortError') { console.log('aborted old request'); }
         else console.error('save error: ', e);
+      } finally {
+        Editor.setAttribute('disabled', false);
+        State.saving = false;
       }
-    });
+    };
 
     // enable tabs in editor
     Editor.addEventListener('keydown', (e) => {
@@ -112,7 +131,7 @@
       }
 
       // save changes
-      if (e.ctrlKey && e.key === 's') {
+      if (e.ctrlKey && e.key === 's' && !State.saving) {
         e.preventDefault();
         saveChanges(editor.value);
       }

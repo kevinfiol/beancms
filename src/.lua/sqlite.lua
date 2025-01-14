@@ -12,6 +12,7 @@ local SCHEMA = [[
     post_id text primary key,
     user_id integer not null,
     title text default '',
+    slug text default '',
     content blob,
     content_size number,
     created_time text not null default CURRENT_TIMESTAMP,

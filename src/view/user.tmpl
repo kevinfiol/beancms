@@ -18,8 +18,8 @@
   <ul>
     {% for _, post in pairs(posts) do %}
       <li>
-        <a href="/{%& username %}/{%& post.title or post.post_id %}">
-          {%& post.title or post.post_id %}
+        <a href="/{%& username %}/{%& post.slug or post.post_id %}">
+          {%& post.title or post.slug or post.post_id %}
         </a>
       </li>
     {% end %}
