@@ -37,3 +37,10 @@ main {
   resize: none;
   overflow: hidden;
 }
+
+#toast {
+  position: absolute;
+  top: 0;
+  right: 0;
+  user-select: none;
+}

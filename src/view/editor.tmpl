@@ -7,6 +7,9 @@
   <title>{%& title or slug or post_id %}</title>
 </head>
 <body>
+  <figure id="toast" role="alert" style="display:none">
+  </figure>
+
   <main>
     <textarea 
       id="editor"
@@ -15,6 +18,7 @@
       maxlength="10000"
     >{%& content %}</textarea>
   </main>
+
   <script>
     const USERNAME = '{%& username %}';
     const POST_ID = '{%& post_id %}';
@@ -22,6 +26,7 @@
     const TITLE = '{%& title or slug or post_id or '' %}';
 
     const Editor = document.getElementById('editor');
+    const Alert = document.getElementById('toast');
 
     const State = {
       slug: SLUG,
@@ -34,6 +39,12 @@
     if (Editor.style.height !== Editor.scrollHeight + 'px') {
       Editor.style.height = 'inherit';
       Editor.style.height = Editor.scrollHeight + 'px';
+    }
+
+    async function wait(ms) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, ms)
+      );
     }
 
     function debounce(callback, wait = 500) {
@@ -67,6 +78,17 @@
       return '';
     }
 
+    function showAlert(text = 'Saving...') {
+      if (showAlert.timer) clearTimeout(showAlert.timer);
+      Alert.style.display = 'inherit';
+      Alert.innerText = text;
+
+      showAlert.timer = setTimeout(() => {
+        Alert.style.display = 'none';
+        Alert.innerText = '';
+      }, 3000);
+    }
+
     const setTitle = debounce(async (content) => {
       const trimmed = content.trim();
       const firstLine = trimmed.split('\n')[0];
@@ -90,6 +112,7 @@
       Editor.setAttribute('disabled', true);
       State.saving = true;
       State.saveController = new AbortController();
+      showAlert('Saving...');
 
       try {
         await fetch(`/${USERNAME}/${POST_ID}`, {
@@ -103,13 +126,17 @@
           })
         });
 
+        showAlert('Saved! Redirecting...');
+        await wait(1000);
+
         // redirect
         window.location.replace(`/${USERNAME}/${State.slug}`);
       } catch (e) {
         if (e.name === 'AbortError') { console.log('aborted old request'); }
         else console.error('save error: ', e);
+        showAlert('Could not save! Try again');
       } finally {
-        Editor.setAttribute('disabled', false);
+        Editor.removeAttribute('disabled');
         State.saving = false;
       }
     };
