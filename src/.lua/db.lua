@@ -8,8 +8,9 @@ local function normalizePostId (s)
   s = s or ''
   s = string.gsub(s, "[^%w]", '') -- remove non-alphanumerics
   s = string.sub(s, 1, 10) -- trim to 11 characters
-  if #s < 11 then
-    s = s .. (uid(DEFAULT_UID_LENGTH - #s))
+  local len = string.len(s)
+  if len < 11 then
+    s = s .. (uid(DEFAULT_UID_LENGTH - len))
   end
 
   return s

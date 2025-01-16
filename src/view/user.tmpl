@@ -2,8 +2,12 @@
 <main>
   <h1>{%& username %}</h1>
 
-  {% if has_user_access then %}
+  {% if true then %}
     <nav>
+      <button id="view-drafts">
+        Local Drafts
+      </button>
+
       <a href="/{%& username %}/{%& new_post_id %}">
         Write
       </a>
@@ -12,6 +16,12 @@
         Logout
       </a>
     </nav>
+
+    <dialog id="drafts">
+      <button class="close" autofocus>Close</button>
+      <ul class="list">
+      </ul>
+    </dialog>
   {% end %}
 
   <h2>Posts</h2>
@@ -25,6 +35,69 @@
     {% end %}
   </ul>
 </main>
+
+<script type="module">
+  import { entries, del } from '/static/idb-keyval.js';
+
+  const USERNAME = '{%& username %}';
+
+  const ViewDraftsBtn = document.getElementById('view-drafts');
+  const DraftsDialog = document.getElementById('drafts');
+  const DialogList = DraftsDialog.querySelector('.list');
+  const CloseDialogBtn = DraftsDialog.querySelector('button.close');
+
+  if (ViewDraftsBtn) {
+    let listInitialized = false;
+
+    ViewDraftsBtn.addEventListener('click', () => {
+      entries().then((drafts) => {
+        if (!listInitialized) {
+          if (drafts.length) populateList(drafts);
+          else {
+            DraftsDialog.removeChild(DialogList);
+            const note = document.createElement('p');
+            note.innerText = 'No saved drafts';
+            DraftsDialog.appendChild(note);
+          }
+
+          listInitialized = true;
+        }
+
+        DraftsDialog.showModal();
+      });
+    });
+
+    CloseDialogBtn.addEventListener('click', () => {
+      DraftsDialog.close();
+    });
+
+    function populateList(drafts) {
+      for (const [slug] of drafts) {
+        // list item
+        const li = document.createElement('li');
+
+        // link to edit page
+        const a = document.createElement('a');
+        a.href = `/${USERNAME}/${slug}/edit`;
+        a.innerText = slug;
+
+        // delete button
+        const button = document.createElement('button');
+        button.innerText = 'Delete';
+        button.onclick = () => {
+          del(slug).then(() =>
+            DialogList.removeChild(li)
+          );
+        };
+
+        // append elements to DOM
+        li.appendChild(a);
+        li.appendChild(button);
+        DialogList.appendChild(li);
+      }
+    }
+  }
+</script>
 {% end %}
 
 {% render('layout') %}
