@@ -19,7 +19,9 @@
     >{%& content %}</textarea>
   </main>
 
-  <script>
+  <script type="module">
+    import { get, set, del } from '/static/idb-keyval.js';
+
     const USERNAME = '{%& username %}';
     const POST_ID = '{%& post_id %}';
     const SLUG = '{%& slug or post_id or '' %}';
@@ -32,14 +34,9 @@
       slug: SLUG,
       title: TITLE,
       saveController: undefined,
-      saving: false
+      saving: false,
+      changes: false
     };
-
-    // initial autoexpand
-    if (Editor.style.height !== Editor.scrollHeight + 'px') {
-      Editor.style.height = 'inherit';
-      Editor.style.height = Editor.scrollHeight + 'px';
-    }
 
     async function wait(ms) {
       await new Promise((resolve) =>
@@ -89,10 +86,14 @@
       }, 3000);
     }
 
+    const saveDraft = debounce(async (content) => {
+      await set(State.slug, content).then(() => showAlert('Draft saved'));
+    });
+
     const setTitle = debounce(async (content) => {
       const trimmed = content.trim();
-      const firstLine = trimmed.split('\n')[0];
-      const title = firstLine.slice(0, 50).trim().replace(/#/g, ''); // remove MD #s
+      const firstLine = trimmed.split('\n')[0].trim();
+      const title = firstLine.slice(0, 50).replace(/#/g, '').trim(); // remove MD #s
       const slug = (createSlug(title) || POST_ID);
 
       State.title = title;
@@ -115,22 +116,28 @@
       showAlert('Saving...');
 
       try {
-        await fetch(`/${USERNAME}/${POST_ID}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: State.saveController.signal,
-          body: JSON.stringify({
-            content: trimmed,
-            title: State.title,
-            slug: State.slug
-          })
-        });
+        if (State.changes) {
+          await fetch(`/${USERNAME}/${POST_ID}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: State.saveController.signal,
+            body: JSON.stringify({
+              content: trimmed,
+              title: State.title,
+              slug: State.slug
+            })
+          });
+        }
 
         showAlert('Saved! Redirecting...');
-        await wait(1000);
+
+        // delete draft now that it is sync with server
+        await del(State.slug).catch(console.error);
+        await wait(250);
 
         // redirect
-        window.location.replace(`/${USERNAME}/${State.slug}`);
+        if (trimmed) window.location.replace(`/${USERNAME}/${State.slug}`);
+        else window.location.replace(`/${USERNAME}`);
       } catch (e) {
         if (e.name === 'AbortError') { console.log('aborted old request'); }
         else console.error('save error: ', e);
@@ -167,13 +174,29 @@
     // auto-expand editor
     Editor.addEventListener('input', (e) => {
       const editor = e.target;
+
+      if (!State.changes) State.changes = true;
       setTitle(editor.value);
-      if (e.inputType === 'insertText') return;
+      saveDraft(editor.value);
 
       if (editor.style.height !== editor.scrollHeight + 'px') {
         editor.style.height = 'inherit';
         editor.style.height = editor.scrollHeight + 'px';
       }
+    });
+
+    // initial autoexpand
+    if (Editor.style.height !== Editor.scrollHeight + 'px') {
+      Editor.style.height = 'inherit';
+      Editor.style.height = Editor.scrollHeight + 'px';
+    }
+
+    // initial check for draft
+    get(State.slug).then((value) => {
+      if (!value) return;
+      Editor.textContent = value;
+      State.changes = true;
+      showAlert('Local draft loaded')
     });
   </script>
 </body>

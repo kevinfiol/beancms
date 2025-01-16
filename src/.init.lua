@@ -4,7 +4,6 @@ local moon = require 'lib.fullmoon'
 local db = require 'db'
 local constant = require 'constants'
 local session = require 'session'
-local util = require 'util'
 local markdown = require 'lib.markdown'
 
 -- helper functions
@@ -196,8 +195,14 @@ moon.get('/:_username/:slug/edit(/)', function (r)
   local username = _.trim(r.params._username)
   local slug = _.trim(r.params.slug)
 
-  local post_id = util.normalizePostId(slug)
+  local ok, post_id = db.getPostId(slug)
   local content = ''
+
+  if not ok then
+    LogError(post_id)
+    moon.setStatus(500)
+    return 'An error occurred'
+  end
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
@@ -266,7 +271,6 @@ end)
 moon.post('/:_username/:post_id', function (r)
   local username = _.trim(r.params._username)
   local post_id = _.trim(r.params.post_id)
-
   local body = DecodeJson(r.body)
 
   local content = body.content
@@ -281,7 +285,16 @@ moon.post('/:_username/:post_id', function (r)
   --   return 'Unauthorized'
   -- end
 
-  local ok, result = db.createPost(post_id, title, slug, username, content)
+  local ok = true
+  local result = nil
+
+  if _.trim(content) ~= '' then
+    -- create or update
+    ok, result = db.createPost(post_id, title, slug, username, content)
+  else
+    -- delete
+    ok, result = db.deletePost(post_id, slug, username)
+  end
 
   if not ok then
     moon.setStatus(500)

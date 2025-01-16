@@ -2,6 +2,19 @@ local sql = require 'sqlite'
 local constant = require 'constants'
 local uid = require 'lib.uid'
 
+local DEFAULT_UID_LENGTH = 10
+
+local function normalizePostId (s)
+  s = s or ''
+  s = string.gsub(s, "[^%w]", '') -- remove non-alphanumerics
+  s = string.sub(s, 1, 10) -- trim to 11 characters
+  if #s < 11 then
+    s = s .. (uid(DEFAULT_UID_LENGTH - #s))
+  end
+
+  return s
+end
+
 return {
   createUser = function (username, hashed, salt)
     local ok, result = pcall(function ()
@@ -57,11 +70,12 @@ return {
     return true, result
   end,
 
-  getPostId = function ()
+  getPostId = function (slug)
     local ok = true
-    local post_id = uid()
+    local post_id = normalizePostId(slug)
     local retry = true
     local retries = 0
+    local uid_increment = 0
     local exists = true
 
     while exists and retry do
@@ -74,11 +88,13 @@ return {
         if retries > 10 then
           retry = false
           ok = false
+        elseif retries == 5 then
+          uid_increment = uid_increment + 1
         else
           retries = retries + 1
         end
 
-        post_id = uid()
+        post_id = uid(DEFAULT_UID_LENGTH + uid_increment)
       else
         exists = false
       end
@@ -163,6 +179,24 @@ return {
       ok = false
       result = 'Post creation/update failed. No rows inserted/updated'
     end
+
+    return ok, result
+  end,
+
+  deletePost = function (post_id, slug, username)
+    local ok, result = pcall(function ()
+      return sql:execute(
+        [[
+          delete from post
+          where (post_id = :post_id or slug = :slug)
+          and user_id = (
+            select user_id from user
+            where username = :username
+          )
+        ]],
+        { post_id = post_id, slug = slug, username = username }
+      )
+    end)
 
     return ok, result
   end
