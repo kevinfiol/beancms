@@ -34,7 +34,7 @@
       slug: SLUG,
       title: TITLE,
       saveController: undefined,
-      saving: false,
+      pending: false,
       changes: false
     };
 
@@ -44,7 +44,7 @@
       );
     }
 
-    function debounce(callback, wait = 500) {
+    function debounce(callback, wait = 350) {
       let timer;
 
       return (...args) => {
@@ -86,13 +86,19 @@
       }, 3000);
     }
 
-    const saveDraft = debounce(async (content) => {
-      await set(State.slug, content).then(() => showAlert('Draft saved'));
+    const saveDraft = debounce((content) => {
+      if (content) 
+        set(State.slug, content)
+          .then(() => showAlert('Draft saved'))
+          .finally(() => State.pending = false);
+      else
+        del(State.slug)
+          .catch(() => {})
+          .finally(() => State.pending = false);
     });
 
-    const setTitle = debounce(async (content) => {
-      const trimmed = content.trim();
-      const firstLine = trimmed.split('\n')[0].trim();
+    const setTitle = debounce((content) => {
+      const firstLine = content.split('\n')[0].trim();
       const title = firstLine.slice(0, 50).replace(/#/g, '').trim(); // remove MD #s
       const slug = (createSlug(title) || POST_ID);
 
@@ -101,17 +107,16 @@
 
       document.title = title;
       modifyUrl(slug);
+      State.pending = false;
     });
 
     const saveChanges = async (content) => {
-      const trimmed = content.trim();
-
       if (State.saveController) {
         State.saveController.abort();
       }
 
       Editor.setAttribute('disabled', true);
-      State.saving = true;
+      State.pending = true;
       State.saveController = new AbortController();
       showAlert('Saving...');
 
@@ -122,7 +127,7 @@
             headers: { 'Content-Type': 'application/json' },
             signal: State.saveController.signal,
             body: JSON.stringify({
-              content: trimmed,
+              content,
               title: State.title,
               slug: State.slug
             })
@@ -136,7 +141,7 @@
         await wait(250);
 
         // redirect
-        if (trimmed) window.location.replace(`/${USERNAME}/${State.slug}`);
+        if (content) window.location.replace(`/${USERNAME}/${State.slug}`);
         else window.location.replace(`/${USERNAME}`);
       } catch (e) {
         if (e.name === 'AbortError') { console.log('aborted old request'); }
@@ -144,7 +149,7 @@
         showAlert('Could not save! Try again');
       } finally {
         Editor.removeAttribute('disabled');
-        State.saving = false;
+        State.pending = false;
       }
     };
 
@@ -165,9 +170,9 @@
       }
 
       // save changes
-      if (e.ctrlKey && e.key === 's' && !State.saving) {
+      if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        saveChanges(editor.value);
+        if (!State.pending) saveChanges(editor.value.trim());
       }
     });
 
@@ -176,8 +181,12 @@
       const editor = e.target;
 
       if (!State.changes) State.changes = true;
-      setTitle(editor.value);
-      saveDraft(editor.value);
+      const currentLine = editor.value.substr(0, editor.selectionStart).split('\n').length;
+      const content = editor.value.trim();
+
+      State.pending = true;
+      if (currentLine > 1) saveDraft(content);
+      else setTitle(content);
 
       if (editor.style.height !== editor.scrollHeight + 'px') {
         editor.style.height = 'inherit';
