@@ -88,7 +88,7 @@
 
     const saveDraft = debounce((content) => {
       if (content) 
-        set(State.slug, content)
+        set(State.slug, { username: USERNAME, content })
           .then(() => showAlert('Draft saved'))
           .finally(() => State.pending = false);
       else
@@ -172,7 +172,8 @@
       // save changes
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        if (!State.pending) saveChanges(editor.value.trim());
+        if (!State.pending)
+          saveChanges(editor.value.trim());
       }
     });
 
@@ -181,8 +182,12 @@
       const editor = e.target;
 
       if (!State.changes) State.changes = true;
-      const currentLine = editor.value.substr(0, editor.selectionStart).split('\n').length;
+
       const content = editor.value.trim();
+      const currentLine = editor.value
+        .substr(0, editor.selectionStart)
+        .split('\n')
+        .length;
 
       State.pending = true;
       if (currentLine > 1) saveDraft(content);
@@ -203,7 +208,9 @@
     // initial check for draft
     get(State.slug).then((value) => {
       if (!value) return;
-      Editor.textContent = value;
+      const { content } = value;
+
+      Editor.textContent = content;
       State.changes = true;
       showAlert('Local draft loaded')
     });

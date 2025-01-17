@@ -52,8 +52,11 @@
     ViewDraftsBtn.addEventListener('click', () => {
       entries().then((drafts) => {
         if (!listInitialized) {
-          if (drafts.length) populateList(drafts);
-          else {
+          drafts = drafts.filter(([key, value]) => value.username === USERNAME);
+
+          if (drafts.length) {
+            populateList(drafts);
+          } else {
             DraftsDialog.removeChild(DialogList);
             const note = document.createElement('p');
             note.innerText = 'No saved drafts';
