@@ -5,7 +5,9 @@ local SCHEMA = [[
     user_id integer primary key,
     username text not null unique,
     hashed text not null,
-    salt text not null
+    salt text not null,
+    intro text default '',
+    custom_css text default ''
   );
 
   create table if not exists post (

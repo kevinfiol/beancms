@@ -1,4 +1,8 @@
 {% function block.content() %}
+  <style>
+    {%& custom_css %}
+  </style>
+
   <nav>
     {% if has_user_access then %}
       <a href="/{%& username %}/{%& slug %}/edit">Edit</a>

@@ -1,6 +1,13 @@
 {% function block.content() %}
+<style>
+  {%& custom_css %}
+</style>
+
 <main>
   <h1>{%& username %}</h1>
+  <div>
+    {%= intro %}
+  </div>
 
   {% if true then %}
     <nav>
@@ -25,15 +32,30 @@
   {% end %}
 
   <h2>Posts</h2>
-  <ul>
-    {% for _, post in pairs(posts) do %}
-      <li>
-        <a href="/{%& username %}/{%& post.slug or post.post_id %}">
-          {%& post.title or post.slug or post.post_id %}
-        </a>
-      </li>
-    {% end %}
-  </ul>
+  {% for _, post in pairs(posts) do %}
+    <div>
+      <a href="/{%& username %}/{%& post.slug or post.post_id %}">
+        {%& post.title or post.slug or post.post_id %}
+      </a>
+    </div>
+  {% end %}
+
+  <details>
+    <summary>Options</summary>
+    <form action="/a/update/{%& username %}" method="POST">
+      <label>
+        Custom Intro Markdown
+        <textarea name="intro">{%& intro or '' %}</textarea>
+      </label>
+
+      <label>
+        Custom CSS
+        <textarea name="custom_css">{%& custom_css or '' %}</textarea>
+      </label>
+
+      <button type="submit">Save</button>
+    </form>
+  </details>
 </main>
 
 <script type="module">

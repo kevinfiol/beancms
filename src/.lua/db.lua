@@ -31,6 +31,28 @@ return {
     return ok, result
   end,
 
+  updateUser = function (username, intro, custom_css)
+    custom_css = string.sub(custom_css, 1, 80000) -- 80000 char limit
+
+    local ok, result = pcall(function ()
+      return sql:execute(
+        [[
+          update user set
+            intro = :intro,
+            custom_css = :custom_css
+          where username = :username
+        ]],
+        {
+          username = username,
+          intro = intro,
+          custom_css = custom_css
+        }
+      )
+    end)
+
+    return ok, result
+  end,
+
   validateUser = function (username, password)
     local result, err = sql:fetchOne(
       [[
@@ -55,7 +77,11 @@ return {
   getUser = function (username)
     local result, err = sql:fetchOne(
       [[
-        select username, user_id
+        select
+          username,
+          user_id,
+          intro,
+          custom_css
         from user
         where username = ?
       ]],

@@ -133,6 +133,8 @@ moon.get('/:_username(/)', function (r)
   local ok, user = db.getUser(username)
   local new_post_id = ''
 
+  p({ ok = ok, user = user })
+
   if not ok then
     moon.setStatus(404)
     return 'User does not exist'
@@ -158,7 +160,9 @@ moon.get('/:_username(/)', function (r)
     username = user.username,
     new_post_id = new_post_id,
     has_user_access = has_user_access,
-    posts = posts
+    posts = posts,
+    intro = markdown(EscapeHtml(user.intro)),
+    custom_css = user.custom_css
   })
 end)
 
@@ -182,12 +186,20 @@ moon.get('/:_username/:slug(/)', function (r)
     return moon.serveRedirect(302, f'/{username}/{slug}/edit')
   end
 
+  -- get custom css
+  local custom_css = ''
+  local ok, user = db.getUser(username)
+  if ok then
+    custom_css = user.custom_css
+  end
+
   -- otherwise, we can render the post content
   return moon.serveContent('post', {
     slug = slug,
     username = username,
     has_user_access = has_user_access,
-    content = markdown(EscapeHtml(result.content))
+    content = markdown(EscapeHtml(result.content)),
+    custom_css = custom_css
   })
 end)
 
@@ -265,6 +277,30 @@ moon.post('/a/register', function (r)
   end
 
   setSessionCookie(r, username)
+  return moon.serveRedirect(302, f'/{username}')
+end)
+
+moon.post('/a/update/:_username', function (r)
+  local username = _.trim(r.params._username)
+  local intro = _.trim(r.params.intro)
+  local custom_css = _.trim(r.params.custom_css)
+
+  local user_session = checkSession(r, username)
+  local has_user_access = user_session.is_valid and user_session.user_access
+
+  p({ intro = intro, custom_css = custom_css, has_user_access = has_user_access })
+
+  -- if not has_user_access then
+  --   return moon.serveRedirect(302, f'/{username}')
+  -- end
+
+  local ok, result = db.updateUser(username, intro, custom_css)
+
+  if not ok then
+    LogError(f'Error: could not update user: {username}')
+    return moon.serveRedirect(303, f'/{username}')
+  end
+
   return moon.serveRedirect(302, f'/{username}')
 end)
 
