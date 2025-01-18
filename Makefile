@@ -5,7 +5,6 @@ HOST=127.0.0.1
 # vendor
 REDBEAN=vendor/redbean.com
 ZIP=vendor/zip.com
-UNZIP=vendor/unzip.com
 
 # build
 BUILD=bin/redbean.com
@@ -18,7 +17,6 @@ LOG_FILE=bin/redbean.log
 download:
 	curl -o ${REDBEAN} https://redbean.dev/redbean-3.0.0.com && chmod +x ${REDBEAN}
 	curl -o ${ZIP} https://redbean.dev/zip.com && chmod +x ${ZIP}
-	curl -o ${UNZIP} https://redbean.dev/unzip.com && chmod +x ${UNZIP}
 
 add:
 	cp -f ${REDBEAN} ${BUILD}
@@ -57,7 +55,6 @@ clean_db:
 clean: clean_db
 	rm -f ${REDBEAN}
 	rm -f ${ZIP}
-	rm -f ${UNZIP}
 	rm -f ${BUILD}
 	rm -f ${LOG_FILE}
 	rm -f ${PID_FILE}
