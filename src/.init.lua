@@ -162,7 +162,9 @@ moon.get('/:_username(/)', function (r)
     has_user_access = has_user_access,
     posts = posts,
     intro = markdown(EscapeHtml(user.intro)),
-    custom_css = user.custom_css
+    intro_raw = EscapeHtml(user.intro),
+    custom_css = user.custom_css,
+    custom_title = user.custom_title
   })
 end)
 
@@ -284,17 +286,16 @@ moon.post('/a/update/:_username', function (r)
   local username = _.trim(r.params._username)
   local intro = _.trim(r.params.intro)
   local custom_css = _.trim(r.params.custom_css)
+  local custom_title = _.trim(r.params.custom_title)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
-
-  p({ intro = intro, custom_css = custom_css, has_user_access = has_user_access })
 
   -- if not has_user_access then
   --   return moon.serveRedirect(302, f'/{username}')
   -- end
 
-  local ok, result = db.updateUser(username, intro, custom_css)
+  local ok, result = db.updateUser(username, intro, custom_css, custom_title)
 
   if not ok then
     LogError(f'Error: could not update user: {username}')

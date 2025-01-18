@@ -31,21 +31,25 @@ return {
     return ok, result
   end,
 
-  updateUser = function (username, intro, custom_css)
+  updateUser = function (username, intro, custom_css, custom_title)
     custom_css = string.sub(custom_css, 1, 80000) -- 80000 char limit
+    intro = string.sub(intro, 1, 500) -- 500 char limit
+    custom_title = string.sub(custom_title, 1, 50) -- 50 char limit
 
     local ok, result = pcall(function ()
       return sql:execute(
         [[
           update user set
             intro = :intro,
-            custom_css = :custom_css
+            custom_css = :custom_css,
+            custom_title = :custom_title
           where username = :username
         ]],
         {
           username = username,
           intro = intro,
-          custom_css = custom_css
+          custom_css = custom_css,
+          custom_title = custom_title
         }
       )
     end)
@@ -81,7 +85,8 @@ return {
           username,
           user_id,
           intro,
-          custom_css
+          custom_css,
+          custom_title
         from user
         where username = ?
       ]],

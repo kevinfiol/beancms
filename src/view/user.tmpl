@@ -4,7 +4,7 @@
 </style>
 
 <main>
-  <h1>{%& username %}</h1>
+  <h1>{%& custom_title ~= '' and custom_title or username %}</h1>
   <div>
     {%= intro %}
   </div>
@@ -41,16 +41,21 @@
   {% end %}
 
   <details>
-    <summary>Options</summary>
+    <summary style="user-select: none">Options</summary>
     <form action="/a/update/{%& username %}" method="POST">
       <label>
+        Custom Title
+        <input type="text" name="custom_title" maxlength="50" value="{%& custom_title or '' %}" />
+      </label>
+
+      <label>
         Custom Intro Markdown
-        <textarea name="intro">{%& intro or '' %}</textarea>
+        <textarea name="intro" maxlength="500">{%& intro_raw or '' %}</textarea>
       </label>
 
       <label>
         Custom CSS
-        <textarea name="custom_css">{%& custom_css or '' %}</textarea>
+        <textarea name="custom_css" maxlength="80000">{%& custom_css or '' %}</textarea>
       </label>
 
       <button type="submit">Save</button>
@@ -71,6 +76,13 @@
   if (ViewDraftsBtn) {
     let listInitialized = false;
 
+    function showEmptyDialog() {
+      DraftsDialog.removeChild(DialogList);
+      const note = document.createElement('p');
+      note.innerText = 'No saved drafts';
+      DraftsDialog.appendChild(note);
+    }
+
     ViewDraftsBtn.addEventListener('click', () => {
       entries().then((drafts) => {
         if (!listInitialized) {
@@ -79,10 +91,7 @@
           if (drafts.length) {
             populateList(drafts);
           } else {
-            DraftsDialog.removeChild(DialogList);
-            const note = document.createElement('p');
-            note.innerText = 'No saved drafts';
-            DraftsDialog.appendChild(note);
+            showEmptyDialog();
           }
 
           listInitialized = true;
@@ -110,9 +119,13 @@
         const button = document.createElement('button');
         button.innerText = 'Delete';
         button.onclick = () => {
-          del(slug).then(() =>
-            DialogList.removeChild(li)
-          );
+          del(slug).then(() => {
+            DialogList.removeChild(li);
+
+            if (DialogList.children.length === 0) {
+              showEmptyDialog();
+            }
+          });
         };
 
         // append elements to DOM

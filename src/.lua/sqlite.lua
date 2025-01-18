@@ -7,7 +7,8 @@ local SCHEMA = [[
     hashed text not null,
     salt text not null,
     intro text default '',
-    custom_css text default ''
+    custom_css text default '',
+    custom_title text default ''
   );
 
   create table if not exists post (
