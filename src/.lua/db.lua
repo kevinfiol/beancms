@@ -180,6 +180,7 @@ return {
   createPost = function (post_id, title, slug, username, content)
     local content_size = #content
 
+    p({ title = title, slug = slug })
     local ok, result = pcall(function ()
       return sql:execute(
         [[

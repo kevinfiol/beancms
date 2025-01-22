@@ -86,6 +86,12 @@
       }, 3000);
     }
 
+    function parseTitle(content) {
+      const firstLine = content.split('\n')[0].trim();
+      const title = firstLine.slice(0, 50).replace(/#/g, '').trim(); // remove MD #s
+      return title;
+    }
+
     const saveDraft = debounce((content) => {
       if (content) 
         set(State.slug, { username: USERNAME, content })
@@ -98,8 +104,7 @@
     });
 
     const setTitle = debounce((content) => {
-      const firstLine = content.split('\n')[0].trim();
-      const title = firstLine.slice(0, 50).replace(/#/g, '').trim(); // remove MD #s
+      const title = parseTitle(content);
       const slug = (createSlug(title) || POST_ID);
 
       State.title = title;
@@ -168,14 +173,16 @@
 
         editor.selectionEnd = originalStart + 1;
       }
+    });
 
-      // save changes
+    // save hotkey
+    document.addEventListener('keydown', (e) => {
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         if (!State.pending)
-          saveChanges(editor.value.trim());
+          saveChanges(Editor.value.trim());
       }
-    });
+    })
 
     // auto-expand editor
     Editor.addEventListener('input', (e) => {
@@ -209,6 +216,11 @@
     get(State.slug).then((value) => {
       if (!value) return;
       const { content } = value;
+
+      if (State.slug === State.title) {
+        // unsaved draft; parse title
+        State.title = parseTitle(content);
+      }
 
       Editor.textContent = content;
       State.changes = true;
