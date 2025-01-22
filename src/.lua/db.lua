@@ -180,7 +180,6 @@ return {
   createPost = function (post_id, title, slug, username, content)
     local content_size = #content
 
-    p({ title = title, slug = slug })
     local ok, result = pcall(function ()
       return sql:execute(
         [[
@@ -195,7 +194,8 @@ return {
             title = excluded.title,
             slug = excluded.slug,
             content = excluded.content,
-            content_size = :content_size
+            content_size = :content_size,
+            modified_time = CURRENT_TIMESTAMP
         ]],
         {
           post_id = post_id,
