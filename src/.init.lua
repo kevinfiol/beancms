@@ -133,8 +133,6 @@ moon.get('/:_username(/)', function (r)
   local ok, user = db.getUser(username)
   local new_post_id = ''
 
-  p({ ok = ok, user = user })
-
   if not ok then
     moon.setStatus(404)
     return 'User does not exist'
@@ -142,7 +140,12 @@ moon.get('/:_username(/)', function (r)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
-  local ok, posts = db.getPosts(username)
+  local ok, posts = db.getPosts(username, user.max_display_posts)
+
+  if not ok then
+    moon.setStatus(500)
+    return 'Error retrieving user posts'
+  end
 
   if has_user_access then
     local ok, result = db.getPostId()
@@ -164,7 +167,8 @@ moon.get('/:_username(/)', function (r)
     intro = markdown(EscapeHtml(user.intro)),
     intro_raw = EscapeHtml(user.intro),
     custom_css = user.custom_css,
-    custom_title = user.custom_title
+    custom_title = user.custom_title,
+    max_display_posts = user.max_display_posts
   })
 end)
 
@@ -287,6 +291,7 @@ moon.post('/a/update/:_username', function (r)
   local intro = _.trim(r.params.intro)
   local custom_css = _.trim(r.params.custom_css)
   local custom_title = _.trim(r.params.custom_title)
+  local max_display_posts = tonumber(r.params.max_display_posts)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
@@ -295,7 +300,13 @@ moon.post('/a/update/:_username', function (r)
   --   return moon.serveRedirect(302, f'/{username}')
   -- end
 
-  local ok, result = db.updateUser(username, intro, custom_css, custom_title)
+  local ok, result = db.updateUser(
+    username,
+    intro,
+    custom_css,
+    custom_title,
+    max_display_posts
+  )
 
   if not ok then
     LogError(f'Error: could not update user: {username}')

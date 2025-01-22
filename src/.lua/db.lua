@@ -31,10 +31,11 @@ return {
     return ok, result
   end,
 
-  updateUser = function (username, intro, custom_css, custom_title)
+  updateUser = function (username, intro, custom_css, custom_title, max_display_posts)
     custom_css = string.sub(custom_css, 1, 80000) -- 80000 char limit
     intro = string.sub(intro, 1, 500) -- 500 char limit
     custom_title = string.sub(custom_title, 1, 50) -- 50 char limit
+    max_display_posts = math.max(math.min(100, max_display_posts), 1) -- clamp from 1-100
 
     local ok, result = pcall(function ()
       return sql:execute(
@@ -42,14 +43,16 @@ return {
           update user set
             intro = :intro,
             custom_css = :custom_css,
-            custom_title = :custom_title
+            custom_title = :custom_title,
+            max_display_posts = :max_display_posts
           where username = :username
         ]],
         {
           username = username,
           intro = intro,
           custom_css = custom_css,
-          custom_title = custom_title
+          custom_title = custom_title,
+          max_display_posts = max_display_posts
         }
       )
     end)
@@ -86,7 +89,8 @@ return {
           user_id,
           intro,
           custom_css,
-          custom_title
+          custom_title,
+          max_display_posts
         from user
         where username = ?
       ]],
@@ -157,15 +161,26 @@ return {
     return true, result
   end,
 
-  getPosts = function (username)
+  getPosts = function (username, max)
+    max = max or 50
+
     local result, err = sql:fetchAll(
       [[
-        select p.title, p.post_id, p.slug
+        select
+          p.title,
+          p.post_id,
+          p.slug,
+          p.created_time,
+          p.modified_time
         from post p
         join user u on p.user_id = u.user_id
         where u.username = ?
+        order by
+          p.created_time desc
+        limit ?
       ]],
-      username
+      username,
+      max
     )
 
     if err then

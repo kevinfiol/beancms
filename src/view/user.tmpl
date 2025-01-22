@@ -58,6 +58,11 @@
         <textarea name="custom_css" maxlength="80000">{%& custom_css or '' %}</textarea>
       </label>
 
+      <label>
+        Number of newest posts to display
+        <input type="number" name="max_display_posts" min="1" max="100" value="{%& max_display_posts or 50 %}" />
+      </label>
+
       <button type="submit">Save</button>
     </form>
   </details>
