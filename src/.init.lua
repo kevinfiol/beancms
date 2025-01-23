@@ -55,31 +55,6 @@ local function setSessionCookie (r, username)
   return r
 end
 
--- function buildToc(items: TocItem[] = []) {
---   let html = '';
-
---   while (items.length > 0) {
---     html += buildNestedList(items, 1);
---   }
-
---   return html ? `<div class="toc">${html}</div>` : html;
--- }
-
--- function buildNestedList(items: TocItem[] = [], level: number) {
---   let html = '<ul>';
-
---   while (items.length > 0 && items[0].level === level) {
---     const item = items.shift();
---     if (item) html += `<li><a href="#${item.anchor}">${item.text}</a></li>`;
---   }
-
---   while (items.length > 0 && items[0].level > level) {
---     html += buildNestedList(items, level + 1);
---   }
-
---   return html + '</ul>';
--- }
-
 local function buildNestedList (headings, level)
   local html = '<ul>'
 
