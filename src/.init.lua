@@ -4,7 +4,7 @@ local moon = require 'lib.fullmoon'
 local db = require 'db'
 local constant = require 'constants'
 local session = require 'session'
-local markdown = require 'lib.markdown'
+local djot = require 'lib.djot'
 
 -- helper functions
 moon.get = function (route, handler)
@@ -159,12 +159,15 @@ moon.get('/:_username(/)', function (r)
     new_post_id = result
   end
 
+  local parsed_md = djot.parse(user.intro)
+  local intro_html = djot.render_html(parsed_md)
+
   return moon.serveContent('user', {
     username = user.username,
     new_post_id = new_post_id,
     has_user_access = has_user_access,
     posts = posts,
-    intro = markdown(EscapeHtml(user.intro)),
+    intro = intro_html,
     intro_raw = EscapeHtml(user.intro),
     custom_css = user.custom_css,
     custom_title = user.custom_title,
@@ -199,12 +202,15 @@ moon.get('/:_username/:slug(/)', function (r)
     custom_css = user.custom_css
   end
 
+  local parsed_md = djot.parse(result.content)
+  local content_html = djot.render_html(parsed_md)
+
   -- otherwise, we can render the post content
   return moon.serveContent('post', {
     slug = slug,
     username = username,
     has_user_access = has_user_access,
-    content = markdown(EscapeHtml(result.content)),
+    content = content_html,
     custom_css = custom_css
   })
 end)
