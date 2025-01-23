@@ -206,12 +206,6 @@
       }
     });
 
-    // initial autoexpand
-    if (Editor.style.height !== Editor.scrollHeight + 'px') {
-      Editor.style.height = 'inherit';
-      Editor.style.height = Editor.scrollHeight + 'px';
-    }
-
     // initial check for draft
     get(State.slug).then((value) => {
       if (!value) return;
@@ -225,6 +219,12 @@
       Editor.textContent = content;
       State.changes = true;
       showAlert('Local draft loaded')
+    }).finally(() => {
+      // initial autoexpand
+      if (Editor.style.height !== Editor.scrollHeight + 'px') {
+        Editor.style.height = 'inherit';
+        Editor.style.height = Editor.scrollHeight + 'px';
+      }
     });
   </script>
 </body>

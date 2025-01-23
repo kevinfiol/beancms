@@ -44,6 +44,11 @@
     <summary style="user-select: none">Options</summary>
     <form action="/a/update/{%& username %}" method="POST">
       <label>
+        Enable Table of Contents
+        <input type="checkbox" name="enable_toc" {%& enable_toc == 1 and 'checked' or '' %} />
+      </label>
+
+      <label>
         Custom Title
         <input type="text" name="custom_title" maxlength="50" value="{%& custom_title or '' %}" />
       </label>

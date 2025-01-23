@@ -41,6 +41,8 @@ local unpack = unpack or table.unpack
 local find, lower, sub, rep, format =
   string.find, string.lower, string.sub, string.rep, string.format
 
+local HEADING_ORDER = 1
+
 -- Creates a sparse array whose indices are byte positions.
 -- sourcepos_map[bytepos] = "line:column:charpos"
 local function make_sourcepos_map(input)
@@ -873,6 +875,9 @@ local function to_ast(parser, sourcepos)
             references[heading_str] =
               new_node("reference")
             references[heading_str].destination = "#" .. node.attr.id
+            references[heading_str].level = node.level -- add level to references obj
+            references[heading_str].order = HEADING_ORDER -- keep order of headings
+            HEADING_ORDER = HEADING_ORDER + 1
           end
 
         elseif tag == "destination" then

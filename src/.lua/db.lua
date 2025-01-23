@@ -31,11 +31,12 @@ return {
     return ok, result
   end,
 
-  updateUser = function (username, intro, custom_css, custom_title, max_display_posts)
-    custom_css = string.sub(custom_css, 1, 80000) -- 80000 char limit
-    intro = string.sub(intro, 1, 500) -- 500 char limit
-    custom_title = string.sub(custom_title, 1, 50) -- 50 char limit
-    max_display_posts = math.max(math.min(100, max_display_posts), 1) -- clamp from 1-100
+  updateUser = function (username, intro, custom_css, custom_title, max_display_posts, enable_toc)
+    custom_css = string.sub(custom_css or '', 1, 80000) -- 80000 char limit
+    intro = string.sub(intro or '', 1, 500) -- 500 char limit
+    custom_title = string.sub(custom_title or '', 1, 50) -- 50 char limit
+    max_display_posts = math.max(math.min(100, max_display_posts or 50), 1) -- clamp from 1-100
+    enable_toc = math.max(math.min(1, enable_toc or 0), 0)
 
     local ok, result = pcall(function ()
       return sql:execute(
@@ -44,7 +45,8 @@ return {
             intro = :intro,
             custom_css = :custom_css,
             custom_title = :custom_title,
-            max_display_posts = :max_display_posts
+            max_display_posts = :max_display_posts,
+            enable_toc = :enable_toc
           where username = :username
         ]],
         {
@@ -52,7 +54,8 @@ return {
           intro = intro,
           custom_css = custom_css,
           custom_title = custom_title,
-          max_display_posts = max_display_posts
+          max_display_posts = max_display_posts,
+          enable_toc = enable_toc
         }
       )
     end)
@@ -90,7 +93,8 @@ return {
           intro,
           custom_css,
           custom_title,
-          max_display_posts
+          max_display_posts,
+          enable_toc
         from user
         where username = ?
       ]],

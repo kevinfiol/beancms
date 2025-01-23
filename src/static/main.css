@@ -22,6 +22,43 @@ main {
   text-rendering: optimizeLegibility;
 }
 
+@media (max-width: 1200px) {
+  .toc {
+    display: none;
+  }
+}
+
+/*post page*/
+.toc {
+  &:hover {
+    opacity: 0.8;
+    overflow-y: auto;
+  }
+
+  font-size: 10pt;
+  opacity: 0.25;
+  position: fixed;
+  top: 14%;
+  left: 1%;
+  white-space: nowrap;
+  max-width: 15%;
+  max-height: 600px;
+  overflow-y: hidden;
+
+  ul {
+    margin: 0;
+    padding-right: 0;
+    padding-left: 12px;
+    padding-top: 0.2em;
+
+    li {
+      text-overflow: ellipsis;
+      overflow-x: hidden;
+      padding: 0.2em;
+    }
+  }
+}
+
 /* editor */
 #editor {
   font-family: serif;

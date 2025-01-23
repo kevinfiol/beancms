@@ -10,6 +10,12 @@
     <a href="/{%& username %}">Back</a>
   </nav>
 
+  {% if toc ~= '' then %}
+    <aside class="toc">
+      {%= toc %}
+    </aside>
+  {% end %}
+
   <main>
     {%= content %}
   </main>

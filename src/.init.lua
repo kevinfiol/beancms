@@ -55,6 +55,75 @@ local function setSessionCookie (r, username)
   return r
 end
 
+-- function buildToc(items: TocItem[] = []) {
+--   let html = '';
+
+--   while (items.length > 0) {
+--     html += buildNestedList(items, 1);
+--   }
+
+--   return html ? `<div class="toc">${html}</div>` : html;
+-- }
+
+-- function buildNestedList(items: TocItem[] = [], level: number) {
+--   let html = '<ul>';
+
+--   while (items.length > 0 && items[0].level === level) {
+--     const item = items.shift();
+--     if (item) html += `<li><a href="#${item.anchor}">${item.text}</a></li>`;
+--   }
+
+--   while (items.length > 0 && items[0].level > level) {
+--     html += buildNestedList(items, level + 1);
+--   }
+
+--   return html + '</ul>';
+-- }
+
+local function buildNestedList (headings, level)
+  local html = '<ul>'
+
+  while #headings > 0 and headings[#headings].level == level do
+    local last = table.remove(headings)
+    if last ~= nil then
+      html = html ..
+        string.format('<li><a href="%s" title="%s">%s</a></li>',
+          EscapeHtml(last.destination),
+          EscapeHtml(last.title),
+          EscapeHtml(last.title)
+        )
+    end
+  end
+
+  while #headings > 0 and headings[#headings].level > level do
+    html = html .. buildNestedList(headings, level + 1)
+  end
+
+  return html .. '</ul>'
+end
+
+local function generateTOC (references, start_level)
+  start_level = start_level or 1
+  local html = ''
+
+  -- build flat array of headings
+  local headings = {}
+  for k, v in pairs(references) do
+    table.insert(headings, _.merge(v, { title = k }))
+  end
+
+  -- sort in reverse order
+  headings = _.sort(headings, function (a, b) return a.order > b.order end)
+  -- filter based on start level
+  headings = _.filter(headings, function (a) return a.level >= start_level end)
+
+  while #headings > 0 do
+    html = html .. buildNestedList(headings, start_level)
+  end
+
+  return html
+end
+
 moon.get('/', function (r)
   local user_session = checkSession(r)
   return moon.serveContent('home', { logged_in = user_session.is_valid })
@@ -117,17 +186,6 @@ moon.get('/a/register', function (r)
   return moon.serveContent('register', { error_message = error_message })
 end)
 
-moon.get('/a/test', function (r)
-  local id = 'wahfosdfjaosdf'
-  local ok, result = db.createPost(id, id, 'kevin', 'hooheeehaahaa')
-
-  if ok then
-    p('successfully created post')
-  end
-
-  return 'test'
-end)
-
 moon.get('/:_username(/)', function (r)
   local username = _.trim(r.params._username)
   local ok, user = db.getUser(username)
@@ -171,7 +229,8 @@ moon.get('/:_username(/)', function (r)
     intro_raw = EscapeHtml(user.intro),
     custom_css = user.custom_css,
     custom_title = user.custom_title,
-    max_display_posts = user.max_display_posts
+    max_display_posts = user.max_display_posts,
+    enable_toc = user.enable_toc
   })
 end)
 
@@ -205,12 +264,18 @@ moon.get('/:_username/:slug(/)', function (r)
   local parsed_md = djot.parse(result.content)
   local content_html = djot.render_html(parsed_md)
 
+  -- generate toc
+  local toc_html = user.enable_toc == 1
+    and generateTOC(parsed_md.references, 2)
+    or nil
+
   -- otherwise, we can render the post content
   return moon.serveContent('post', {
     slug = slug,
     username = username,
     has_user_access = has_user_access,
     content = content_html,
+    toc = toc_html,
     custom_css = custom_css
   })
 end)
@@ -298,6 +363,7 @@ moon.post('/a/update/:_username', function (r)
   local custom_css = _.trim(r.params.custom_css)
   local custom_title = _.trim(r.params.custom_title)
   local max_display_posts = tonumber(r.params.max_display_posts)
+  local enable_toc = r.params.enable_toc == 'on' and 1 or 0
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
@@ -311,7 +377,8 @@ moon.post('/a/update/:_username', function (r)
     intro,
     custom_css,
     custom_title,
-    max_display_posts
+    max_display_posts,
+    enable_toc
   )
 
   if not ok then
