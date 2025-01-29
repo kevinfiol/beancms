@@ -20,7 +20,7 @@ moon.setTemplate({ '/view/', tmpl = 'fmt' })
 moon.get('/static/*', moon.serveAsset)
 moon.get("/favicon.ico", moon.serveAsset)
 
-local function checkSession (r, username)
+local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
   local user_session = session.get(token)
 
@@ -35,11 +35,11 @@ local function checkSession (r, username)
   end
 
   -- invalidate user's expired token
-  r.cookies[constant.SESSION_TOKEN_NAME] = false
+  -- r.cookies[constant.SESSION_TOKEN_NAME] = false
   return result, 'Unauthorized'
 end
 
-local function setSessionCookie (r, username)
+local function setSessionCookie(r, username)
   -- create session and set cookie
   local token = session.new(username, constant.SESSION_MAX_AGE)
 
@@ -55,7 +55,7 @@ local function setSessionCookie (r, username)
   return r
 end
 
-local function buildNestedList (headings, level)
+local function buildNestedList(headings, level)
   local html = '<ul>'
 
   while #headings > 0 and headings[#headings].level == level do
@@ -77,7 +77,7 @@ local function buildNestedList (headings, level)
   return html .. '</ul>'
 end
 
-local function generateTOC (references, start_level)
+local function generateTOC(references, start_level)
   start_level = start_level or 1
   local html = ''
 
@@ -239,12 +239,11 @@ moon.get('/:_username/:slug(/)', function (r)
   local parsed_md = djot.parse(result.content)
   local content_html = djot.render_html(parsed_md)
 
-  -- generate toc
   local toc_html = user.enable_toc == 1
     and generateTOC(parsed_md.references, 2)
     or nil
 
-  -- otherwise, we can render the post content
+  r.headers.CacheControl = 'public, max-age=120'
   return moon.serveContent('post', {
     slug = slug,
     username = username,

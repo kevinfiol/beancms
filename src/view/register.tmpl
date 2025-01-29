@@ -1,33 +1,33 @@
 {% function block.content() %}
-<nav>
-  <a href="/">← home</a>
-</nav>
+  <nav>
+    <a href="/">← home</a>
+  </nav>
 
-<main>
-  <h1>Register</h1>
+  <main>
+    <h1>Register</h1>
 
-  <section>
-    <form action="/a/register" method="post" id="register-form">
-      <div>
-        <input type="text" name="username" id="username" placeholder="Username" required>
-        <input type="password" name="password" id="password" placeholder="Password" minlength="7" required>
-        <input type="password" name="confirm" id="confirm" placeholder="Confirm Password" minlength="7" required>
-      </div>
+    <section>
+      <form action="/a/register" method="post" id="register-form">
+        <div>
+          <input type="text" name="username" id="username" placeholder="Username" required>
+          <input type="password" name="password" id="password" placeholder="Password" minlength="7" required>
+          <input type="password" name="confirm" id="confirm" placeholder="Confirm Password" minlength="7" required>
+        </div>
 
-      {% if error_message then %}
-        <figure class="error" role="alert">
-          {%& error_message %}
-        </figure>
-      {% end %}
+        {% if error_message then %}
+          <figure class="error" role="alert">
+            {%& error_message %}
+          </figure>
+        {% end %}
 
-      <div>
-        <button type="submit">
-          Register
-        </button>
-      </div>
-    </form>
-  </section>
-</main>
+        <div>
+          <button type="submit">
+            Register
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
 {% end %}
 
 {% render('layout') %}

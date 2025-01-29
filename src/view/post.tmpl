@@ -1,8 +1,14 @@
-{% function block.content() %}
+{% function block.head() %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+
   <style>
     {%& custom_css %}
   </style>
 
+  <script src="/static/highlight.min.js"></script>
+{% end %}
+
+{% function block.content() %}
   <nav>
     {% if has_user_access then %}
       <a href="/{%& username %}/{%& slug %}/edit">Edit</a>
@@ -19,6 +25,10 @@
   <main>
     {%= content %}
   </main>
+
+  <script>
+    hljs.highlightAll();
+  </script>
 {% end %}
 
 {% render('layout') %}

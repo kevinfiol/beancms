@@ -1,32 +1,32 @@
 {% function block.content() %}
-<nav>
-  <a href="/">← home</a>
-</nav>
+  <nav>
+    <a href="/">← home</a>
+  </nav>
 
-<main>
-  <h1>Login</h1>
+  <main>
+    <h1>Login</h1>
 
-  <section>
-    <form action="/a/login" method="post">
-      <div>
-        <input type="text" name="username" id="username" placeholder="Username" required>
-        <input type="password" name="password" id="password" placeholder="Password" required>
-      </div>
+    <section>
+      <form action="/a/login" method="post">
+        <div>
+          <input type="text" name="username" id="username" placeholder="Username" required>
+          <input type="password" name="password" id="password" placeholder="Password" required>
+        </div>
 
-      {% if error_message then %}
-        <figure class="error" role="alert">
-          {%& error_message %}
-        </figure>
-      {% end %}
+        {% if error_message then %}
+          <figure class="error" role="alert">
+            {%& error_message %}
+          </figure>
+        {% end %}
 
-      <div>
-        <button type="submit">
-          Login
-        </button>
-      </div>
-    </form>
-  </section>
-</main>
+        <div>
+          <button type="submit">
+            Login
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
 {% end %}
 
 {% render('layout') %}

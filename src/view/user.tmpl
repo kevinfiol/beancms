@@ -1,151 +1,153 @@
-{% function block.content() %}
-<style>
-  {%& custom_css %}
-</style>
-
-<main>
-  <h1>{%& custom_title ~= '' and custom_title or username %}</h1>
-  <div>
-    {%= intro %}
-  </div>
-
-  {% if true then %}
-    <nav>
-      <button id="view-drafts">
-        Local Drafts
-      </button>
-
-      <a href="/{%& username %}/{%& new_post_id %}">
-        Write
-      </a>
-
-      <a href="/a/logout">
-        Logout
-      </a>
-    </nav>
-
-    <dialog id="drafts">
-      <button class="close" autofocus>Close</button>
-      <ul class="list">
-      </ul>
-    </dialog>
-  {% end %}
-
-  <h2>Posts</h2>
-  {% for _, post in pairs(posts) do %}
-    <div>
-      <a href="/{%& username %}/{%& post.slug or post.post_id %}">
-        {%& post.title or post.slug or post.post_id %}
-      </a>
-    </div>
-  {% end %}
-
-  <details>
-    <summary style="user-select: none">Options</summary>
-    <form action="/a/update/{%& username %}" method="POST">
-      <label>
-        Enable Table of Contents
-        <input type="checkbox" name="enable_toc" {%& enable_toc == 1 and 'checked' or '' %} />
-      </label>
-
-      <label>
-        Custom Title
-        <input type="text" name="custom_title" maxlength="50" value="{%& custom_title or '' %}" />
-      </label>
-
-      <label>
-        Custom Intro Markdown
-        <textarea name="intro" maxlength="500">{%& intro_raw or '' %}</textarea>
-      </label>
-
-      <label>
-        Custom CSS
-        <textarea name="custom_css" maxlength="80000">{%& custom_css or '' %}</textarea>
-      </label>
-
-      <label>
-        Number of newest posts to display
-        <input type="number" name="max_display_posts" min="1" max="100" value="{%& max_display_posts or 50 %}" />
-      </label>
-
-      <button type="submit">Save</button>
-    </form>
-  </details>
-</main>
-
-<script type="module">
-  import { entries, del } from '/static/idb-keyval.js';
-
-  const USERNAME = '{%& username %}';
-
-  const ViewDraftsBtn = document.getElementById('view-drafts');
-  const DraftsDialog = document.getElementById('drafts');
-  const DialogList = DraftsDialog.querySelector('.list');
-  const CloseDialogBtn = DraftsDialog.querySelector('button.close');
-
-  if (ViewDraftsBtn) {
-    let listInitialized = false;
-
-    function showEmptyDialog() {
-      DraftsDialog.removeChild(DialogList);
-      const note = document.createElement('p');
-      note.innerText = 'No saved drafts';
-      DraftsDialog.appendChild(note);
-    }
-
-    ViewDraftsBtn.addEventListener('click', () => {
-      entries().then((drafts) => {
-        if (!listInitialized) {
-          drafts = drafts.filter(([key, value]) => value.username === USERNAME);
-
-          if (drafts.length) {
-            populateList(drafts);
-          } else {
-            showEmptyDialog();
-          }
-
-          listInitialized = true;
-        }
-
-        DraftsDialog.showModal();
-      });
-    });
-
-    CloseDialogBtn.addEventListener('click', () => {
-      DraftsDialog.close();
-    });
-
-    function populateList(drafts) {
-      for (const [slug] of drafts) {
-        // list item
-        const li = document.createElement('li');
-
-        // link to edit page
-        const a = document.createElement('a');
-        a.href = `/${USERNAME}/${slug}/edit`;
-        a.innerText = slug;
-
-        // delete button
-        const button = document.createElement('button');
-        button.innerText = 'Delete';
-        button.onclick = () => {
-          del(slug).then(() => {
-            DialogList.removeChild(li);
-
-            if (DialogList.children.length === 0) {
-              showEmptyDialog();
-            }
-          });
-        };
-
-        // append elements to DOM
-        li.appendChild(a);
-        li.appendChild(button);
-        DialogList.appendChild(li);
-      }
-    }
-  }
-</script>
+{% function block.head() %}
+  <style>
+    {%& custom_css %}
+  </style>
 {% end %}
 
-{% render('layout') %}
+{% function block.content() %}
+  <main>
+    {% if true then %}
+      <nav>
+        <a href="/{%& username %}/{%& new_post_id %}">
+          Write
+        </a>
+
+        <a href="/a/logout">
+          Logout
+        </a>
+
+        <button id="view-drafts">
+          Drafts
+        </button>
+      </nav>
+
+      <dialog id="drafts">
+        <button class="close" autofocus>Close</button>
+        <ul class="list">
+        </ul>
+      </dialog>
+    {% end %}
+
+    <h1>{%& custom_title ~= '' and custom_title or username %}</h1>
+    <div>{%= intro %}</div>
+
+    <h2>Posts</h2>
+    {% for _, post in pairs(posts) do %}
+      <div>
+        <a href="/{%& username %}/{%& post.slug or post.post_id %}">
+          {%& post.title or post.slug or post.post_id %}
+        </a>
+      </div>
+    {% end %}
+
+    <details>
+      <summary>Options</summary>
+      <form action="/a/update/{%& username %}" method="POST">
+        <label>
+          <strong>Enable Table of Contents</strong>
+          <input type="checkbox" name="enable_toc" {%& enable_toc == 1 and 'checked' or '' %} />
+        </label>
+
+        <label>
+          <strong>Custom Title</strong>
+          <input type="text" name="custom_title" maxlength="50" value="{%& custom_title or '' %}" />
+        </label>
+
+        <label>
+          <strong>Custom Intro Markdown</strong>
+          <textarea name="intro" maxlength="500" rows="4" cols="33">{%& intro_raw or '' %}</textarea>
+        </label>
+
+        <label>
+          <strong>Custom CSS</strong>
+          <textarea name="custom_css" maxlength="80000" rows="8" cols="33">{%& custom_css or '' %}</textarea>
+        </label>
+
+        <label>
+          <strong>Number of newest posts to display</strong>
+          <input type="number" name="max_display_posts" min="1" max="100" value="{%& max_display_posts or 50 %}" />
+        </label>
+
+        <div>
+          <button type="submit">Save</button>
+        </div>
+      </form>
+    </details>
+  </main>
+
+  <script type="module">
+    import { entries, del } from '/static/idb-keyval.js';
+
+    const USERNAME = '{%& username %}';
+
+    const ViewDraftsBtn = document.getElementById('view-drafts');
+    const DraftsDialog = document.getElementById('drafts');
+    const DialogList = DraftsDialog.querySelector('.list');
+    const CloseDialogBtn = DraftsDialog.querySelector('button.close');
+
+    if (ViewDraftsBtn) {
+      let listInitialized = false;
+
+      function showEmptyDialog() {
+        DraftsDialog.removeChild(DialogList);
+        const note = document.createElement('p');
+        note.innerText = 'No saved drafts';
+        DraftsDialog.appendChild(note);
+      }
+
+      ViewDraftsBtn.addEventListener('click', () => {
+        entries().then((drafts) => {
+          if (!listInitialized) {
+            drafts = drafts.filter(([key, value]) => value.username === USERNAME);
+
+            if (drafts.length) {
+              populateList(drafts);
+            } else {
+              showEmptyDialog();
+            }
+
+            listInitialized = true;
+          }
+
+          DraftsDialog.showModal();
+        });
+      });
+
+      CloseDialogBtn.addEventListener('click', () => {
+        DraftsDialog.close();
+      });
+
+      function populateList(drafts) {
+        for (const [slug] of drafts) {
+          // list item
+          const li = document.createElement('li');
+
+          // link to edit page
+          const a = document.createElement('a');
+          a.href = `/${USERNAME}/${slug}/edit`;
+          a.innerText = slug;
+
+          // delete button
+          const button = document.createElement('button');
+          button.innerText = 'Delete';
+          button.onclick = () => {
+            del(slug).then(() => {
+              DialogList.removeChild(li);
+
+              if (DialogList.children.length === 0) {
+                showEmptyDialog();
+              }
+            });
+          };
+
+          // append elements to DOM
+          li.appendChild(a);
+          li.appendChild(button);
+          DialogList.appendChild(li);
+        }
+      }
+    }
+  </script>
+{% end %}
+
+{% render('layout', { title = username }) %}

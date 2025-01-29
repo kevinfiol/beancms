@@ -12,6 +12,26 @@ h3 {
   line-height: 1.2
 }
 
+h1 { font-size: 1.6em; margin: 0 0 0.4em 0; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1.05em; }
+
+h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.2em 0;
+}
+
+nav {
+  display: inline-block;
+  margin-bottom: 1rem;
+
+  > a:not(:last-child),
+    button:not(:last-child) {
+    margin-right: 0.5rem;
+  }
+}
+
 figure.error {
   margin: 1rem 0;
   padding: 18px;
@@ -22,13 +42,51 @@ main {
   text-rendering: optimizeLegibility;
 }
 
+details {
+  margin: 0.5rem 0;
+
+  &:hover {
+    outline: 1px solid rgba(0, 0, 0, 0.06);
+  }
+}
+
+details[open] {
+  background-color: ;
+  outline: 1px solid rgba(0, 0, 0, 0.06);
+
+  > summary {
+    background-color: rgba(0, 0, 0, 0.10);
+  }
+
+  > form {
+    padding: 1rem;
+  }
+}
+
+summary {
+  user-select: none;
+  padding: 0.2rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.10);
+  }
+}
+
+form > label {
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  margin: 0.5rem 0;
+}
+
+/* post page */
 @media (max-width: 1200px) {
   .toc {
     display: none;
   }
 }
 
-/*post page*/
 .toc {
   &:hover {
     opacity: 0.8;
@@ -61,7 +119,7 @@ main {
 
 /* editor */
 #editor {
-  font-family: serif;
+  font-family: monospace;
   line-height: 1.25em;
   font-size: 1em;
   width: 100%;

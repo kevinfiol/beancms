@@ -4,11 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="/static/main.css">
-  <title>bean cms</title>
+  <title>{%& title or 'bean cms' %}</title>
+  {% function block.head() %}
+  {% end %}
+  {% block.head() %}
   <script>
     // js helpers
     window.$ = document.querySelector.bind(document);
-    window.$$ = document.querySelector.bind(document);
+    window.$$ = document.querySelectorAll.bind(document);
   </script>
 </head>
 <body>

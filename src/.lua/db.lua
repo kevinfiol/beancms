@@ -146,7 +146,10 @@ return {
   getPost = function (username, slug)
     local result, err = sql:fetchOne(
       [[
-        select p.rowid, p.*
+        select
+          p.rowid,
+          p.*,
+          strftime('%s', p.modified_time) as unix_modified_time
         from post p
         join user u on p.user_id = u.user_id
         where u.username = :username
@@ -162,6 +165,7 @@ return {
     end
 
     result.content = Inflate(result.content, result.content_size)
+    result.unix_modified_time = tonumber(result.unix_modified_time)
     return true, result
   end,
 
