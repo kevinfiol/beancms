@@ -18,6 +18,7 @@
     const POST_ID = '{%& post_id %}';
     const SLUG = '{%& slug or post_id or '' %}';
     const TITLE = '{%& title or slug or post_id or '' %}';
+    const MAX_IMAGE_SIZE = 8 * 1024 * 1024; // 8 MB
 
     const Editor = document.getElementById('editor');
     const Alert = document.getElementById('toast');
@@ -82,6 +83,30 @@
       const firstLine = content.split('\n')[0].trim();
       const title = firstLine.slice(0, 50).replace(/#/g, '').trim(); // remove MD #s
       return title;
+    }
+
+    function uploadImage(file) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/a/upload', true);
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (!e.lengthComputable) return;
+          const percent = (e.loaded / e.total) * 100;
+          console.log('percent: ', percent);
+        });
+
+        xhr.onload = () => {
+          if (xhr.status === 200) resolve(xhr.response);
+          else reject(Error('Failed to upload image'));
+        };
+
+        xhr.onerror = () => reject(Error('Network error occurred while uploading image'));
+
+        const formData = new FormData();
+        formData.append('image', file);
+        xhr.send(formData);
+      });
     }
 
     const saveDraft = debounce((content) => {
@@ -195,6 +220,32 @@
       if (editor.style.height !== editor.scrollHeight + 'px') {
         editor.style.height = 'inherit';
         editor.style.height = editor.scrollHeight + 'px';
+      }
+    });
+
+    Editor.addEventListener('paste', async (e) => {
+      const data = e.clipboardData;
+
+      if (data && data.items) {
+        for (const item of data.items) {
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile();
+            if (!file) return;
+
+            if (file.size > MAX_IMAGE_SIZE) {
+              showAlert('Image size too large (> 8MB)');
+              return;
+            }
+
+            try {
+              await uploadImage(file);
+            } catch (e) {
+              console.error('Failed to upload image: ', e);
+            }
+
+            e.preventDefault();
+          }
+        }
       }
     });
 

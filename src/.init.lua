@@ -6,6 +6,9 @@ local constant = require 'constants'
 local session = require 'session'
 local djot = require 'lib.djot'
 
+local BIN_PATH = path.dirname(path.join(unix.getcwd(), arg[-1]))
+local IMG_DIR = path.join(BIN_PATH, 'img')
+
 -- helper functions
 moon.get = function (route, handler)
   return moon.setRoute({route, method = 'GET'}, handler)
@@ -19,6 +22,12 @@ end
 moon.setTemplate({ '/view/', tmpl = 'fmt' })
 moon.get('/static/*', moon.serveAsset)
 moon.get("/favicon.ico", moon.serveAsset)
+
+-- create image folder
+unix.makedirs(IMG_DIR)
+
+-- set max payload size for images
+ProgramMaxPayloadSize(8000000) -- 8MB
 
 local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
@@ -333,6 +342,20 @@ moon.post('/a/register', function (r)
 
   setSessionCookie(r, username)
   return moon.serveRedirect(302, f'/{username}')
+end)
+
+moon.post('/a/upload', function (r)
+  local image = r.params.image
+  local filepath = path.join(IMG_DIR, UuidV4()) .. '.png'
+
+  local WRITE_FLAGS = unix.O_CREAT | unix.O_WRONLY
+  local PERMISSIONS = 0644
+
+  local fd = unix.open(filepath, WRITE_FLAGS, PERMISSIONS)
+  unix.write(fd, image)
+  unix.close(fd)
+
+  return 'OK'
 end)
 
 moon.post('/a/update/:_username', function (r)
