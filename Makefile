@@ -18,16 +18,16 @@ download:
 	curl -o ${REDBEAN} https://redbean.dev/redbean-3.0.0.com && chmod +x ${REDBEAN}
 	curl -o ${ZIP} https://redbean.dev/zip.com && chmod +x ${ZIP}
 
-add:
+build:
 	cp -f ${REDBEAN} ${BUILD}
 	cd src/ && ../${ZIP} -r ../${BUILD} `ls -A`
 
-run: add
+run: build
 	${BUILD} -vv -p ${PORT} -l ${HOST}
 
-start: add
+start: build
 	@(test ! -f ./bin/redbean.pid && \
-		${BUILD} -vv -d -L ${LOG_FILE} -P ${PID_FILE} -p ${PORT} -l ${HOST} \
+		REDBEAN_MODE=dev ${BUILD} -vv -d -L ${LOG_FILE} -P ${PID_FILE} -p ${PORT} -l ${HOST} \
 	|| echo "Redbean is already running at $$(cat ${PID_FILE})")
 
 stop:
@@ -36,7 +36,7 @@ stop:
 		rm ${PID_FILE} \
 	|| true)
 
-restart: stop add start
+restart: stop build start
 
 watch:
 	make stop

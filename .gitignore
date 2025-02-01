@@ -4,3 +4,4 @@ bin/*.pid
 bin/*.log
 *.db
 *.db-*
+.env

@@ -28,7 +28,8 @@ local SCHEMA = [[
 ]]
 
 -- open db and enable wal mode
-local sql = moon.makeStorage('bin/cms.db', SCHEMA)
+local db_path = ENV.REDBEAN_MODE == 'dev' and 'bin/cms.db' or 'cms.db'
+local sql = moon.makeStorage(db_path, SCHEMA)
 sql:execute[[ pragma journal_mode = WAL ]]
 
 -- handle migrations
