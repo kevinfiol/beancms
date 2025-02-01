@@ -9,6 +9,7 @@ local SCHEMA = [[
     intro text default '',
     custom_css text default '',
     custom_title text default '',
+    theme text default '',
     max_display_posts integer default 50,
     enable_toc integer default 1
   );

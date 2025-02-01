@@ -1,13 +1,17 @@
 {% function block.head() %}
+  {% if theme and theme ~= '' then %}
+    <link rel="stylesheet" type="text/css" href="/static/theme/{%& themes[theme] %}.css">
+  {% end %}
+
   <style>
     {%& custom_css %}
   </style>
 {% end %}
 
 {% function block.content() %}
-  <main>
+  <main class="user-page">
     {% if true then %}
-      <nav>
+      <nav class="user-nav">
         <a href="/{%& username %}/{%& new_post_id %}">
           Write
         </a>
@@ -21,8 +25,10 @@
         </button>
       </nav>
 
-      <dialog id="drafts">
-        <button class="close" autofocus>Close</button>
+      <dialog id="drafts" class="drafts">
+        <div>
+          <button class="close" autofocus>Close</button>
+        </div>
         <ul class="list">
         </ul>
       </dialog>
@@ -31,21 +37,49 @@
     <h1>{%& custom_title ~= '' and custom_title or username %}</h1>
     <div>{%= intro %}</div>
 
-    <h2>Posts</h2>
-    {% for _, post in pairs(posts) do %}
-      <div>
-        <a href="/{%& username %}/{%& post.slug or post.post_id %}">
-          {%& post.title or post.slug or post.post_id %}
-        </a>
-      </div>
+    {% if #posts > 0 then %}
+      <h2>Posts</h2>
+    {% else %}
+      <em>User has no posts</em>
     {% end %}
 
-    <details>
+    <section class="posts">
+      {% for _, post in pairs(posts) do %}
+        <div class="post">
+          <a href="/{%& username %}/{%& post.slug or post.post_id %}">
+            {%& post.title or post.slug or post.post_id %}
+          </a>
+        </div>
+      {% end %}
+    </section>
+
+    <details class="options">
       <summary>Options</summary>
       <form action="/a/update/{%& username %}" method="POST">
         <label>
           <strong>Enable Table of Contents</strong>
           <input type="checkbox" name="enable_toc" {%& enable_toc == 1 and 'checked' or '' %} />
+        </label>
+
+        <label>
+          Theme
+          <select name="theme">
+            <option
+              value=""
+              {%& theme == '' and 'selected' or '' %}
+            >
+              Default
+            </option>
+
+            {% for key, css_theme in pairs(themes) do %}
+              <option
+                value="{%& key %}"
+                {%& theme == key and 'selected' or '' %}
+              >
+                {%& css_theme %}
+              </option>
+            {% end %}
+          </select>
         </label>
 
         <label>

@@ -22,7 +22,8 @@ h2, h3, h4, h5, h6 {
   margin: 1em 0 0.2em 0;
 }
 
-nav {
+nav.user-nav {
+  text-align: left;
   display: inline-block;
   margin-bottom: 1rem;
 
@@ -38,19 +39,47 @@ figure.error {
   border: 1px solid black;
 }
 
-main {
+main.user-page,
+main.post-page {
   text-rendering: optimizeLegibility;
+  padding-top: 1rem;
+  padding-bottom: 4rem;
 }
 
-details {
+dialog.drafts {
+  margin: auto auto;
+  padding: 2rem;
+
+  > button.close {
+    color: black;
+    border: 1px solid black;
+  }
+
+  > p {
+    padding: 1rem 0;
+  }
+}
+
+details.options {
+  text-align: left;
   margin: 0.5rem 0;
 
   &:hover {
     outline: 1px solid rgba(0, 0, 0, 0.06);
   }
+
+  > summary {
+    user-select: none;
+    padding: 0.2rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.10);
+    }
+  }
 }
 
-details[open] {
+details.options[open] {
   background-color: ;
   outline: 1px solid rgba(0, 0, 0, 0.06);
 
@@ -59,17 +88,8 @@ details[open] {
   }
 
   > form {
+    text-align: left;
     padding: 1rem;
-  }
-}
-
-summary {
-  user-select: none;
-  padding: 0.2rem;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.10);
   }
 }
 

@@ -205,7 +205,9 @@ moon.get('/:_username(/)', function (r)
     custom_css = user.custom_css,
     custom_title = user.custom_title,
     max_display_posts = user.max_display_posts,
-    enable_toc = user.enable_toc
+    enable_toc = user.enable_toc,
+    theme = user.theme,
+    themes = constant.THEME
   })
 end)
 
@@ -250,7 +252,9 @@ moon.get('/:_username/:slug(/)', function (r)
     has_user_access = has_user_access,
     content = content_html,
     toc = toc_html,
-    custom_css = custom_css
+    custom_css = custom_css,
+    theme = user.theme,
+    themes = constant.THEME
   })
 end)
 
@@ -338,6 +342,7 @@ moon.post('/a/update/:_username', function (r)
   local custom_title = _.trim(r.params.custom_title)
   local max_display_posts = tonumber(r.params.max_display_posts)
   local enable_toc = r.params.enable_toc == 'on' and 1 or 0
+  local theme = _.trim(r.params.theme)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
@@ -352,7 +357,8 @@ moon.post('/a/update/:_username', function (r)
     custom_css,
     custom_title,
     max_display_posts,
-    enable_toc
+    enable_toc,
+    theme
   )
 
   if not ok then

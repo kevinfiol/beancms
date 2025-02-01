@@ -31,7 +31,7 @@ return {
     return ok, result
   end,
 
-  updateUser = function (username, intro, custom_css, custom_title, max_display_posts, enable_toc)
+  updateUser = function (username, intro, custom_css, custom_title, max_display_posts, enable_toc, theme)
     custom_css = string.sub(custom_css or '', 1, 80000) -- 80000 char limit
     intro = string.sub(intro or '', 1, 500) -- 500 char limit
     custom_title = string.sub(custom_title or '', 1, 50) -- 50 char limit
@@ -46,7 +46,8 @@ return {
             custom_css = :custom_css,
             custom_title = :custom_title,
             max_display_posts = :max_display_posts,
-            enable_toc = :enable_toc
+            enable_toc = :enable_toc,
+            theme = :theme
           where username = :username
         ]],
         {
@@ -55,7 +56,8 @@ return {
           custom_css = custom_css,
           custom_title = custom_title,
           max_display_posts = max_display_posts,
-          enable_toc = enable_toc
+          enable_toc = enable_toc,
+          theme = theme
         }
       )
     end)
@@ -94,7 +96,8 @@ return {
           custom_css,
           custom_title,
           max_display_posts,
-          enable_toc
+          enable_toc,
+          theme
         from user
         where username = ?
       ]],

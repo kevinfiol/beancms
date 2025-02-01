@@ -1,6 +1,10 @@
 {% function block.head() %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
 
+  {% if theme and theme ~= '' then %}
+    <link rel="stylesheet" type="text/css" href="/static/theme/{%& themes[theme] %}.css">
+  {% end %}
+
   <style>
     {%& custom_css %}
   </style>
@@ -9,20 +13,20 @@
 {% end %}
 
 {% function block.content() %}
-  <nav>
-    {% if has_user_access then %}
+  <nav class="user-nav">
+    {% if true then %}
       <a href="/{%& username %}/{%& slug %}/edit">Edit</a>
     {% end %}
     <a href="/{%& username %}">Back</a>
   </nav>
 
   {% if toc ~= '' then %}
-    <aside class="toc">
+    <div class="toc">
       {%= toc %}
-    </aside>
+    </div>
   {% end %}
 
-  <main>
+  <main class="post-page">
     {%= content %}
   </main>
 
