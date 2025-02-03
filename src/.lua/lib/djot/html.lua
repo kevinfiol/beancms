@@ -1,3 +1,6 @@
+-- modifications by kevinfiol:
+-- add lazy loading to images
+
 -- https://raw.githubusercontent.com/jgm/djot.lua/refs/heads/main/LICENSE
 -- Copyright (C) 2022 John MacFarlane
 
@@ -437,6 +440,10 @@ Renderer.email = Renderer.link
 function Renderer:image(node)
   local attrs = new_attributes{}
   local alt_text = to_text(node)
+
+  -- kevinfiol: add lazy loading to all images
+  insert_attribute(attrs, "loading", "lazy")
+
   if #alt_text > 0 then
     insert_attribute(attrs, "alt", to_text(node))
   end
