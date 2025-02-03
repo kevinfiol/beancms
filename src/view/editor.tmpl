@@ -109,6 +109,20 @@
       });
     }
 
+    function insertTextAtCursor(text) {
+      const start = Editor.selectionStart;
+      const end = Editor.selectionEnd;
+
+      const currentValue = Editor.value;
+      const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
+      Editor.value = newValue;
+
+      // update cursor position
+      const newCursorPos = start + text.length;
+      Editor.setSelectionRange(newCursorPos, newCursorPos);
+      Editor.focus();
+    }
+
     const saveDraft = debounce((content) => {
       if (content) 
         set(State.slug, { username: USERNAME, content })
@@ -238,12 +252,14 @@
             }
 
             try {
-              await uploadImage(file);
+              const imagePath = '/' + (await uploadImage(file));
+              insertTextAtCursor(`![${file.name}](${imagePath})`);
             } catch (e) {
               console.error('Failed to upload image: ', e);
             }
 
             e.preventDefault();
+            return;
           }
         }
       }

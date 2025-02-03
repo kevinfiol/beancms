@@ -7,7 +7,13 @@ local session = require 'session'
 local djot = require 'lib.djot'
 
 local BIN_PATH = path.dirname(path.join(unix.getcwd(), arg[-1]))
-local IMG_DIR = path.join(BIN_PATH, 'img')
+local IMG_PATH = 'img/'
+
+-- create image folder
+unix.makedirs(path.join(BIN_PATH, IMG_PATH))
+
+-- set max payload size for images
+ProgramMaxPayloadSize(8000000) -- 8MB
 
 -- helper functions
 moon.get = function (route, handler)
@@ -17,17 +23,6 @@ end
 moon.post = function (route, handler)
   return moon.setRoute({route, method = 'POST'}, handler)
 end
-
--- set templates and static asset paths
-moon.setTemplate({ '/view/', tmpl = 'fmt' })
-moon.get('/static/*', moon.serveAsset)
-moon.get("/favicon.ico", moon.serveAsset)
-
--- create image folder
-unix.makedirs(IMG_DIR)
-
--- set max payload size for images
-ProgramMaxPayloadSize(8000000) -- 8MB
 
 local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
@@ -107,6 +102,17 @@ local function generateTOC(references, start_level)
 
   return html
 end
+
+-- set templates and static asset paths
+moon.setTemplate({ '/view/', tmpl = 'fmt' })
+moon.get('/static/*', moon.serveAsset)
+moon.get('/favicon.ico', moon.serveAsset)
+
+-- serve user uploaded images
+moon.get('/img/:filename', function (r)
+  local filepath = path.join(IMG_PATH, r.params.filename)
+  return ServeAsset(filepath)
+end)
 
 moon.get('/', function (r)
   local user_session = checkSession(r)
@@ -345,17 +351,28 @@ moon.post('/a/register', function (r)
 end)
 
 moon.post('/a/upload', function (r)
-  local image = r.params.image
-  local filepath = path.join(IMG_DIR, UuidV4()) .. '.png'
+  local image = r.params.multipart.image.data
+  local filename = r.params.multipart.image.filename
+  local content_type = r.params.multipart.image.headers['content-type']
 
+  local is_image = _.split(content_type, '/')[1] == 'image'
+  if not is_image then
+    moon.setStatus(500)
+    return 'Invalid content type for image'
+  end
+
+  local ext = _.split(filename, '.')[2]
+  local relative_path = path.join(IMG_PATH, UuidV4()) .. '.' .. ext
+  local file_system_path = path.join(BIN_PATH, relative_path)
+
+  -- save image to filesystem
   local WRITE_FLAGS = unix.O_CREAT | unix.O_WRONLY
   local PERMISSIONS = 0644
-
-  local fd = unix.open(filepath, WRITE_FLAGS, PERMISSIONS)
+  local fd = unix.open(path.join(BIN_PATH, relative_path), WRITE_FLAGS, PERMISSIONS)
   unix.write(fd, image)
   unix.close(fd)
 
-  return 'OK'
+  return relative_path
 end)
 
 moon.post('/a/update/:_username', function (r)
