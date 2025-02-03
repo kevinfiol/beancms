@@ -34,24 +34,30 @@
       </dialog>
     {% end %}
 
-    <h1>{%& custom_title ~= '' and custom_title or username %}</h1>
-    <div>{%= intro %}</div>
+    <h1 class="user-heading">{%& custom_title ~= '' and custom_title or username %}</h1>
+    <section class="intro">{%= intro %}</section>
 
     {% if #posts > 0 then %}
-      <h2>Posts</h2>
+      <h2 class="posts-heading">Posts</h2>
+      <section class="posts-container">
+        <div class="posts" role="list">
+          {% for _, post in pairs(posts) do %}
+            <div class="post" role="listitem">
+              <div class="title">
+                <a href="/{%& username %}/{%& post.slug or post.post_id %}">
+                  {%& post.title or post.slug or post.post_id %}
+                </a>
+              </div>
+              <div class="created-time">
+                <span>{%& post.created_time %}</span>
+              </div>
+            </div>
+          {% end %}
+        </div>
+      </section>
     {% else %}
       <em>User has no posts</em>
     {% end %}
-
-    <section class="posts">
-      {% for _, post in pairs(posts) do %}
-        <div class="post">
-          <a href="/{%& username %}/{%& post.slug or post.post_id %}">
-            {%& post.title or post.slug or post.post_id %}
-          </a>
-        </div>
-      {% end %}
-    </section>
 
     <details class="options">
       <summary>Options</summary>

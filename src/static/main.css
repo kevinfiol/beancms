@@ -22,6 +22,11 @@ h2, h3, h4, h5, h6 {
   margin: 1em 0 0.2em 0;
 }
 
+img {
+  height: auto;
+  max-width: 100%;
+}
+
 nav.user-nav {
   text-align: left;
   display: inline-block;
@@ -98,6 +103,27 @@ form > label {
   flex-direction: column;
   align-items: baseline;
   margin: 0.5rem 0;
+}
+
+.posts-container {
+  > .posts {
+    > .post {
+      display: grid;
+      grid-template-columns: 1fr min-content;
+      grid-column-gap: 5px;
+
+      > .title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      > .created-time {
+        white-space: nowrap;
+        opacity: 0.5;
+      }
+    }
+  }
 }
 
 /* post page */

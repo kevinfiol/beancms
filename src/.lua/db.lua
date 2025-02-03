@@ -181,8 +181,8 @@ return {
           p.title,
           p.post_id,
           p.slug,
-          p.created_time,
-          p.modified_time
+          strftime('%Y-%m-%d', p.created_time) as created_time,
+          strftime('%Y-%m-%d', p.modified_time) as modified_time
         from post p
         join user u on p.user_id = u.user_id
         where u.username = ?

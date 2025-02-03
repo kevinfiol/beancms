@@ -2,6 +2,8 @@ bin/*.com
 vendor/*.com
 bin/*.pid
 bin/*.log
+bin/img
+bin/img/*
 *.db
 *.db-*
 .env
