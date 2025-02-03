@@ -1,39 +1,43 @@
 {% function block.head() %}
   {% if theme and theme ~= '' then %}
     <link rel="stylesheet" type="text/css" href="/static/theme/{%& themes[theme] %}.css">
+  {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/default.css">
   {% end %}
 
-  <style>
-    {%& custom_css %}
-  </style>
+  {% if custom_css and custom_css ~= '' then %}
+    <style>
+      {%& custom_css %}
+    </style>
+  {% end %}
 {% end %}
 
 {% function block.content() %}
+  {% if true then %}
+    <nav class="user-nav">
+      <a href="/{%& username %}/{%& new_post_id %}">
+        Write
+      </a>
+
+      <a href="/a/logout">
+        Logout
+      </a>
+
+      <button id="view-drafts">
+        Drafts
+      </button>
+    </nav>
+
+    <dialog id="drafts" class="drafts">
+      <div class="controls">
+        <button class="close" autofocus>Close</button>
+      </div>
+      <ul class="list">
+      </ul>
+    </dialog>
+  {% end %}
+
   <main class="user-page">
-    {% if true then %}
-      <nav class="user-nav">
-        <a href="/{%& username %}/{%& new_post_id %}">
-          Write
-        </a>
-
-        <a href="/a/logout">
-          Logout
-        </a>
-
-        <button id="view-drafts">
-          Drafts
-        </button>
-      </nav>
-
-      <dialog id="drafts" class="drafts">
-        <div>
-          <button class="close" autofocus>Close</button>
-        </div>
-        <ul class="list">
-        </ul>
-      </dialog>
-    {% end %}
-
     <h1 class="user-heading">{%& custom_title ~= '' and custom_title or username %}</h1>
     <section class="intro">{%= intro %}</section>
 
@@ -169,7 +173,9 @@
 
           // delete button
           const button = document.createElement('button');
-          button.innerText = 'Delete';
+          button.innerText = '✕';
+          button.setAttribute('aria-label', 'Delete Draft');
+          button.setAttribute('title', 'Delete Draft');
           button.onclick = () => {
             del(slug).then(() => {
               DialogList.removeChild(li);

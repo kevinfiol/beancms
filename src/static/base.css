@@ -1,41 +1,17 @@
-body {
-  margin: 40px auto;
-  max-width: 650px;
-  line-height: 1.6;
-  font-size: 18px;
-  padding: 0 10px
-}
-
-h1,
-h2,
-h3 {
-  line-height: 1.2
-}
-
-h1 { font-size: 1.6em; margin: 0 0 0.4em 0; }
-h2 { font-size: 1.3em; }
-h3 { font-size: 1.2em; }
-h4 { font-size: 1.1em; }
-h5 { font-size: 1.05em; }
-
-h2, h3, h4, h5, h6 {
-  margin: 1em 0 0.2em 0;
-}
-
-img {
-  height: auto;
-  max-width: 100%;
-}
-
 nav.user-nav {
   text-align: left;
   display: inline-block;
-  margin-bottom: 1rem;
+  margin: 1rem 0;
 
   > a:not(:last-child),
     button:not(:last-child) {
     margin-right: 0.5rem;
   }
+}
+
+img {
+  height: auto;
+  max-width: 100%;
 }
 
 figure.error {
@@ -52,12 +28,41 @@ main.post-page {
 }
 
 dialog.drafts {
+  color: black;
+  background-color: white;
   margin: auto auto;
   padding: 2rem;
+  min-width: 200px;
 
-  > button.close {
+  button {
+    background-color: white;
     color: black;
     border: 1px solid black;
+  }
+
+  > div.controls {
+    display: flex;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  > ul.list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    > li {
+      display: flex;
+      gap: 20px;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      > a { color: black; }
+    }
   }
 
   > p {
@@ -135,12 +140,12 @@ form > label {
 
 .toc {
   &:hover {
-    opacity: 0.8;
+    opacity: 0.9;
     overflow-y: auto;
   }
 
   font-size: 10pt;
-  opacity: 0.25;
+  opacity: 0.4;
   position: fixed;
   top: 14%;
   left: 1%;

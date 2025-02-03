@@ -1,0 +1,23 @@
+body {
+  margin: 40px auto;
+  max-width: 650px;
+  line-height: 1.6;
+  font-size: 18px;
+  padding: 0 10px
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2
+}
+
+h1 { font-size: 1.6em; margin: 0 0 0.4em 0; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1.05em; }
+
+h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.2em 0;
+}

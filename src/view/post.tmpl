@@ -3,11 +3,15 @@
 
   {% if theme and theme ~= '' then %}
     <link rel="stylesheet" type="text/css" href="/static/theme/{%& themes[theme] %}.css">
+  {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/default.css">
   {% end %}
 
-  <style>
-    {%& custom_css %}
-  </style>
+  {% if custom_css and custom_css ~= '' then %}
+    <style>
+      {%& custom_css %}
+    </style>
+  {% end %}
 
   <script src="/static/highlight.min.js"></script>
 {% end %}
