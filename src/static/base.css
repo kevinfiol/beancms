@@ -10,8 +10,9 @@ nav.user-nav {
 }
 
 img {
-  height: auto;
-  max-width: 100%;
+  height: auto !important;
+  max-width: 100% !important;
+  width: auto !important;
 }
 
 figure.error {
