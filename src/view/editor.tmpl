@@ -6,6 +6,10 @@
   <figure id="toast" role="alert" style="display:none">
   </figure>
 
+  <div class="drag-overlay">
+    <span>Drop to upload</span>
+  </div>
+
   <main>
     <textarea 
       id="editor"
@@ -26,6 +30,7 @@
 
     const Editor = document.getElementById('editor');
     const Alert = document.getElementById('toast');
+    const DragOverlay = document.querySelector('.drag-overlay');
 
     const State = {
       slug: SLUG,
@@ -97,7 +102,7 @@
         xhr.upload.addEventListener('progress', (e) => {
           if (!e.lengthComputable) return;
           const percent = (e.loaded / e.total) * 100;
-          console.log('percent: ', percent);
+          showAlert(`Uploading image: ${percent}%`)
         });
 
         xhr.onload = () => {
@@ -193,6 +198,66 @@
       }
     };
 
+    // save hotkey
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        if (!State.pending)
+          saveChanges(Editor.value.trim());
+      }
+    });
+
+    // drop images
+    let isDraggingFile = false;
+
+    document.addEventListener('dragenter', (e) => {
+      if (!isDraggingFile && e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+        e.preventDefault();
+        isDraggingFile = true;
+        DragOverlay.classList.add('-active');
+      }
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      if (isDraggingFile && e.relatedTarget === null) {
+        e.preventDefault();
+        isDraggingFile = false;
+        DragOverlay.classList.remove('-active');
+      }
+    });
+
+    document.addEventListener('dragover', (e) => {
+      if (isDraggingFile && e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener('drop', (e) => {
+      if (isDraggingFile && e.dataTransfer && e.dataTransfer.files.length > 0) {
+        e.preventDefault();
+        isDraggingFile = false;
+        DragOverlay.classList.remove('-active');
+        const [file] = e.dataTransfer.files;
+
+        if (file.type.startsWith('image/')) {
+          if (file.size > MAX_IMAGE_SIZE) {
+            showAlert('Image size too large (> 8MB)');
+            return;
+          }
+
+          (async () => {
+            try {
+              const imagePath = '/' + (await uploadImage(file));
+              insertTextAtCursor(`![${file.name}](${imagePath})`);
+            } catch (e) {
+              console.error('Failed to upload image: ', e);
+              showAlert('Failed to upload image.')
+            }
+          })();
+        }
+      }
+    });
+
     // enable tabs in editor
     Editor.addEventListener('keydown', (e) => {
       const editor = e.target;
@@ -209,15 +274,6 @@
         editor.selectionEnd = originalStart + 1;
       }
     });
-
-    // save hotkey
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 's') {
-        e.preventDefault();
-        if (!State.pending)
-          saveChanges(Editor.value.trim());
-      }
-    })
 
     // auto-expand editor
     Editor.addEventListener('input', (e) => {
@@ -260,6 +316,7 @@
               insertTextAtCursor(`![${file.name}](${imagePath})`);
             } catch (e) {
               console.error('Failed to upload image: ', e);
+              showAlert('Failed to upload image.')
             }
 
             e.preventDefault();
