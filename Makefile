@@ -10,6 +10,7 @@ ZIP=vendor/zip.com
 BUILD=bin/redbean.com
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log
+IMG_DIR=bin/img
 
 .PHONY: download run clean clean_db stop logs watch
 
@@ -58,3 +59,4 @@ clean: clean_db
 	rm -f ${BUILD}
 	rm -f ${LOG_FILE}
 	rm -f ${PID_FILE}
+	rm -rf ${IMG_DIR}

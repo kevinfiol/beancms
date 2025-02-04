@@ -308,6 +308,21 @@ moon.get('/:_username/:slug/edit(/)', function (r)
   })
 end)
 
+moon.get('/:_username/:slug/raw(/)', function (r)
+  local username = _.trim(r.params._username)
+  local slug = _.trim(r.params.slug)
+  r.headers.ContentType = 'text/plain'
+
+  local ok, result = db.getPost(username, slug)
+
+  if not ok then
+    moon.setStatus(404)
+    return 'Post does not exist'
+  end
+
+  return result.content
+end)
+
 moon.post('/a/login', function (r)
   local username = _.trim(r.params.username)
   local password = r.params.password
