@@ -4,7 +4,10 @@ A micro-CMS built with [redbean](https://redbean.dev).
 
 ## Development
 
-Note: [watchexec](https://github.com/watchexec/watchexec) required for `make watch` to work.
+System dependencies required for building:
+
+* `make`
+* `zip`
 
 ```bash
 # download dev dependencies
@@ -16,3 +19,5 @@ make run
 # or start service and watch for changes
 make watch
 ```
+
+Note: [watchexec](https://github.com/watchexec/watchexec) is required for `make watch` to work.
