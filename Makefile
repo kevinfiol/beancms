@@ -4,7 +4,6 @@ HOST=127.0.0.1
 
 # vendor
 REDBEAN=vendor/redbean.com
-ZIP=vendor/zip.com
 
 # build
 BUILD=bin/redbean.com
@@ -14,14 +13,13 @@ IMG_DIR=bin/img
 
 .PHONY: download run clean clean_db stop logs watch
 
-# download all dependencies
+# download dependencies
 download:
 	curl -o ${REDBEAN} https://redbean.dev/redbean-3.0.0.com && chmod +x ${REDBEAN}
-	curl -o ${ZIP} https://redbean.dev/zip.com && chmod +x ${ZIP}
 
 build:
 	cp -f ${REDBEAN} ${BUILD}
-	cd src/ && ../${ZIP} -r ../${BUILD} `ls -A`
+	cd src/ && zip -r ../${BUILD} `ls -A`
 
 run: build
 	${BUILD} -vv -p ${PORT} -l ${HOST}
@@ -55,7 +53,6 @@ clean_db:
 
 clean: clean_db
 	rm -f ${REDBEAN}
-	rm -f ${ZIP}
 	rm -f ${BUILD}
 	rm -f ${LOG_FILE}
 	rm -f ${PID_FILE}
