@@ -171,6 +171,7 @@ form > label {
 
 /* editor */
 #editor {
+  padding: 1rem 4rem;
   font-family: monospace;
   line-height: 1.25em;
   font-size: 1em;
