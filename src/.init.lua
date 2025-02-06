@@ -376,16 +376,19 @@ moon.post('/a/upload', function (r)
     return 'Invalid content type for image'
   end
 
+  local image_hash = EncodeHex(Md5(image))
   local ext = _.split(filename, '.')[2]
-  local relative_path = path.join(IMG_PATH, UuidV4()) .. '.' .. ext
+  local relative_path = path.join(IMG_PATH, image_hash) .. '.' .. ext
   local file_system_path = path.join(BIN_PATH, relative_path)
 
-  -- save image to filesystem
-  local WRITE_FLAGS = unix.O_CREAT | unix.O_WRONLY
-  local PERMISSIONS = 0644
-  local fd = unix.open(path.join(BIN_PATH, relative_path), WRITE_FLAGS, PERMISSIONS)
-  unix.write(fd, image)
-  unix.close(fd)
+  if not path.exists(file_system_path) then
+    -- save image to filesystem
+    local WRITE_FLAGS = unix.O_CREAT | unix.O_WRONLY
+    local PERMISSIONS = 0644
+    local fd = unix.open(file_system_path, WRITE_FLAGS, PERMISSIONS)
+    unix.write(fd, image)
+    unix.close(fd)
+  end
 
   return relative_path
 end)
