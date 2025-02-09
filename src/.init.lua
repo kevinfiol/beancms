@@ -178,10 +178,11 @@ end)
 
 moon.get('/:_username(/)', function (r)
   local username = _.trim(r.params._username)
-  local ok, user = db.getUser(username)
+  local user, err = db.getUser(username)
   local new_post_id = ''
 
-  if not ok then
+  if err then
+    LogError(err)
     moon.setStatus(404)
     return 'User does not exist'
   end
@@ -196,15 +197,15 @@ moon.get('/:_username(/)', function (r)
   end
 
   if has_user_access then
-    local ok, result = db.getPostId()
+    local post_id, err = db.getPostId()
 
-    if not ok then
-      LogError(result)
+    if err then
+      LogError(err)
       moon.setStatus(500)
       return 'An error occurred'
     end
 
-    new_post_id = result
+    new_post_id = post_id
   end
 
   local parsed_md = djot.parse(user.intro)
@@ -355,7 +356,7 @@ moon.post('/a/register', function (r)
   local hashed = argon2.hash_encoded(password, salt, { m_cost = 65536 })
 
   local ok, err = db.createUser(username, hashed, salt)
-  if not ok then
+  if err then
     LogError(f'Could not register user: {username}')
     LogError(err)
     return moon.serveRedirect(303, f'/a/register?error={user_exists}')
@@ -409,7 +410,7 @@ moon.post('/a/update/:_username', function (r)
   --   return moon.serveRedirect(302, f'/{username}')
   -- end
 
-  local ok, result = db.updateUser(
+  local ok, err = db.updateUser(
     username,
     intro,
     custom_css,
@@ -419,8 +420,9 @@ moon.post('/a/update/:_username', function (r)
     theme
   )
 
-  if not ok then
+  if err then
     LogError(f'Error: could not update user: {username}')
+    LogError(err)
     return moon.serveRedirect(303, f'/{username}')
   end
 
@@ -445,18 +447,19 @@ moon.post('/:_username/:post_id', function (r)
   -- end
 
   local ok = true
-  local result = nil
+  local err = nil
 
   if _.trim(content) ~= '' then
     -- create or update
-    ok, result = db.createPost(post_id, title, slug, username, content)
+    ok, err = db.createPost(post_id, title, slug, username, content)
   else
     -- delete
-    ok, result = db.deletePost(post_id, slug, username)
+    ok, err = db.deletePost(post_id, slug, username)
   end
 
-  if not ok then
+  if err then
     moon.setStatus(500)
+    LogError(err)
     return 'ERROR'
   end
 

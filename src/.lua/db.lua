@@ -18,6 +18,7 @@ end
 
 return {
   createUser = function (username, hashed, salt)
+    local err = nil
     local ok, result = pcall(function ()
       return sql:execute(
         [[
@@ -28,7 +29,12 @@ return {
       )
     end)
 
-    return ok, result
+    if result ~= 1 then
+      ok = false
+      err = 'Unable to create new user; result: ' .. result
+    end
+
+    return ok, err
   end,
 
   updateUser = function (username, intro, custom_css, custom_title, max_display_posts, enable_toc, theme)
@@ -38,6 +44,7 @@ return {
     max_display_posts = math.max(math.min(100, max_display_posts or 50), 1) -- clamp from 1-100
     enable_toc = math.max(math.min(1, enable_toc or 0), 0)
 
+    local err = nil
     local ok, result = pcall(function ()
       return sql:execute(
         [[
@@ -62,7 +69,12 @@ return {
       )
     end)
 
-    return ok, result
+    if result ~= 1 then
+      ok = false
+      err = 'User update failed. No rows updated'
+    end
+
+    return ok, err
   end,
 
   validateUser = function (username, password)
@@ -87,7 +99,7 @@ return {
   end,
 
   getUser = function (username)
-    local result, err = sql:fetchOne(
+    local user, err = sql:fetchOne(
       [[
         select
           username,
@@ -104,18 +116,17 @@ return {
       username
     )
 
-    if err then
-      return false, err
-    elseif result.user_id == nil then
-      return false, constant.USER_DOES_NOT_EXIST
+    if user.user_id == nil then
+      err = constant.USER_DOES_NOT_EXIST
     end
 
-    return true, result
+    return user, err
   end,
 
   getPostId = function (slug)
-    local ok = true
+    local err = nil
     local post_id = normalizePostId(slug)
+
     local retry = true
     local retries = 0
     local uid_increment = 0
@@ -130,7 +141,7 @@ return {
       if row and row.rowid ~= nil then
         if retries > 10 then
           retry = false
-          ok = false
+          err = 'Unable to generate post ID; ran out of retries'
         elseif retries == 5 then
           uid_increment = uid_increment + 1
         else
@@ -143,7 +154,7 @@ return {
       end
     end
 
-    return ok, ok and post_id or 'Could not generate post id'
+    return post_id, err
   end,
 
   getPost = function (username, slug)
@@ -204,6 +215,7 @@ return {
   end,
 
   createPost = function (post_id, title, slug, username, content)
+    local error = nil
     local content_size = #content
 
     local ok, result = pcall(function ()
@@ -236,7 +248,7 @@ return {
 
     if result ~= 1 then
       ok = false
-      result = 'Post creation/update failed. No rows inserted/updated'
+      error = 'Post creation/update failed. No rows inserted/updated'
     end
 
     return ok, result

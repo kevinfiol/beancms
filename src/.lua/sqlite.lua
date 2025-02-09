@@ -12,25 +12,28 @@ local SCHEMA = [[
     theme text default '',
     max_display_posts integer default 50,
     enable_toc integer default 1
-  );
+  ) strict;
 
   create table if not exists post (
     post_id text primary key,
     user_id integer not null,
     title text default '',
     slug text default '',
-    content blob,
+    content text,
     content_size integer,
     created_time text not null default CURRENT_TIMESTAMP,
     modified_time text not null default CURRENT_TIMESTAMP,
     foreign key (user_id) references user(user_id)
-  );
+  ) strict;
 ]]
 
--- open db and enable wal mode
+-- open db and set pragmas
 local db_path = ENV.REDBEAN_MODE == 'dev' and 'bin/cms.db' or 'cms.db'
 local sql = moon.makeStorage(db_path, SCHEMA)
-sql:execute[[ pragma journal_mode = WAL ]]
+
+sql:execute[[ pragma journal_mode = WAL; ]]
+sql:execute[[ pragma foreign_keys = true; ]]
+sql:execute[[ pragma temp_store = memory; ]]
 
 -- handle migrations
 local changes, error = sql:upgrade()
