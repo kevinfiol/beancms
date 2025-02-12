@@ -158,7 +158,7 @@ return {
   end,
 
   getPost = function (username, slug)
-    local result, err = sql:fetchOne(
+    local post, err = sql:fetchOne(
       [[
         select
           p.rowid,
@@ -173,20 +173,20 @@ return {
     )
 
     if err then
-      return false, err
-    elseif result == nil or (result and result.rowid == nil) then
-      return false, constant.POST_DOES_NOT_EXIST
+      return {}, err
+    elseif post == nil or (post and post.rowid == nil) then
+      return {}, constant.POST_DOES_NOT_EXIST
     end
 
-    result.content = Inflate(result.content, result.content_size)
-    result.unix_modified_time = tonumber(result.unix_modified_time)
-    return true, result
+    post.content = Inflate(post.content, post.content_size)
+    post.unix_modified_time = tonumber(post.unix_modified_time)
+    return post, err
   end,
 
   getPosts = function (username, max)
     max = max or 50
 
-    local result, err = sql:fetchAll(
+    local posts, err = sql:fetchAll(
       [[
         select
           p.title,
@@ -206,16 +206,16 @@ return {
     )
 
     if err then
-      return false, err
-    elseif result == nil then
-      return false, 'Could not retrieve rows'
+      return {}, err
+    elseif posts == nil then
+      return {}, 'Could not retrieve rows'
     end
 
-    return true, result
+    return posts, err
   end,
 
   createPost = function (post_id, title, slug, username, content)
-    local error = nil
+    local err = nil
     local content_size = #content
 
     local ok, result = pcall(function ()
@@ -248,13 +248,14 @@ return {
 
     if result ~= 1 then
       ok = false
-      error = 'Post creation/update failed. No rows inserted/updated'
+      err = 'Post creation/update failed. No rows inserted/updated'
     end
 
-    return ok, result
+    return ok, err
   end,
 
   deletePost = function (post_id, slug, username)
+    local err = nil
     local ok, result = pcall(function ()
       return sql:execute(
         [[
@@ -269,6 +270,11 @@ return {
       )
     end)
 
-    return ok, result
+    if result ~= 1 then
+      ok = false
+      err = 'Post deletion failed. No rows inserted/updated'
+    end
+
+    return ok, err
   end
 }

@@ -189,9 +189,10 @@ moon.get('/:_username(/)', function (r)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
-  local ok, posts = db.getPosts(username, user.max_display_posts)
+  local posts, err = db.getPosts(username, user.max_display_posts)
 
-  if not ok then
+  if err then
+    LogError(err)
     moon.setStatus(500)
     return 'Error retrieving user posts'
   end
@@ -234,8 +235,10 @@ moon.get('/:_username/:slug(/)', function (r)
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
 
-  local ok, result = db.getPost(username, slug)
-  if not ok then
+  local post, err = db.getPost(username, slug)
+  if err then
+    LogError(err)
+
     -- post does not exist
     -- if not authorized, return 404
     if not has_user_access then
@@ -249,12 +252,12 @@ moon.get('/:_username/:slug(/)', function (r)
 
   -- get custom css
   local custom_css = ''
-  local ok, user = db.getUser(username)
-  if ok then
+  local user, err = db.getUser(username)
+  if not err then
     custom_css = user.custom_css
   end
 
-  local parsed_md = djot.parse(result.content)
+  local parsed_md = djot.parse(post.content)
   local content_html = djot.render_html(parsed_md)
 
   local toc_html = user.enable_toc == 1
@@ -278,11 +281,11 @@ moon.get('/:_username/:slug/edit(/)', function (r)
   local username = _.trim(r.params._username)
   local slug = _.trim(r.params.slug)
 
-  local ok, post_id = db.getPostId(slug)
+  local post_id, err = db.getPostId(slug)
   local content = ''
 
-  if not ok then
-    LogError(post_id)
+  if err then
+    LogError(err)
     moon.setStatus(500)
     return 'An error occurred'
   end
@@ -294,16 +297,16 @@ moon.get('/:_username/:slug/edit(/)', function (r)
   --   return moon.serveRedirect(303, f'/{username}/{slug}')
   -- end
 
-  local ok, result = db.getPost(username, slug)
-  if ok then
-    post_id = result.post_id
-    content = result.content
+  local post, err = db.getPost(username, slug)
+  if not err then
+    post_id = post.post_id
+    content = post.content
   end
 
   return moon.serveContent('editor', {
     username = username,
     slug = slug,
-    title = result.title,
+    title = post.title,
     post_id = post_id,
     content = content
   })
@@ -314,14 +317,15 @@ moon.get('/:_username/:slug/raw(/)', function (r)
   local slug = _.trim(r.params.slug)
   r.headers.ContentType = 'text/plain'
 
-  local ok, result = db.getPost(username, slug)
+  local post, err = db.getPost(username, slug)
 
-  if not ok then
+  if err then
+    LogError(err)
     moon.setStatus(404)
     return 'Post does not exist'
   end
 
-  return result.content
+  return post.content
 end)
 
 moon.post('/a/login', function (r)
