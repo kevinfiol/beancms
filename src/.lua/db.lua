@@ -215,6 +215,8 @@ return {
   end,
 
   createPost = function (post_id, title, slug, username, content)
+    content =  string.sub(content or '', 1, 80000) -- 80000 char limit
+
     local err = nil
     local content_size = #content
 

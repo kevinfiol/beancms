@@ -91,6 +91,9 @@ local function generateTOC(references, start_level)
     table.insert(headings, _.merge(v, { title = k }))
   end
 
+  -- filter out none-heading references
+  headings = _.filter(headings, function (a) return a.level ~= nil and a.order ~= nil end)
+  p(headings)
   -- sort in reverse order
   headings = _.sort(headings, function (a, b) return a.order > b.order end)
   -- filter based on start level

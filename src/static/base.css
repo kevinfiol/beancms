@@ -36,9 +36,14 @@ dialog {
   min-width: 200px;
 
   button {
+    padding: 0.5rem;
     background-color: white;
     color: black;
     border: 1px solid black;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.15) !important;
+    }
   }
 
   > div.controls {
