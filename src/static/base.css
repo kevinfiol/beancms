@@ -28,7 +28,7 @@ main.post-page {
   padding-bottom: 4rem;
 }
 
-dialog.drafts {
+dialog {
   color: black;
   background-color: white;
   margin: auto auto;
@@ -64,10 +64,6 @@ dialog.drafts {
 
       > a { color: black; }
     }
-  }
-
-  > p {
-    padding: 1rem 0;
   }
 }
 
@@ -212,5 +208,24 @@ form > label {
   > span {
     padding: 5rem 8rem;
     border: 2px dashed black;
+  }
+}
+
+.editor-btns {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0.5;
+
+  > button {
+    border: 0;
+    font-size: 0.8em;
+    font-family: serif;
+    padding: 0.5rem;
+    font-family: monospace;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }

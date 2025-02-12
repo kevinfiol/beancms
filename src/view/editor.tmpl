@@ -7,6 +7,20 @@
 {% end %}
 
 {% function block.content() %}
+  <div class="editor-btns">
+    <button class="view-help">Help</button>
+  </div>
+
+  <dialog class="help-dialog">
+    <div class="controls">
+      <button class="close" autofocus>Close</button>
+    </div>
+
+    <p>To save changes, press: <code>Ctrl + S</code></p>
+    <p>To delete a post, clear the post content, and save your changes.</p>
+    <p>Unsaved changes are automatically stored as drafts on your local machine.</p>
+  </dialog>
+
   <figure id="toast" role="alert" style="display:none">
   </figure>
 
@@ -35,6 +49,9 @@
     const Editor = document.getElementById('editor');
     const Alert = document.getElementById('toast');
     const DragOverlay = document.querySelector('.drag-overlay');
+    const HelpBtn = document.querySelector('.view-help');
+    const HelpDialog = document.querySelector('.help-dialog');
+    const HelpDialogCloseBtn = document.querySelector('.help-dialog button.close');
 
     const State = {
       slug: SLUG,
@@ -339,6 +356,16 @@
           }
         }
       }
+    });
+
+    HelpBtn.addEventListener('click', () => {
+      State.pending = true;
+      HelpDialog.showModal();
+    });
+
+    HelpDialogCloseBtn.addEventListener('click', () => {
+      State.pending = false;
+      HelpDialog.close();
     });
 
     // initial check for draft
