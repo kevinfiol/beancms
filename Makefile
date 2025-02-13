@@ -22,7 +22,7 @@ build:
 	cd src/ && zip -r ../${BUILD} `ls -A`
 
 run: build
-	${BUILD} -vv -p ${PORT} -l ${HOST}
+	${BUILD} -vv -p ${PORT} -l ${HOST} -D ./bin/
 
 start: build
 	@(test ! -f ./bin/redbean.pid && \
