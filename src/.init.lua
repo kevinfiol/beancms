@@ -109,10 +109,7 @@ moon.get('/static/*', moon.serveAsset)
 moon.get('/favicon.ico', moon.serveAsset)
 
 -- serve user uploaded images
-moon.get('/data/img/:filename', function (r)
-  local filepath = path.join(constant.IMG_DIR, r.params.filename)
-  return ServeAsset(filepath)
-end)
+moon.get('/data/img/:filename', moon.serveAsset)
 
 moon.get('/', function (r)
   local user_session = checkSession(r)
