@@ -6,11 +6,8 @@ local constant = require 'constants'
 local session = require 'session'
 local djot = require 'lib.djot'
 
-local BIN_PATH = path.dirname(path.join(unix.getcwd(), arg[-1]))
-local IMG_PATH = 'img/'
-
 -- create image folder
-unix.makedirs(path.join(BIN_PATH, IMG_PATH))
+unix.makedirs(path.join(constant.BIN_DIR, constant.IMG_DIR))
 
 -- set max payload size for images
 ProgramMaxPayloadSize(8000000) -- 8MB
@@ -112,8 +109,8 @@ moon.get('/static/*', moon.serveAsset)
 moon.get('/favicon.ico', moon.serveAsset)
 
 -- serve user uploaded images
-moon.get('/img/:filename', function (r)
-  local filepath = path.join(IMG_PATH, r.params.filename)
+moon.get('/data/img/:filename', function (r)
+  local filepath = path.join(constant.IMG_DIR, r.params.filename)
   return ServeAsset(filepath)
 end)
 
@@ -387,8 +384,8 @@ moon.post('/a/upload', function (r)
 
   local image_hash = EncodeHex(Md5(image))
   local ext = _.split(filename, '.')[2]
-  local relative_path = path.join(IMG_PATH, image_hash) .. '.' .. ext
-  local file_system_path = path.join(BIN_PATH, relative_path)
+  local relative_path = path.join(constant.IMG_DIR, image_hash) .. '.' .. ext
+  local file_system_path = path.join(constant.BIN_DIR, relative_path)
 
   if not path.exists(file_system_path) then
     -- save image to filesystem

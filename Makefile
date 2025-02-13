@@ -7,9 +7,9 @@ REDBEAN=vendor/redbean.com
 
 # build
 BUILD=bin/redbean.com
+DATA_DIR=bin/data
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log
-IMG_DIR=bin/img
 
 .PHONY: download run clean clean_db stop logs watch
 
@@ -46,14 +46,9 @@ watch:
 logs:
 	tail -f ${LOG_FILE}
 
-clean_db:
-	rm -f bin/cms.sqlite
-	rm -f bin/cms.sqlite-shm
-	rm -f bin/cms.sqlite-wal
-
-clean: clean_db
+clean:
 	rm -f ${REDBEAN}
 	rm -f ${BUILD}
 	rm -f ${LOG_FILE}
 	rm -f ${PID_FILE}
-	rm -rf ${IMG_DIR}
+	rm -rf ${DATA_DIR}

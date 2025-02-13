@@ -1,4 +1,5 @@
 local moon = require 'lib.fullmoon'
+local constant = require 'constants'
 
 local SCHEMA = [[
   create table if not exists user (
@@ -27,8 +28,13 @@ local SCHEMA = [[
   ) strict;
 ]]
 
+local BASE_PATH = path.join(constant.BIN_DIR, constant.DATA_DIR)
+
+-- create data folder if not exists
+unix.makedirs(BASE_PATH)
+
 -- open db and set pragmas
-local db_path = ENV.REDBEAN_MODE == 'dev' and 'bin/cms.sqlite' or 'cms.sqlite'
+local db_path = path.join(BASE_PATH, 'cms.sqlite')
 local sql = moon.makeStorage(db_path, SCHEMA)
 
 sql:execute[[ pragma journal_mode = WAL; ]]

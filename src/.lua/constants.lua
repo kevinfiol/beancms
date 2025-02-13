@@ -1,4 +1,11 @@
+local function stripTrailingDots(path)
+  return path:match("^(.-)%.*$") or path
+end
+
 return {
+  BIN_DIR = stripTrailingDots(path.dirname(path.join(unix.getcwd(), arg[-1]))),
+  DATA_DIR = 'data',
+  IMG_DIR = 'data/img',
   USER_DOES_NOT_EXIST = 'user_does_not_exist',
   USER_EXISTS = 'user_exists',
   PASSWORD_MISMATCH = 'password_mismatch',

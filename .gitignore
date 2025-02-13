@@ -2,8 +2,8 @@ bin/*.com
 vendor/*.com
 bin/*.pid
 bin/*.log
-bin/img
-bin/img/*
+bin/data/img/*
+bin/data/img
 *.db
 *.db-*
 *.sqlite
