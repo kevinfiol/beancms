@@ -16,7 +16,8 @@
       <button class="close" autofocus>Close</button>
     </div>
 
-    <p>To save changes, press: <code>Ctrl + S</code></p>
+    <p>To save changes, press: <code>Ctrl-S</code></p>
+    <p>To add images, drag them onto the page, or paste them from your clipboard.</p>
     <p>To delete a post, clear the post content, and save your changes.</p>
     <p>Unsaved changes are automatically stored as drafts on your local machine.</p>
   </dialog>
@@ -265,7 +266,7 @@
     });
 
     document.addEventListener('drop', (e) => {
-      if (isDraggingFile && e.dataTransfer && e.dataTransfer.files.length > 0) {
+      if (isDraggingFile && e.dataTransfer && e.dataTransfer.files.length > 0  && !State.pending) {
         e.preventDefault();
         isDraggingFile = false;
         DragOverlay.classList.remove('-active');
@@ -334,7 +335,7 @@
 
       if (data && data.items) {
         for (const item of data.items) {
-          if (item.type.startsWith('image/')) {
+          if (item.type.startsWith('image/') && !State.pending) {
             const file = item.getAsFile();
             if (!file) return;
 

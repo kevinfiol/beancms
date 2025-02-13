@@ -262,6 +262,7 @@ moon.get('/:_username/:slug(/)', function (r)
 
   local parsed_md = djot.parse(post.content)
   local content_html = djot.render_html(parsed_md)
+  -- p(content_html)
 
   local toc_html = user.enable_toc == 1
     and generateTOC(parsed_md.references, 2)
