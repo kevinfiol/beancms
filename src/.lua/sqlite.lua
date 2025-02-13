@@ -28,7 +28,7 @@ local SCHEMA = [[
 ]]
 
 -- open db and set pragmas
-local db_path = ENV.REDBEAN_MODE == 'dev' and 'bin/cms.db' or 'cms.db'
+local db_path = ENV.REDBEAN_MODE == 'dev' and 'bin/cms.sqlite' or 'cms.sqlite'
 local sql = moon.makeStorage(db_path, SCHEMA)
 
 sql:execute[[ pragma journal_mode = WAL; ]]

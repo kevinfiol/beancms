@@ -47,9 +47,9 @@ logs:
 	tail -f ${LOG_FILE}
 
 clean_db:
-	rm -f bin/cms.db
-	rm -f bin/cms.db-shm
-	rm -f bin/cms.db-wal
+	rm -f bin/cms.sqlite
+	rm -f bin/cms.sqlite-shm
+	rm -f bin/cms.sqlite-wal
 
 clean: clean_db
 	rm -f ${REDBEAN}

@@ -6,4 +6,6 @@ bin/img
 bin/img/*
 *.db
 *.db-*
+*.sqlite
+*.sqlite-*
 .env
