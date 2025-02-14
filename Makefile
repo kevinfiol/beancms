@@ -4,6 +4,7 @@ HOST=127.0.0.1
 
 # vendor
 REDBEAN=vendor/redbean.com
+ASSIMILATE=vendor/assimilate
 
 # build
 BUILD=bin/redbean.com
@@ -16,6 +17,7 @@ LOG_FILE=bin/redbean.log
 # download dependencies
 download:
 	curl -o ${REDBEAN} https://redbean.dev/redbean-3.0.0.com && chmod +x ${REDBEAN}
+	curl -o ${ASSIMILATE} https://cosmo.zip/pub/cosmos/bin/assimilate && chmod +x ${ASSIMILATE}
 
 build:
 	cp -f ${REDBEAN} ${BUILD}
