@@ -25,9 +25,7 @@ run: build
 	${BUILD} -vv -p ${PORT} -l ${HOST}
 
 start: build
-	@(test ! -f ./bin/redbean.pid && \
-		REDBEAN_MODE=dev ${BUILD} -vv -d -L ${LOG_FILE} -P ${PID_FILE} -p ${PORT} -l ${HOST} -D ./bin/ \
-	|| echo "Redbean is already running at $$(cat ${PID_FILE})")
+	${REDBEAN} -i scripts.lua
 
 stop:
 	@(test -f ${PID_FILE} && \
