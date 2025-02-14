@@ -63,60 +63,62 @@
       <em>User has no posts</em>
     {% end %}
 
-    <details class="options">
-      <summary>Options</summary>
-      <form action="/a/update/{%& username %}" method="POST">
-        <label>
-          <strong>Enable Table of Contents</strong>
-          <input type="checkbox" name="enable_toc" {%& enable_toc == 1 and 'checked' or '' %} />
-        </label>
+    {% if has_user_access then %}
+      <details class="options">
+        <summary>Options</summary>
+        <form action="/a/update/{%& username %}" method="POST">
+          <label>
+            <strong>Enable Table of Contents</strong>
+            <input type="checkbox" name="enable_toc" {%& enable_toc == 1 and 'checked' or '' %} />
+          </label>
 
-        <label>
-          Theme
-          <select name="theme">
-            <option
-              value=""
-              {%& theme == '' and 'selected' or '' %}
-            >
-              Default
-            </option>
-
-            {% for key, css_theme in pairs(themes) do %}
+          <label>
+            Theme
+            <select name="theme">
               <option
-                value="{%& key %}"
-                {%& theme == key and 'selected' or '' %}
+                value=""
+                {%& theme == '' and 'selected' or '' %}
               >
-                {%& css_theme %}
+                Default
               </option>
-            {% end %}
-          </select>
-        </label>
 
-        <label>
-          <strong>Custom Title</strong>
-          <input type="text" name="custom_title" maxlength="50" value="{%& custom_title or '' %}" />
-        </label>
+              {% for key, css_theme in pairs(themes) do %}
+                <option
+                  value="{%& key %}"
+                  {%& theme == key and 'selected' or '' %}
+                >
+                  {%& css_theme %}
+                </option>
+              {% end %}
+            </select>
+          </label>
 
-        <label>
-          <strong>Custom Intro Markdown</strong>
-          <textarea name="intro" maxlength="500" rows="4" cols="33">{%& intro_raw or '' %}</textarea>
-        </label>
+          <label>
+            <strong>Custom Title</strong>
+            <input type="text" name="custom_title" maxlength="50" value="{%& custom_title or '' %}" />
+          </label>
 
-        <label>
-          <strong>Custom CSS</strong>
-          <textarea name="custom_css" maxlength="80000" rows="8" cols="33">{%& custom_css or '' %}</textarea>
-        </label>
+          <label>
+            <strong>Custom Intro Markdown</strong>
+            <textarea name="intro" maxlength="500" rows="4" cols="33">{%& intro_raw or '' %}</textarea>
+          </label>
 
-        <label>
-          <strong>Number of newest posts to display</strong>
-          <input type="number" name="max_display_posts" min="1" max="100" value="{%& max_display_posts or 50 %}" />
-        </label>
+          <label>
+            <strong>Custom CSS</strong>
+            <textarea name="custom_css" maxlength="80000" rows="8" cols="33">{%& custom_css or '' %}</textarea>
+          </label>
 
-        <div>
-          <button type="submit">Save</button>
-        </div>
-      </form>
-    </details>
+          <label>
+            <strong>Number of newest posts to display</strong>
+            <input type="number" name="max_display_posts" min="1" max="100" value="{%& max_display_posts or 50 %}" />
+          </label>
+
+          <div>
+            <button type="submit">Save</button>
+          </div>
+        </form>
+      </details>
+    {% end %}
   </main>
 
   <script type="module">
