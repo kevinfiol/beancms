@@ -12,7 +12,7 @@ DATA_DIR=bin/data
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log
 
-.PHONY: download run clean clean_db stop logs watch
+.PHONY: download run clean stop logs watch
 
 # download dependencies
 download:
