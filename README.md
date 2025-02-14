@@ -9,6 +9,8 @@ System dependencies required for building:
 * `make`
 * `zip`
 
+Note: [watchexec](https://github.com/watchexec/watchexec) is required for `make watch` to work.
+
 ```bash
 # download dev dependencies
 make download
@@ -19,5 +21,3 @@ make run
 # or start service and watch for changes
 make watch
 ```
-
-Note: [watchexec](https://github.com/watchexec/watchexec) is required for `make watch` to work.
