@@ -65,3 +65,6 @@ docker-run:
 		--mount type=bind,source=./bin/data,target=/app/data/ \
 		--mount type=bind,source=./bin/redbean.log,target=/app/redbean.log \
 		beancms
+
+docker-stop:
+	docker stop beancms && docker rm beancms
