@@ -18,7 +18,7 @@
 
 {% function block.content() %}
   <nav class="user-nav">
-    {% if true then %}
+    {% if has_user_access then %}
       <a href="/{%& username %}/{%& slug %}/edit">Edit</a>
     {% end %}
     <a href="/{%& username %}">Back</a>

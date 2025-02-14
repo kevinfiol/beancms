@@ -291,9 +291,9 @@ moon.get('/:_username/:slug/edit(/)', function (r)
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
 
-  -- if not has_user_access then
-  --   return moon.serveRedirect(303, f'/{username}/{slug}')
-  -- end
+  if not has_user_access then
+    return moon.serveRedirect(303, f'/{username}/{slug}')
+  end
 
   local post, err = db.getPost(username, slug)
   if not err then
@@ -408,9 +408,9 @@ moon.post('/a/update/:_username', function (r)
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
 
-  -- if not has_user_access then
-  --   return moon.serveRedirect(302, f'/{username}')
-  -- end
+  if not has_user_access then
+    return moon.serveRedirect(302, f'/{username}')
+  end
 
   local ok, err = db.updateUser(
     username,
@@ -443,10 +443,10 @@ moon.post('/:_username/:post_id', function (r)
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
 
-  -- if not has_user_access then
-  --   moon.setStatus(401)
-  --   return 'Unauthorized'
-  -- end
+  if not has_user_access then
+    moon.setStatus(401)
+    return 'Unauthorized'
+  end
 
   local ok = true
   local err = nil

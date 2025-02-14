@@ -13,7 +13,7 @@
 {% end %}
 
 {% function block.content() %}
-  {% if true then %}
+  {% if has_user_access then %}
     <nav class="user-nav">
       <a href="/{%& username %}/{%& new_post_id %}">
         Write
