@@ -12,7 +12,7 @@ DATA_DIR=bin/data
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log
 
-.PHONY: download run clean stop logs watch
+.PHONY: download run clean stop logs watch docker-build docker-run
 
 # download dependencies
 download:
@@ -54,3 +54,14 @@ clean:
 	rm -f ${LOG_FILE}
 	rm -f ${PID_FILE}
 	rm -rf ${DATA_DIR}
+
+docker-build:
+	docker build --tag=beancms .
+
+docker-run:
+	docker run --detach --name=beancms \
+		--publish 8089:80 \
+		--restart unless-stopped \
+		--mount type=bind,source=./bin/data,target=/app/data/ \
+		--mount type=bind,source=./bin/redbean.log,target=/app/redbean.log \
+		beancms

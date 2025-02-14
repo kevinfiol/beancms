@@ -2,6 +2,7 @@ vendor/*
 bin/*.com
 bin/*.pid
 bin/data/*
+data/*
 *.db
 *.db-*
 *.sqlite
