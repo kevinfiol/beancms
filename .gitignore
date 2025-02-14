@@ -1,11 +1,10 @@
+vendor/*
 bin/*.com
-vendor/*.com
 bin/*.pid
-bin/*.log
-bin/data/img/*
-bin/data/img
+bin/data/*
 *.db
 *.db-*
 *.sqlite
 *.sqlite-*
+*.log
 .env

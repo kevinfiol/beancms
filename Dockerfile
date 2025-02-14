@@ -20,4 +20,4 @@ WORKDIR /app
 
 COPY --from=builder /app/bin/redbean.com /app/redbean.com
 VOLUME ["/app/data", "/app/redbean.log"]
-CMD ["/app/redbean.com", "-vv", "-p", "80", "-L", "/app/redbean.log", "-D", "./"]
+ENTRYPOINT ["/app/redbean.com", "-vv", "-p", "80", "-L", "/app/redbean.log", "-D", "./"]
