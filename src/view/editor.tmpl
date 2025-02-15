@@ -62,6 +62,13 @@
       changes: false
     };
 
+    function resetEditorHeight(extra = 0) {
+      if (Editor.style.height !== Editor.scrollHeight + 'px') {
+        Editor.style.height = 'inherit';
+        Editor.style.height = Editor.scrollHeight + extra + 'px';
+      }
+    }
+
     async function wait(ms) {
       await new Promise((resolve) =>
         setTimeout(resolve, ms)
@@ -99,7 +106,7 @@
       return '';
     }
 
-    function showAlert(text = 'Saving...') {
+    function showAlert(text = '') {
       if (showAlert.timer) clearTimeout(showAlert.timer);
       Alert.style.display = 'inherit';
       Alert.innerText = text;
@@ -157,12 +164,7 @@
       const newCursorPos = start + text.length;
       Editor.setSelectionRange(newCursorPos, newCursorPos);
       Editor.focus();
-
-      // expand height of textarea if necessary
-      if (Editor.style.height !== Editor.scrollHeight + 'px') {
-        Editor.style.height = 'inherit';
-        Editor.style.height = Editor.scrollHeight + 'px';
-      }
+      resetEditorHeight();
     }
 
     const saveDraft = debounce((content) => {
@@ -324,10 +326,7 @@
       if (currentLine > 1) saveDraft(content);
       else setTitle(content);
 
-      if (editor.style.height !== editor.scrollHeight + 'px') {
-        editor.style.height = 'inherit';
-        editor.style.height = editor.scrollHeight + 'px';
-      }
+      resetEditorHeight();
     });
 
     Editor.addEventListener('paste', async (e) => {
@@ -383,11 +382,7 @@
       State.changes = true;
       showAlert('Local draft loaded')
     }).finally(() => {
-      // initial autoexpand
-      if (Editor.style.height !== Editor.scrollHeight + 'px') {
-        Editor.style.height = 'inherit';
-        Editor.style.height = Editor.scrollHeight + 23 + 'px'; // 23 is a magic number for some reason, this fixes the issue where after loading from a draft, the height is incorrect
-      }
+      resetEditorHeight(23);
     });
   </script>
 {% end %}

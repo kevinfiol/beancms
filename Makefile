@@ -59,11 +59,12 @@ docker-build:
 	docker build --tag=beancms .
 
 docker-run:
-	docker run --detach --name=beancms \
-		--publish 8089:80 \
+	docker run --detach \
+		--name=beancms \
+		--publish ${PORT}:80 \
 		--restart unless-stopped \
-		--mount type=bind,source=./bin/data,target=/app/data/ \
-		--mount type=bind,source=./bin/redbean.log,target=/app/redbean.log \
+		--mount type=bind,source=./${DATA_DIR},target=/app/data/ \
+		--mount type=bind,source=./${LOG_FILE},target=/app/redbean.log \
 		beancms
 
 docker-stop:
