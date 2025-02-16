@@ -7,15 +7,20 @@
     <a href="/">← home</a>
   </nav>
 
-  <main>
+  <main class="login-page">
     <h1>Login</h1>
 
     <section>
       <form action="/a/login" method="post">
-        <div>
+        <label>
+          Username
           <input type="text" name="username" id="username" placeholder="Username" required>
+        </label>
+
+        <label>
+          Password
           <input type="password" name="password" id="password" placeholder="Password" required>
-        </div>
+        </label>
 
         {% if error_message then %}
           <figure class="error" role="alert">

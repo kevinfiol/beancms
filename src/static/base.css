@@ -1,4 +1,4 @@
-nav.user-nav {
+nav {
   text-align: left;
   display: inline-block;
   margin: 1rem 0;
@@ -26,6 +26,15 @@ main.post-page {
   text-rendering: optimizeLegibility;
   padding-top: 1rem;
   padding-bottom: 4rem;
+}
+
+main.login-page,
+main.register-page {
+  input[type="text"],
+  input[type="password"] {
+    padding: 0.5rem 0.25rem;
+    width: 100%;
+  }
 }
 
 dialog {
