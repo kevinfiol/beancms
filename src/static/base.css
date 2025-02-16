@@ -34,6 +34,7 @@ main.register-page {
   input[type="password"] {
     padding: 0.5rem 0.25rem;
     width: 100%;
+    margin-bottom: 0.5rem;
   }
 }
 
