@@ -1,56 +1,105 @@
-local lru = require 'lib.lru'
+local sql = require 'sql.session'
+local constant = require 'constants'
 
-local MAX_LENGTH = 5000
-local cache = lru.new(MAX_LENGTH)
+local delete = function(token)
+  local err = nil
+  local ok, result = pcall(function()
+    return sql:execute(
+      [[
+        delete from session
+        where token = :token
+      ]],
+      { token = token }
+    )
+  end)
+
+  if result ~= 1 then
+    ok = false
+    err = 'Session token does not exist: ' .. token
+  end
+
+  return ok, err
+end
 
 return {
-  new = function (username, max_age)
-    if not username then
-      LogWarn('No username provided to new session')
-      return nil
+  delete = delete,
+
+  set = function(username, token)
+    local err = nil
+    local ok, result = pcall(function()
+      return sql:execute(
+        [[
+          insert into session (token, expires_at, username)
+          values(:token, unixepoch('now') + :max_age, :username)
+          on conflict(token) do update set
+            expires_at = unixepoch('now') + :max_age
+        ]],
+        {
+          token = token,
+          username = username,
+          max_age = constant.SESSION_MAX_AGE
+        }
+      )
+    end)
+
+    if result ~= 1 then
+      ok = false
+      err = 'Unable to set/update session'
     end
 
-    max_age = max_age or 31536000 -- 1 year
-    local token = UuidV4()
-    local current_time_seconds = unix.clock_gettime()
-
-    cache:set(token, {
-      expiry = current_time_seconds + max_age,
-      username = username
-    })
-
-    return token
+    return ok, err
   end,
 
-  delete = function (token)
-    if cache:get(token) == nil then
-      LogWarn(f'Session token does not exist: {token}')
-    else
-      cache:delete(token)
+  get = function(token)
+    local session, err = sql:fetchOne(
+      [[
+        select
+          *,
+          unixepoch('now') as now
+        from session
+        where token = :token
+      ]],
+      { token = token }
+    )
+
+    if err then
+      return {}, err
+    elseif session == nil or (session and session.token == nil) then
+      return {}, 'Session token does not exist: ' .. token
     end
-  end,
 
-  get = function (token)
-    local session = cache:get(token)
+    if session.now > session.expires_at then
+      -- session expired; remove from table
+      local _, deletion_err = delete(token)
 
-    if session ~= nil then
-      local expiry = session.expiry
-      local current_time_seconds = unix.clock_gettime()
-      if current_time_seconds > expiry then
-        cache:delete(token)
-        return nil
+      if deletion_err then
+        return {}, deletion_err
       end
+
+      return {}, 'Session token has expired: ' .. token
     end
 
-    return session
+    return session, err
   end,
 
-  all = function ()
-    local sessions = {}
-    for k, v in cache:pairs() do
-      sessions[k] = v
+  prune = function()
+    local pruned = 0
+    local err = nil
+    local ok, result = pcall(function()
+      return sql:execute(
+        [[
+          delete from session
+          where unixepoch('now') > expires_at
+        ]]
+      )
+    end)
+
+    if not ok then
+      err = result
+    else
+      pruned = result
     end
 
-    return sessions
+    return pruned, err
   end
 }

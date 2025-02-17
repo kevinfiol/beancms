@@ -48,7 +48,7 @@ if error then
 end
 
 if #changes > 0 then
-  moon.logWarn("Migrated DB to v%s\n%s",
+  moon.logWarn("Migrated cms DB to v%s\n%s",
     sql:fetchOne("PRAGMA user_version").user_version,
     table.concat(changes, ";\n")
   )

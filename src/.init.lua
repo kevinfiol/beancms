@@ -6,6 +6,17 @@ local constant = require 'constants'
 local session = require 'session'
 local djot = require 'lib.djot'
 
+-- schedule daily cleanup of session every 12 hours
+moon.setSchedule("0 */12 * * *", function()
+  local pruned, err = session.prune()
+
+  if err then
+    LogError(err)
+  else
+    LogDebug('Pruned sessions: ' .. pruned)
+  end
+end)
+
 -- create image folder
 unix.makedirs(path.join(constant.BIN_DIR, constant.IMG_DIR))
 
@@ -23,13 +34,28 @@ end
 
 local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
-  local user_session = session.get(token)
+  local user_session = nil
+
+  if token then
+    user_session = session.get(token)
+  end
 
   local result = { is_valid = false, user_access = false }
-  result.is_valid = user_session ~= nil
+  result.is_valid = user_session and user_session.token
   result.user_access = user_session and user_session.username == username
 
   if result.is_valid then
+    session.set(username, token) -- extend session
+
+    r.cookies[constant.SESSION_TOKEN_NAME] = {
+      token,
+      path = '/',
+      secure = true,
+      httponly = true,
+      maxage = constant.SESSION_MAX_AGE,
+      samesite = 'Strict',
+    }
+
     return result, nil
   elseif token then
     session.delete(token)
@@ -37,13 +63,15 @@ local function checkSession(r, username)
 
   -- invalidate user's expired token
   r.cookies[constant.SESSION_TOKEN_NAME] = false
+  r.session.token = nil
   return result, 'Unauthorized'
 end
 
 local function setSessionCookie(r, username)
   -- create session and set cookie
-  local token = session.new(username, constant.SESSION_MAX_AGE)
+  local token = UuidV4()
 
+  session.set(username, token)
   r.cookies[constant.SESSION_TOKEN_NAME] = {
     token,
     path = '/',

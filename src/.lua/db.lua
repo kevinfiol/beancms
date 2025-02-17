@@ -1,10 +1,10 @@
-local sql = require 'sqlite'
+local sql = require 'sql.cms'
 local constant = require 'constants'
 local uid = require 'lib.uid'
 
 local DEFAULT_UID_LENGTH = 10
 
-local function normalizePostId (s)
+local function normalizePostId(s)
   s = s or ''
   s = string.gsub(s, "[^%w]", '') -- remove non-alphanumerics
   s = string.sub(s, 1, 10) -- trim to 11 characters
@@ -17,7 +17,7 @@ local function normalizePostId (s)
 end
 
 return {
-  createUser = function (username, hashed, salt)
+  createUser = function(username, hashed, salt)
     local err = nil
     local ok, result = pcall(function ()
       return sql:execute(
@@ -37,7 +37,7 @@ return {
     return ok, err
   end,
 
-  updateUser = function (username, intro, custom_css, custom_title, max_display_posts, enable_toc, theme)
+  updateUser = function(username, intro, custom_css, custom_title, max_display_posts, enable_toc, theme)
     custom_css = string.sub(custom_css or '', 1, 80000) -- 80000 char limit
     intro = string.sub(intro or '', 1, 500) -- 500 char limit
     custom_title = string.sub(custom_title or '', 1, 50) -- 50 char limit
@@ -77,7 +77,7 @@ return {
     return ok, err
   end,
 
-  validateUser = function (username, password)
+  validateUser = function(username, password)
     local result, err = sql:fetchOne(
       [[
         select hashed
@@ -98,7 +98,7 @@ return {
     return ok, (ok and nil or constant.WRONG_PASSWORD)
   end,
 
-  getUser = function (username)
+  getUser = function(username)
     local user, err = sql:fetchOne(
       [[
         select
@@ -123,7 +123,7 @@ return {
     return user, err
   end,
 
-  getPostId = function (slug)
+  getPostId = function(slug)
     local err = nil
     local post_id = normalizePostId(slug)
 
@@ -157,7 +157,7 @@ return {
     return post_id, err
   end,
 
-  getPost = function (username, slug)
+  getPost = function(username, slug)
     local post, err = sql:fetchOne(
       [[
         select
@@ -183,7 +183,7 @@ return {
     return post, err
   end,
 
-  getPosts = function (username, max)
+  getPosts = function(username, max)
     max = max or 50
 
     local posts, err = sql:fetchAll(
@@ -214,7 +214,7 @@ return {
     return posts, err
   end,
 
-  createPost = function (post_id, title, slug, username, content)
+  createPost = function(post_id, title, slug, username, content)
     content =  string.sub(content or '', 1, 80000) -- 80000 char limit
 
     local err = nil
@@ -256,7 +256,7 @@ return {
     return ok, err
   end,
 
-  deletePost = function (post_id, slug, username)
+  deletePost = function(post_id, slug, username)
     local err = nil
     local ok, result = pcall(function ()
       return sql:execute(
