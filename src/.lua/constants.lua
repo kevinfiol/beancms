@@ -13,8 +13,7 @@ return {
   INVALID_USERNAME = 'invalid_username',
   POST_DOES_NOT_EXIST = 'post_does_not_exist',
   SESSION_TOKEN_NAME = 'beancms',
-  -- SESSION_MAX_AGE = 2592000, -- 30 days
-  SESSION_MAX_AGE = 30, -- 30 days
+  SESSION_MAX_AGE = 2592000, -- 30 days
   RESERVED_USERNAMES = { 'login', 'logout', 'register' },
   THEME = {
     CONCRETE = 'concrete',
