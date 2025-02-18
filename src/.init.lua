@@ -62,7 +62,6 @@ local function checkSession(r, username)
 
   -- invalidate user's expired token
   r.cookies[constant.SESSION_TOKEN_NAME] = false
-  r.session.token = nil
   return result, 'Unauthorized'
 end
 
