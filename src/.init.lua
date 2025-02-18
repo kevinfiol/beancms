@@ -36,11 +36,7 @@ end
 
 local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
-  local user_session = nil
-
-  if token then
-    user_session = session.get(token)
-  end
+  local user_session = token and session.get(token) or nil
 
   local result = { is_valid = false, user_access = false }
   result.is_valid = user_session and user_session.token
