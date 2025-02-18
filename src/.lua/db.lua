@@ -1,5 +1,5 @@
-local sql = require 'sql.cms'
-local constant = require 'constants'
+local sql = require 'sqlite.cms'
+local constant = require 'constant'
 local uid = require 'lib.uid'
 
 local DEFAULT_UID_LENGTH = 10
@@ -142,9 +142,11 @@ return {
         if retries > 10 then
           retry = false
           err = 'Unable to generate post ID; ran out of retries'
-        elseif retries == 5 then
-          uid_increment = uid_increment + 1
         else
+          if retries % 2 == 0 then
+            uid_increment = uid_increment + 1
+          end
+
           retries = retries + 1
         end
 

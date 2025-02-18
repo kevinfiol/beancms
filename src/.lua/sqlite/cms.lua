@@ -1,5 +1,4 @@
-local moon = require 'lib.fullmoon'
-local constant = require 'constants'
+local util = require 'sqlite.util'
 
 local SCHEMA = [[
   create table if not exists user (
@@ -28,30 +27,6 @@ local SCHEMA = [[
   ) strict;
 ]]
 
-local BASE_PATH = path.join(constant.BIN_DIR, constant.DATA_DIR)
-
--- create data folder if not exists
-unix.makedirs(BASE_PATH)
-
--- open db and set pragmas
-local db_path = path.join(BASE_PATH, 'cms.sqlite')
-local sql = moon.makeStorage(db_path, SCHEMA)
-
-sql:execute[[ pragma journal_mode = WAL; ]]
-sql:execute[[ pragma foreign_keys = true; ]]
-sql:execute[[ pragma temp_store = memory; ]]
-
--- handle migrations
-local changes, error = sql:upgrade()
-if error then
-  moon.logWarn("Migrated DB with errors resolved: " .. error)
-end
-
-if #changes > 0 then
-  moon.logWarn("Migrated cms DB to v%s\n%s",
-    sql:fetchOne("PRAGMA user_version").user_version,
-    table.concat(changes, ";\n")
-  )
-end
+local sql = util.openDatabase(SCHEMA, 'cms.sqlite')
 
 return sql

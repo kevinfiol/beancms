@@ -121,81 +121,83 @@
     {% end %}
   </main>
 
-  <script type="module">
-    import { entries, del } from '/static/idb-keyval.js';
+  {% if has_user_access then %}
+    <script type="module">
+      import { entries, del } from '/static/idb-keyval.js';
 
-    const USERNAME = '{%& username %}';
+      const USERNAME = '{%& username %}';
 
-    const ViewDraftsBtn = document.getElementById('view-drafts');
-    const DraftsDialog = document.getElementById('drafts');
-    const DialogList = DraftsDialog.querySelector('.list');
-    const CloseDialogBtn = DraftsDialog.querySelector('button.close');
+      const ViewDraftsBtn = $('#view-drafts');
+      const DraftsDialog = $('#drafts');
+      const DialogList = DraftsDialog.querySelector('.list');
+      const CloseDialogBtn = DraftsDialog.querySelector('button.close');
 
-    if (ViewDraftsBtn) {
-      let listInitialized = false;
+      if (ViewDraftsBtn) {
+        let listInitialized = false;
 
-      function showEmptyDialog() {
-        DraftsDialog.removeChild(DialogList);
-        const note = document.createElement('p');
-        note.innerText = 'No saved drafts';
-        DraftsDialog.appendChild(note);
-      }
+        function showEmptyDialog() {
+          DraftsDialog.removeChild(DialogList);
+          const note = document.createElement('p');
+          note.innerText = 'No saved drafts';
+          DraftsDialog.appendChild(note);
+        }
 
-      ViewDraftsBtn.addEventListener('click', () => {
-        entries().then((drafts) => {
-          if (!listInitialized) {
-            drafts = drafts.filter(([key, value]) => value.username === USERNAME);
+        ViewDraftsBtn.addEventListener('click', () => {
+          entries().then((drafts) => {
+            if (!listInitialized) {
+              drafts = drafts.filter(([key, value]) => value.username === USERNAME);
 
-            if (drafts.length) {
-              populateList(drafts);
-            } else {
-              showEmptyDialog();
-            }
-
-            listInitialized = true;
-          }
-
-          DraftsDialog.showModal();
-        });
-      });
-
-      CloseDialogBtn.addEventListener('click', () => {
-        DraftsDialog.close();
-      });
-
-      function populateList(drafts) {
-        for (const [slug] of drafts) {
-          // list item
-          const li = document.createElement('li');
-
-          // link to edit page
-          const a = document.createElement('a');
-          a.href = `/${USERNAME}/${slug}/edit`;
-          a.innerText = slug;
-
-          // delete button
-          const button = document.createElement('button');
-          button.innerText = '✕';
-          button.setAttribute('aria-label', 'Delete Draft');
-          button.setAttribute('title', 'Delete Draft');
-          button.onclick = () => {
-            del(slug).then(() => {
-              DialogList.removeChild(li);
-
-              if (DialogList.children.length === 0) {
+              if (drafts.length) {
+                populateList(drafts);
+              } else {
                 showEmptyDialog();
               }
-            });
-          };
 
-          // append elements to DOM
-          li.appendChild(a);
-          li.appendChild(button);
-          DialogList.appendChild(li);
+              listInitialized = true;
+            }
+
+            DraftsDialog.showModal();
+          });
+        });
+
+        CloseDialogBtn.addEventListener('click', () => {
+          DraftsDialog.close();
+        });
+
+        function populateList(drafts) {
+          for (const [slug] of drafts) {
+            // list item
+            const li = document.createElement('li');
+
+            // link to edit page
+            const a = document.createElement('a');
+            a.href = `/${USERNAME}/${slug}/edit`;
+            a.innerText = slug;
+
+            // delete button
+            const button = document.createElement('button');
+            button.innerText = '✕';
+            button.setAttribute('aria-label', 'Delete Draft');
+            button.setAttribute('title', 'Delete Draft');
+            button.onclick = () => {
+              del(slug).then(() => {
+                DialogList.removeChild(li);
+
+                if (DialogList.children.length === 0) {
+                  showEmptyDialog();
+                }
+              });
+            };
+
+            // append elements to DOM
+            li.appendChild(a);
+            li.appendChild(button);
+            DialogList.appendChild(li);
+          }
         }
       }
-    }
-  </script>
+    </script>
+  {% end %}
 {% end %}
 
 {% render('layout', { title = username }) %}

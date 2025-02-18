@@ -1,5 +1,5 @@
-local sql = require 'sql.session'
-local constant = require 'constants'
+local sql = require 'sqlite.session'
+local constant = require 'constant'
 
 local delete = function(token)
   local err = nil
