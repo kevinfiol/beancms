@@ -1,8 +1,16 @@
+local constant = require 'constant'
+
+-- create required directories
+unix.makedirs(constant.DATA_DIR)
+unix.makedirs(constant.IMG_DIR)
+
+-- set max payload size for images
+ProgramMaxPayloadSize(constant.MAX_IMAGE_SIZE)
+
 require 'global'
 local _ = require 'lib.lume'
 local moon = require 'lib.fullmoon'
 local db = require 'db'
-local constant = require 'constant'
 local session = require 'session'
 local djot = require 'lib.djot'
 
@@ -17,19 +25,13 @@ moon.setSchedule("0 */12 * * *", function()
   end
 end)
 
--- create image folder
-unix.makedirs(path.join(constant.BIN_DIR, constant.IMG_DIR))
-
--- set max payload size for images
-ProgramMaxPayloadSize(8000000) -- 8MB
-
 -- helper functions
-moon.get = function (route, handler)
-  return moon.setRoute({route, method = 'GET'}, handler)
+moon.get = function(route, handler)
+  return moon.setRoute({ route, method = 'GET' }, handler)
 end
 
-moon.post = function (route, handler)
-  return moon.setRoute({route, method = 'POST'}, handler)
+moon.post = function(route, handler)
+  return moon.setRoute({ route, method = 'POST' }, handler)
 end
 
 local function checkSession(r, username)
@@ -418,7 +420,7 @@ moon.post('/a/upload', function (r)
 
   local image_hash = EncodeHex(Md5(image))
   local ext = _.split(filename, '.')[2]
-  local relative_path = path.join(constant.IMG_DIR, image_hash) .. '.' .. ext
+  local relative_path = path.join('data/img', image_hash) .. '.' .. ext
   local file_system_path = path.join(constant.BIN_DIR, relative_path)
 
   if not path.exists(file_system_path) then

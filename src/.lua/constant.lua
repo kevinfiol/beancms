@@ -2,10 +2,14 @@ local function stripTrailingDots(path)
   return path:match("^(.-)%.*$") or path
 end
 
+local BIN_DIR = stripTrailingDots(path.dirname(path.join(unix.getcwd(), arg[-1])))
+local DATA_DIR = path.join(BIN_DIR, 'data')
+local IMG_DIR = path.join(DATA_DIR, 'img')
+
 return {
-  BIN_DIR = stripTrailingDots(path.dirname(path.join(unix.getcwd(), arg[-1]))),
-  DATA_DIR = 'data',
-  IMG_DIR = 'data/img',
+  BIN_DIR = BIN_DIR,
+  DATA_DIR = DATA_DIR,
+  IMG_DIR = IMG_DIR,
   USER_DOES_NOT_EXIST = 'user_does_not_exist',
   USER_EXISTS = 'user_exists',
   PASSWORD_MISMATCH = 'password_mismatch',
@@ -13,7 +17,8 @@ return {
   INVALID_USERNAME = 'invalid_username',
   POST_DOES_NOT_EXIST = 'post_does_not_exist',
   SESSION_TOKEN_NAME = 'beancms',
-  SESSION_MAX_AGE = 2592000, -- 30 days
+  SESSION_MAX_AGE = 2592000, -- 30 days,
+  MAX_IMAGE_SIZE = 8000000, -- 8MB
   RESERVED_USERNAMES = { 'login', 'logout', 'register' },
   THEME = {
     CONCRETE = 'concrete',
