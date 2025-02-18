@@ -38,9 +38,10 @@ local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
   local user_session = token and session.get(token) or nil
 
-  local result = { is_valid = false, user_access = false }
-  result.is_valid = user_session and user_session.token
-  result.user_access = user_session and user_session.username == username
+  local result = {
+    is_valid = user_session and user_session.token,
+    user_access = user_session and user_session.username == username
+  }
 
   if result.is_valid then
     session.set(username, token) -- extend session
