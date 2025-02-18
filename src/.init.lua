@@ -116,9 +116,8 @@ local function generateTOC(references, start_level)
     table.insert(headings, _.merge(v, { title = k }))
   end
 
-  -- filter out none-heading references
+  -- filter out non-heading references
   headings = _.filter(headings, function (a) return a.level ~= nil and a.order ~= nil end)
-  p(headings)
   -- sort in reverse order
   headings = _.sort(headings, function (a, b) return a.order > b.order end)
   -- filter based on start level
@@ -237,13 +236,14 @@ moon.get('/:_username(/)', function (r)
   local parsed_md = djot.parse(user.intro)
   local intro_html = djot.render_html(parsed_md)
 
+  r.headers.CacheControl = 'public, max-age=120'
   return moon.serveContent('user', {
     username = user.username,
     new_post_id = new_post_id,
     has_user_access = has_user_access,
     posts = posts,
     intro = intro_html,
-    intro_raw = EscapeHtml(user.intro),
+    intro_raw = user.intro,
     custom_css = user.custom_css,
     custom_title = user.custom_title,
     max_display_posts = user.max_display_posts,
@@ -284,7 +284,6 @@ moon.get('/:_username/:slug(/)', function (r)
 
   local parsed_md = djot.parse(post.content)
   local content_html = djot.render_html(parsed_md)
-  -- p(content_html)
 
   local toc_html = user.enable_toc == 1
     and generateTOC(parsed_md.references, 2)
@@ -439,6 +438,8 @@ moon.post('/a/update/:_username', function (r)
   if not has_user_access then
     return moon.serveRedirect(302, f'/{username}')
   end
+
+  p(intro)
 
   local ok, err = db.updateUser(
     username,
