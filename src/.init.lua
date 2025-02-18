@@ -454,8 +454,6 @@ moon.post('/a/update/:_username', function(r)
     return moon.serveRedirect(302, f'/{username}')
   end
 
-  p(intro)
-
   local ok, err = db.updateUser(
     username,
     intro,
