@@ -2,7 +2,7 @@ require 'global'
 local _ = require 'lib.lume'
 local moon = require 'lib.fullmoon'
 local db = require 'db'
-local constant = require 'constants'
+local constant = require 'constant'
 local session = require 'session'
 local djot = require 'lib.djot'
 
@@ -236,7 +236,12 @@ moon.get('/:_username(/)', function (r)
   local parsed_md = djot.parse(user.intro)
   local intro_html = djot.render_html(parsed_md)
 
-  r.headers.CacheControl = 'public, max-age=120'
+  if has_user_access then
+    r.headers.CacheControl = 'private, no-store'
+  else
+    r.headers.CacheControl = 'public, max-age=3600, must-revalidate'
+  end
+
   return moon.serveContent('user', {
     username = user.username,
     new_post_id = new_post_id,
@@ -289,7 +294,12 @@ moon.get('/:_username/:slug(/)', function (r)
     and generateTOC(parsed_md.references, 2)
     or nil
 
-  r.headers.CacheControl = 'public, max-age=120'
+  if has_user_access then
+    r.headers.CacheControl = 'private, no-store'
+  else
+    r.headers.CacheControl = 'public, max-age=3600, must-revalidate'
+  end
+
   return moon.serveContent('post', {
     slug = slug,
     username = username,
