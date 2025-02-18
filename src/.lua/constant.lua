@@ -20,6 +20,20 @@ return {
   SESSION_MAX_AGE = 2592000, -- 30 days,
   MAX_IMAGE_SIZE = 8000000, -- 8MB
   RESERVED_USERNAMES = { 'login', 'logout', 'register' },
+  DEFAULT_HEADERS = {
+    -- https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+    ['X-Frame-Options'] = 'SAMEORIGIN',
+    ['X-Content-Type-Options'] = 'nosniff',
+    ['Referrer-Policy'] = 'strict-origin-when-cross-origin',
+    ['Cross-Origin-Embedder-Policy'] = 'require-corp',
+    ['Cross-Origin-Resource-Policy'] = 'same-site',
+    ['Cross-Origin-Opener-Policy'] = 'same-origin',
+    ['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload',
+    ['X-DNS-Prefetch-Control'] = 'off',
+    ['X-Download-Options'] = 'noopen',
+    ['X-Permitted-Cross-Domain-Policies'] = 'none',
+    ['X-XSS-Protection'] = '0'
+  },
   THEME = {
     CONCRETE = 'concrete',
     MAGICK = 'magick',

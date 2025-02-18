@@ -140,12 +140,19 @@ moon.get('/favicon.ico', moon.serveAsset)
 -- serve user uploaded images
 moon.get('/data/img/:filename', moon.serveAsset)
 
-moon.get('/', function (r)
+-- set secure headers for all dynamic routes below
+moon.setRoute({ '*', method = {'GET', 'POST'} }, function(r)
+  for k, v in pairs(constant.DEFAULT_HEADERS) do
+    r.headers[k] = v
+  end
+end)
+
+moon.get('/', function(r)
   local user_session = checkSession(r)
   return moon.serveContent('home', { logged_in = user_session.is_valid })
 end)
 
-moon.get('/a/login', function (r)
+moon.get('/a/login', function(r)
   local user_session = checkSession(r)
 
   if user_session.is_valid then
@@ -167,7 +174,7 @@ moon.get('/a/login', function (r)
   return moon.serveContent('login', { error_message = error_message })
 end)
 
-moon.get('/a/logout', function (r)
+moon.get('/a/logout', function(r)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
 
   if token then
@@ -178,7 +185,7 @@ moon.get('/a/logout', function (r)
   return moon.serveRedirect(302, '/')
 end)
 
-moon.get('/a/register', function (r)
+moon.get('/a/register', function(r)
   local user_session = checkSession(r)
   if user_session.is_valid then
     -- already active session, so redirect
@@ -202,7 +209,7 @@ moon.get('/a/register', function (r)
   return moon.serveContent('register', { error_message = error_message })
 end)
 
-moon.get('/:_username(/)', function (r)
+moon.get('/:_username(/)', function(r)
   local username = _.trim(r.params._username)
   local user, err = db.getUser(username)
   local new_post_id = ''
@@ -260,7 +267,7 @@ moon.get('/:_username(/)', function (r)
   })
 end)
 
-moon.get('/:_username/:slug(/)', function (r)
+moon.get('/:_username/:slug(/)', function(r)
   local username = _.trim(r.params._username)
   local slug = _.trim(r.params.slug)
 
@@ -314,7 +321,7 @@ moon.get('/:_username/:slug(/)', function (r)
   })
 end)
 
-moon.get('/:_username/:slug/edit(/)', function (r)
+moon.get('/:_username/:slug/edit(/)', function(r)
   local username = _.trim(r.params._username)
   local slug = _.trim(r.params.slug)
 
@@ -349,7 +356,7 @@ moon.get('/:_username/:slug/edit(/)', function (r)
   })
 end)
 
-moon.get('/:_username/:slug/raw(/)', function (r)
+moon.get('/:_username/:slug/raw(/)', function(r)
   local username = _.trim(r.params._username)
   local slug = _.trim(r.params.slug)
   r.headers.ContentType = 'text/plain'
@@ -365,7 +372,7 @@ moon.get('/:_username/:slug/raw(/)', function (r)
   return post.content
 end)
 
-moon.post('/a/login', function (r)
+moon.post('/a/login', function(r)
   local username = _.trim(r.params.username)
   local password = r.params.password
   local ok, err = db.validateUser(username, password)
@@ -378,7 +385,7 @@ moon.post('/a/login', function (r)
   return moon.serveRedirect(302, f'/{username}')
 end)
 
-moon.post('/a/register', function (r)
+moon.post('/a/register', function(r)
   local username = _.trim(r.params.username)
   local password = r.params.password
   local confirm = r.params.confirm
@@ -407,7 +414,7 @@ moon.post('/a/register', function (r)
   return moon.serveRedirect(302, f'/{username}')
 end)
 
-moon.post('/a/upload', function (r)
+moon.post('/a/upload', function(r)
   local image = r.params.multipart.image.data
   local filename = r.params.multipart.image.filename
   local content_type = r.params.multipart.image.headers['content-type']
@@ -435,7 +442,7 @@ moon.post('/a/upload', function (r)
   return relative_path
 end)
 
-moon.post('/a/update/:_username', function (r)
+moon.post('/a/update/:_username', function(r)
   local username = _.trim(r.params._username)
   local intro = _.trim(r.params.intro)
   local custom_css = _.trim(r.params.custom_css)
@@ -472,7 +479,7 @@ moon.post('/a/update/:_username', function (r)
   return moon.serveRedirect(302, f'/{username}')
 end)
 
-moon.post('/:_username/:post_id', function (r)
+moon.post('/:_username/:post_id', function(r)
   local username = _.trim(r.params._username)
   local post_id = _.trim(r.params.post_id)
   local body = DecodeJson(r.body)
