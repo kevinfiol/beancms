@@ -20,7 +20,7 @@ return {
   SESSION_MAX_AGE = 2592000, -- 30 days,
   MAX_IMAGE_SIZE = 8000000, -- 8MB
   RESERVED_USERNAMES = { 'login', 'logout', 'register' },
-  DEFAULT_HEADERS = {
+  SECURE_HEADERS = {
     -- https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
     ['X-Frame-Options'] = 'SAMEORIGIN',
     ['X-Content-Type-Options'] = 'nosniff',

@@ -86,7 +86,7 @@ end
 local function setNonce(r, nonce)
   r.headers['Content-Security-Policy'] = util.tableToCSP(
     _.merge(
-      constant.DEFAULT_HEADERS['Content-Security-Policy'],
+      constant.SECURE_HEADERS['Content-Security-Policy'],
       { ['script-src'] = "'self' 'nonce-" .. nonce .. "'" }
     )
   )
@@ -104,7 +104,7 @@ moon.get('/data/img/:filename', moon.serveAsset)
 
 -- set secure headers for all dynamic routes below
 moon.setRoute({ '*', method = {'GET', 'POST'} }, function(r)
-  for k, v in pairs(constant.DEFAULT_HEADERS) do
+  for k, v in pairs(constant.SECURE_HEADERS) do
     r.headers[k] = type(v) == 'table'
       and util.tableToCSP(v)
       or v
