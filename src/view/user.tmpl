@@ -123,7 +123,7 @@
 
   {% if has_user_access then %}
     <script type="module" nonce="{%= nonce %}">
-      import { entries, del } from '/static/idb-keyval.js';
+      import { entries, del } from '/static/lib/idb-keyval.js';
 
       const USERNAME = '{%& username %}';
 
