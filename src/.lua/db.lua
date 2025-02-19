@@ -31,7 +31,7 @@ return {
 
     if result ~= 1 then
       ok = false
-      err = 'Unable to create new user; result: ' .. result
+      err = 'Unable to create new user'
     end
 
     return ok, err

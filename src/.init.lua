@@ -116,7 +116,7 @@ moon.get('/', function(r)
   return moon.serveContent('home', { logged_in = user_session.is_valid })
 end)
 
-moon.get('/a/login', function(r)
+moon.get('/login', function(r)
   local user_session = checkSession(r)
 
   if user_session.is_valid then
@@ -138,18 +138,20 @@ moon.get('/a/login', function(r)
   return moon.serveContent('login', { error_message = error_message })
 end)
 
-moon.get('/a/logout', function(r)
-  local token = r.cookies[constant.SESSION_TOKEN_NAME]
+moon.post('/login', function(r)
+  local username = _.trim(r.params.username)
+  local password = r.params.password
+  local ok, err = db.validateUser(username, password)
 
-  if token then
-    r.cookies[constant.SESSION_TOKEN_NAME] = false
-    session.delete(token)
+  if not ok then
+    return moon.serveRedirect(303, f'/login?error={err}')
   end
 
-  return moon.serveRedirect(302, '/')
+  setSessionCookie(r, username)
+  return moon.serveRedirect(302, f'/{username}')
 end)
 
-moon.get('/a/register', function(r)
+moon.get('/register', function(r)
   local user_session = checkSession(r)
   if user_session.is_valid then
     -- already active session, so redirect
@@ -171,6 +173,46 @@ moon.get('/a/register', function(r)
   end
 
   return moon.serveContent('register', { error_message = error_message })
+end)
+
+moon.post('/register', function(r)
+  local username = _.trim(r.params.username)
+  local password = r.params.password
+  local confirm = r.params.confirm
+
+  local password_mismatch = constant.PASSWORD_MISMATCH
+  local user_exists = constant.USER_EXISTS
+  local invalid_username = constant.INVALID_USERNAME
+
+  if password ~= confirm then
+    return moon.serveRedirect(303, f'/register?error={password_mismatch}')
+  elseif _.find(constant.RESERVED_USERNAMES, username) then
+    return moon.serveRedirect(303, f'/register?error={invalid_username}')
+  end
+
+  local salt = GetRandomBytes(16)
+  local hashed = argon2.hash_encoded(password, salt, { m_cost = 65536 })
+
+  local ok, err = db.createUser(username, hashed, salt)
+  if err then
+    LogError(f'Could not register user: {username}')
+    LogError(err)
+    return moon.serveRedirect(303, f'/register?error={user_exists}')
+  end
+
+  setSessionCookie(r, username)
+  return moon.serveRedirect(302, f'/{username}')
+end)
+
+moon.get('/logout', function(r)
+  local token = r.cookies[constant.SESSION_TOKEN_NAME]
+
+  if token then
+    r.cookies[constant.SESSION_TOKEN_NAME] = false
+    session.delete(token)
+  end
+
+  return moon.serveRedirect(302, '/')
 end)
 
 moon.get('/:_username(/)', function(r)
@@ -345,49 +387,7 @@ moon.get('/:_username/:slug/raw(/)', function(r)
   return post.content
 end)
 
-moon.post('/a/login', function(r)
-  local username = _.trim(r.params.username)
-  local password = r.params.password
-  local ok, err = db.validateUser(username, password)
-
-  if not ok then
-    return moon.serveRedirect(303, f'/a/login?error={err}')
-  end
-
-  setSessionCookie(r, username)
-  return moon.serveRedirect(302, f'/{username}')
-end)
-
-moon.post('/a/register', function(r)
-  local username = _.trim(r.params.username)
-  local password = r.params.password
-  local confirm = r.params.confirm
-
-  local password_mismatch = constant.PASSWORD_MISMATCH
-  local user_exists = constant.USER_EXISTS
-  local invalid_username = constant.INVALID_USERNAME
-
-  if password ~= confirm then
-    return moon.serveRedirect(303, f'/a/register?error={password_mismatch}')
-  elseif _.find(constant.RESERVED_USERNAMES, username) then
-    return moon.serveRedirect(303, f'/a/register?error={invalid_username}')
-  end
-
-  local salt = GetRandomBytes(16)
-  local hashed = argon2.hash_encoded(password, salt, { m_cost = 65536 })
-
-  local ok, err = db.createUser(username, hashed, salt)
-  if err then
-    LogError(f'Could not register user: {username}')
-    LogError(err)
-    return moon.serveRedirect(303, f'/a/register?error={user_exists}')
-  end
-
-  setSessionCookie(r, username)
-  return moon.serveRedirect(302, f'/{username}')
-end)
-
-moon.post('/a/upload', function(r)
+moon.post('/upload', function(r)
   local image = r.params.multipart.image.data
   local filename = r.params.multipart.image.filename
   local content_type = r.params.multipart.image.headers['content-type']
@@ -415,7 +415,7 @@ moon.post('/a/upload', function(r)
   return relative_path
 end)
 
-moon.post('/a/update/:_username', function(r)
+moon.post('/:_username', function(r)
   local username = _.trim(r.params._username)
   local intro = _.trim(r.params.intro)
   local custom_css = _.trim(r.params.custom_css)
