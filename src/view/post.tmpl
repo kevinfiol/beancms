@@ -18,10 +18,10 @@
 
 {% function block.content() %}
   <nav class="user-nav">
+    <a href="/{%& username %}">{%& username %}</a>
     {% if has_user_access then %}
       <a href="/{%& username %}/{%& slug %}/edit">Edit</a>
     {% end %}
-    <a href="/{%& username %}">Back</a>
   </nav>
 
   {% if toc ~= '' then %}

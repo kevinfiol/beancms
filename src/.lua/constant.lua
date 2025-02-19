@@ -36,9 +36,9 @@ return {
     ['Content-Security-Policy'] = {
       ['default-src'] = "'self'",
       ['script-src'] = "'self'",
-      ['style-src'] = "'self' 'unsafe-inline'",
+      ['style-src'] = "'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.xz.style",
       ['img-src'] = "'self' https: data:",
-      ['font-src'] = "'self'",
+      ['font-src'] = "'self' https://fonts.gstatic.com https://fonts.xz.style",
       ['connect-src'] = "'self'",
       ['media-src'] = "'self'",
       ['frame-src'] = "'none'",

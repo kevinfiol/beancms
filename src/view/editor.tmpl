@@ -173,15 +173,14 @@
     const saveDraft = debounce((content) => {
       if (content) 
         set(State.slug, { username: USERNAME, content })
-          .then(() => showAlert('Draft saved'))
-          .finally(() => State.pending = false);
+          .then(() => showAlert('Draft saved'));
       else
         del(State.slug)
-          .catch(() => {})
-          .finally(() => State.pending = false);
+          .catch(console.error)
     });
 
     const setTitle = debounce((content) => {
+      State.pending = true;
       const title = parseTitle(content);
       const slug = (createSlug(title) || POST_ID);
 
@@ -325,7 +324,6 @@
         .split('\n')
         .length;
 
-      State.pending = true;
       if (currentLine > 1) saveDraft(content);
       else setTitle(content);
 
