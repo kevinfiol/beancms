@@ -59,6 +59,7 @@ docker-build:
 	docker build --tag=beancms .
 
 docker-run:
+	mkdir -p ${DATA_DIR}
 	docker run --detach \
 		--name=beancms \
 		--publish ${PORT}:80 \
