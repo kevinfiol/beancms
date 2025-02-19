@@ -278,11 +278,7 @@ moon.get('/:_username/:slug(/)', function(r)
     r.headers.CacheControl = 'public, max-age=3600, must-revalidate'
   end
 
-  nonce = util.generateNonce()
-  setNonce(r, nonce)
-
   return moon.serveContent('post', {
-    nonce = nonce,
     slug = slug,
     username = username,
     has_user_access = has_user_access,

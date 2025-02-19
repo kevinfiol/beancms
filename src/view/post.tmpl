@@ -1,5 +1,5 @@
 {% function block.head() %}
-  <link rel="stylesheet" href="/static/highlightjs/default.min.css">
+  <link rel="stylesheet" href="/static/lib/hljs-default.min.css">
 
   {% if theme and theme ~= '' then %}
     <link rel="stylesheet" type="text/css" href="/static/theme/{%& themes[theme] %}.css">
@@ -13,7 +13,7 @@
     </style>
   {% end %}
 
-  <script src="/static/highlight.min.js"></script>
+  <script src="/static/lib/highlight.min.js"></script>
 {% end %}
 
 {% function block.content() %}
@@ -34,9 +34,7 @@
     {%= content %}
   </main>
 
-  <script nonce="{%= nonce %}">
-    hljs.highlightAll();
-  </script>
+  <script src="/static/post.js"></script>
 {% end %}
 
 {% render('layout') %}
