@@ -40,7 +40,7 @@
     >{%& content %}</textarea>
   </main>
 
-  <script type="module">
+  <script type="module" nonce="{%= nonce %}">
     import { get, set, del } from '/static/idb-keyval.js';
 
     const USERNAME = '{%& username %}';
@@ -49,6 +49,7 @@
     const TITLE = '{%& title or slug or post_id or '' %}';
     const MAX_IMAGE_SIZE = 8 * 1024 * 1024; // 8 MB
 
+    const $ = document.querySelector.bind(document);
     const Editor = $('#editor');
     const Alert = $('#toast');
     const DragOverlay = $('.drag-overlay');

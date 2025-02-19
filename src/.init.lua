@@ -10,9 +10,10 @@ ProgramMaxPayloadSize(constant.MAX_IMAGE_SIZE)
 require 'global'
 local _ = require 'lib.lume'
 local moon = require 'lib.fullmoon'
+local djot = require 'lib.djot'
 local db = require 'db'
 local session = require 'session'
-local djot = require 'lib.djot'
+local util = require 'util'
 
 -- schedule daily cleanup of session every 12 hours
 moon.setSchedule("0 */12 * * *", function()
@@ -82,50 +83,15 @@ local function setSessionCookie(r, username)
   return r
 end
 
-local function buildNestedList(headings, level)
-  local html = '<ul>'
+local function setNonce(r, nonce)
+  r.headers['Content-Security-Policy'] = util.tableToCSP(
+    _.merge(
+      constant.DEFAULT_HEADERS['Content-Security-Policy'],
+      { ['script-src'] = "'self' 'nonce-" .. nonce .. "'" }
+    )
+  )
 
-  while #headings > 0 and headings[#headings].level == level do
-    local last = table.remove(headings)
-    if last ~= nil then
-      html = html ..
-        string.format('<li><a href="%s" title="%s">%s</a></li>',
-          EscapeHtml(last.destination),
-          EscapeHtml(last.title),
-          EscapeHtml(last.title)
-        )
-    end
-  end
-
-  while #headings > 0 and headings[#headings].level > level do
-    html = html .. buildNestedList(headings, level + 1)
-  end
-
-  return html .. '</ul>'
-end
-
-local function generateTOC(references, start_level)
-  start_level = start_level or 1
-  local html = ''
-
-  -- build flat array of headings
-  local headings = {}
-  for k, v in pairs(references) do
-    table.insert(headings, _.merge(v, { title = k }))
-  end
-
-  -- filter out non-heading references
-  headings = _.filter(headings, function (a) return a.level ~= nil and a.order ~= nil end)
-  -- sort in reverse order
-  headings = _.sort(headings, function (a, b) return a.order > b.order end)
-  -- filter based on start level
-  headings = _.filter(headings, function (a) return a.level >= start_level end)
-
-  while #headings > 0 do
-    html = html .. buildNestedList(headings, start_level)
-  end
-
-  return html
+  return r
 end
 
 -- set templates and static asset paths
@@ -139,7 +105,9 @@ moon.get('/data/img/:filename', moon.serveAsset)
 -- set secure headers for all dynamic routes below
 moon.setRoute({ '*', method = {'GET', 'POST'} }, function(r)
   for k, v in pairs(constant.DEFAULT_HEADERS) do
-    r.headers[k] = v
+    r.headers[k] = type(v) == 'table'
+      and util.tableToCSP(v)
+      or v
   end
 end)
 
@@ -209,6 +177,7 @@ moon.get('/:_username(/)', function(r)
   local username = _.trim(r.params._username)
   local user, err = db.getUser(username)
   local new_post_id = ''
+  local nonce = nil
 
   if err then
     LogError(err)
@@ -243,11 +212,14 @@ moon.get('/:_username(/)', function(r)
 
   if has_user_access then
     r.headers.CacheControl = 'private, no-store'
+    nonce = util.generateNonce()
+    setNonce(r, nonce)
   else
     r.headers.CacheControl = 'public, max-age=3600, must-revalidate'
   end
 
   return moon.serveContent('user', {
+    nonce = nonce,
     username = user.username,
     new_post_id = new_post_id,
     has_user_access = has_user_access,
@@ -269,6 +241,7 @@ moon.get('/:_username/:slug(/)', function(r)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
+  local nonce = nil
 
   local post, err = db.getPost(username, slug)
   if err then
@@ -296,7 +269,7 @@ moon.get('/:_username/:slug(/)', function(r)
   local content_html = djot.render_html(parsed_md)
 
   local toc_html = user.enable_toc == 1
-    and generateTOC(parsed_md.references, 2)
+    and util.generateTOC(parsed_md.references, 2)
     or nil
 
   if has_user_access then
@@ -305,7 +278,11 @@ moon.get('/:_username/:slug(/)', function(r)
     r.headers.CacheControl = 'public, max-age=3600, must-revalidate'
   end
 
+  nonce = util.generateNonce()
+  setNonce(r, nonce)
+
   return moon.serveContent('post', {
+    nonce = nonce,
     slug = slug,
     username = username,
     has_user_access = has_user_access,
@@ -343,7 +320,11 @@ moon.get('/:_username/:slug/edit(/)', function(r)
     content = post.content
   end
 
+  nonce = util.generateNonce()
+  setNonce(r, nonce)
+
   return moon.serveContent('editor', {
+    nonce = nonce,
     username = username,
     slug = slug,
     title = post.title,

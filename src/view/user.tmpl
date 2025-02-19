@@ -122,11 +122,12 @@
   </main>
 
   {% if has_user_access then %}
-    <script type="module">
+    <script type="module" nonce="{%= nonce %}">
       import { entries, del } from '/static/idb-keyval.js';
 
       const USERNAME = '{%& username %}';
 
+      const $ = document.querySelector.bind(document);
       const ViewDraftsBtn = $('#view-drafts');
       const DraftsDialog = $('#drafts');
       const DialogList = DraftsDialog.querySelector('.list');

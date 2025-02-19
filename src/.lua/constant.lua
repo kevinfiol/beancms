@@ -32,7 +32,20 @@ return {
     ['X-DNS-Prefetch-Control'] = 'off',
     ['X-Download-Options'] = 'noopen',
     ['X-Permitted-Cross-Domain-Policies'] = 'none',
-    ['X-XSS-Protection'] = '0'
+    ['X-XSS-Protection'] = '0',
+    ['Content-Security-Policy'] = {
+      ['default-src'] = "'self'",
+      ['script-src'] = "'self'",
+      ['style-src'] = "'self' 'unsafe-inline'",
+      ['img-src'] = "'self' https: data:",
+      ['font-src'] = "'self'",
+      ['connect-src'] = "'self'",
+      ['media-src'] = "'self'",
+      ['frame-src'] = "'none'",
+      ['object-src'] = "'none'",
+      ['base-uri'] = "'self'",
+      ['form-action'] = "'self'"
+    }
   },
   THEME = {
     CONCRETE = 'concrete',
