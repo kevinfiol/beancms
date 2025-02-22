@@ -30,3 +30,6 @@ make watch
 - [ ] audit themes and fix broken ones
 - [ ] add artist "feed" mode"
 - [ ] add archive page
+- [ ] add .env file parsing
+- [ ] update dockerfile to account for env variables
+- [ ] create docker compose file
