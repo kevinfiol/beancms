@@ -1,1 +1,1 @@
-hljs.highlightAll();
+if (hljs) hljs.highlightAll();

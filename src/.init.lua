@@ -1,3 +1,4 @@
+require 'global'
 local constant = require 'constant'
 
 -- create required directories
@@ -7,16 +8,17 @@ unix.makedirs(constant.IMG_DIR)
 -- set max payload size for images
 ProgramMaxPayloadSize(constant.MAX_IMAGE_SIZE)
 
-require 'global'
 local _ = require 'lib.lume'
 local moon = require 'lib.fullmoon'
 local djot = require 'lib.djot'
 local db = require 'db'
 local session = require 'session'
 local util = require 'util'
+local challenge = require 'challenge'
 
--- schedule daily cleanup of session every 12 hours
-moon.setSchedule("0 */12 * * *", function()
+-- schedule daily cleanup of session every 6 hours by default
+local SESSION_CLEAN_INTERVAL_HOURS = tonumber(ENV.SESSION_CLEAN_INTERVAL_HOURS) or 6
+moon.setSchedule(f'0 */{SESSION_CLEAN_INTERVAL_HOURS} * * *', function()
   local pruned, err = session.prune()
 
   if err then
@@ -67,6 +69,9 @@ local function checkSession(r, username)
 end
 
 local function setSessionCookie(r, username)
+  -- clear any existing sessions
+  r.session = nil
+
   -- create session and set cookie
   local token = UuidV4()
 
@@ -170,24 +175,43 @@ moon.get('/register', function(r)
   elseif error == constant.INVALID_USERNAME then
     moon.setStatus(401)
     error_message = 'Invalid or reserved username'
+  elseif error == constant.WRONG_CHALLENGE_ANSWER then
+    moon.setStatus(401)
+    error_message = 'Wrong answer to security challenge'
   end
 
-  return moon.serveContent('register', { error_message = error_message })
+  local random_challenge, challenge_idx = challenge.getRandom()
+  r.session.challenge_idx = challenge_idx
+
+  return moon.serveContent('register', {
+    challenge_question = random_challenge.question,
+    challenge_idx = challenge_idx,
+    error_message = error_message
+  })
 end)
 
 moon.post('/register', function(r)
   local username = _.trim(r.params.username)
   local password = r.params.password
   local confirm = r.params.confirm
+  local phone = r.params.phone
+  local challenge_answer = _.trim(r.params.challenge_answer)
 
   local password_mismatch = constant.PASSWORD_MISMATCH
   local user_exists = constant.USER_EXISTS
   local invalid_username = constant.INVALID_USERNAME
+  local wrong_challenge_answer = constant.WRONG_CHALLENGE_ANSWER
+
+  if phone ~= '' then
+    return moon.serveRedirect(303, '/')
+  end
 
   if password ~= confirm then
     return moon.serveRedirect(303, f'/register?error={password_mismatch}')
   elseif _.find(constant.RESERVED_USERNAMES, username) then
     return moon.serveRedirect(303, f'/register?error={invalid_username}')
+  elseif not r.session.challenge_idx or not challenge.validate(challenge_answer, r.session.challenge_idx) then
+    return moon.serveRedirect(303, f'/register?error={wrong_challenge_answer}')
   end
 
   local salt = GetRandomBytes(16)
@@ -277,6 +301,51 @@ moon.get('/:_username(/)', function(r)
   })
 end)
 
+moon.get('/:_username/feed(/)', function(r)
+  local username = _.trim(r.params._username)
+  local user, err = db.getUser(username)
+
+  if err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'Could not find user: ' .. username
+  end
+
+  if user.stale_feed ~= 1 then
+    -- use cached feed
+    local feed = Inflate(user.atom_feed, user.atom_feed_size)
+    r.headers['Cache-Control'] = 'public, max-age=3600, must-revalidate'
+    return feed
+  end
+
+  local posts, err = db.getFeedPosts(username, 20)
+
+  if err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'An error occurred. Could not retrieve feed for ' .. username
+  end
+
+  for _, post in ipairs(posts) do
+    -- parse the markdown
+    local parsed = djot.parse(post.content)
+    post.content = EscapeHtml(djot.render_html(parsed))
+  end
+
+  local updated_iso_timestamp = db.getDBCurrentTime()
+  local feed = util.buildAtomFeed(ENV.HOSTNAME, username, posts, updated_iso_timestamp)
+  local ok, err = db.updateUserFeed(username, feed)
+
+  if not ok or err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'An error occurred. Could not create feed for ' .. username
+  end
+
+  r.headers['Cache-Control'] = 'public, max-age=3600, must-revalidate'
+  return feed
+end)
+
 moon.get('/:_username/:slug(/)', function(r)
   local username = _.trim(r.params._username)
   local slug = _.trim(r.params.slug)
@@ -323,6 +392,7 @@ moon.get('/:_username/:slug(/)', function(r)
   return moon.serveContent('post', {
     slug = slug,
     username = username,
+    title = post.title,
     has_user_access = has_user_access,
     content = content_html,
     toc = toc_html,
@@ -478,7 +548,7 @@ moon.post('/:_username/:post_id', function(r)
     ok, err = db.deletePost(post_id, slug, username)
   end
 
-  if err then
+  if not ok or err then
     moon.setStatus(500)
     LogError(err)
     return 'ERROR'

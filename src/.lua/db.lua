@@ -1,6 +1,7 @@
 local sql = require 'sqlite.cms'
 local constant = require 'constant'
 local uid = require 'lib.uid'
+local _ = require 'lib.lume'
 
 local DEFAULT_UID_LENGTH = 10
 
@@ -17,6 +18,21 @@ local function normalizePostId(s)
 end
 
 return {
+  getDBCurrentTime = function()
+    local current_time = ''
+    local row, err = sql:fetchOne(
+      [[
+        select strftime('%Y-%m-%dT%H:%M:%SZ', CURRENT_TIMESTAMP) as current_time
+      ]]
+    )
+
+    if not err then
+      current_time = row.current_time 
+    end
+
+    return current_time, err
+  end,
+
   createUser = function(username, hashed, salt)
     local err = nil
     local ok, result = pcall(function ()
@@ -69,9 +85,8 @@ return {
       )
     end)
 
-    if result ~= 1 then
-      ok = false
-      err = 'User update failed. No rows updated'
+    if not ok then
+      err = result
     end
 
     return ok, err
@@ -109,7 +124,10 @@ return {
           custom_title,
           max_display_posts,
           enable_toc,
-          theme
+          theme,
+          stale_feed,
+          atom_feed,
+          atom_feed_size
         from user
         where username = ?
       ]],
@@ -216,15 +234,90 @@ return {
     return posts, err
   end,
 
+  getFeedPosts = function(username, max)
+    max = max or 20
+
+    local posts, err = sql:fetchAll(
+      [[
+        select
+          p.post_id as id,
+          p.title as title,
+          strftime('%Y-%m-%dT%H:%M:%SZ', p.modified_time) as updated_iso,
+          strftime('%Y-%m-%dT%H:%M:%SZ', p.created_time) as published_iso,
+          p.content as content,
+          p.content_size as content_size,
+          p.slug as slug,
+          u.username as name
+        from post p
+        join user u on p.user_id = u.user_id
+        where u.username = ?
+        order by
+          p.created_time desc
+        limit ?
+      ]],
+      username,
+      max
+    )
+
+    if err then
+      return {}, err
+    elseif posts == nil then
+      return {}, 'Could not retrieve feed posts'
+    end
+
+    -- decompress post content
+    for _, post in ipairs(posts) do
+      post.content = Inflate(post.content, post.content_size)
+      post.content_size = nil
+    end
+
+    return posts, err
+  end,
+
+  updateUserFeed = function(username, feed)
+    local err = nil
+    local feed_size = #feed
+
+    local ok, result = pcall(function()
+      return sql:execute(
+        [[
+          update user
+          set
+            stale_feed = 0,
+            atom_feed = :atom_feed,
+            atom_feed_size = :atom_feed_size
+          where username = :username
+        ]],
+        {
+          atom_feed = Deflate(feed, 4),
+          atom_feed_size = feed_size,
+          username = username
+        }
+      )
+    end)
+
+    if not ok then
+      err = result
+    end
+
+    return ok, err
+  end,
+
   createPost = function(post_id, title, slug, username, content)
     content =  string.sub(content or '', 1, 80000) -- 80000 char limit
 
     local err = nil
     local content_size = #content
 
+    if _.find(constant.RESERVED_SLUGS, slug) then
+      slug = slug .. '-' .. post_id
+    end
+
     local ok, result = pcall(function ()
       return sql:execute(
         [[
+          begin immediate transaction;
+
           insert into post
             (user_id, post_id, title, slug, content, content_size)
           select
@@ -237,7 +330,13 @@ return {
             slug = excluded.slug,
             content = excluded.content,
             content_size = :content_size,
-            modified_time = CURRENT_TIMESTAMP
+            modified_time = CURRENT_TIMESTAMP;
+
+          update user
+          set stale_feed = 1
+          where username = :username;
+
+          commit;
         ]],
         {
           post_id = post_id,
@@ -250,9 +349,8 @@ return {
       )
     end)
 
-    if result ~= 1 then
-      ok = false
-      err = 'Post creation/update failed. No rows inserted/updated'
+    if not ok then
+      err = result
     end
 
     return ok, err
@@ -274,9 +372,8 @@ return {
       )
     end)
 
-    if result ~= 1 then
-      ok = false
-      err = 'Post deletion failed. No rows inserted/updated'
+    if not ok then
+      err = result
     end
 
     return ok, err

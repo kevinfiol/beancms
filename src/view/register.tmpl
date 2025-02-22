@@ -27,6 +27,16 @@
             Confirm Password
             <input type="password" name="confirm" id="confirm" placeholder="Confirm Password" minlength="7" required>
           </label>
+
+          <label>
+            {%& challenge_question %}
+            <input type="text" name="challenge_answer" id="challenge_answer" placeholder="" maxlength="20" required>
+          </label>
+
+          <label class="escondido" aria-hidden="true">
+            Phone
+            <input name="phone" type="phone" class="escondido" tabindex="-1" aria-hidden="true">
+          </label>
         </div>
 
         {% if error_message then %}

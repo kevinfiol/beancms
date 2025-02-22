@@ -13,9 +13,8 @@ local delete = function(token)
     )
   end)
 
-  if result ~= 1 then
-    ok = false
-    err = 'Session token does not exist: ' .. token
+  if not ok then
+    err = result
   end
 
   return ok, err
@@ -42,9 +41,8 @@ return {
       )
     end)
 
-    if result ~= 1 then
-      ok = false
-      err = 'Unable to set/update session'
+    if not ok then
+      err = result
     end
 
     return ok, err

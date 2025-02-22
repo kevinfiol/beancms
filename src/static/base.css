@@ -9,6 +9,10 @@ nav {
   }
 }
 
+.escondido {
+  display: none;
+}
+
 img {
   height: auto !important;
   max-width: 100% !important;
@@ -33,7 +37,7 @@ main.register-page {
   input[type="text"],
   input[type="password"] {
     padding: 0.5rem 0.25rem;
-    width: 100%;
+    width: 94%;
     margin-bottom: 0.5rem;
   }
 }

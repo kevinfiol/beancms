@@ -12,7 +12,10 @@ local SCHEMA = [[
     custom_title text default '',
     theme text default '',
     max_display_posts integer default 50,
-    enable_toc integer default 1
+    enable_toc integer default 1,
+    stale_feed integer default 1,
+    atom_feed text default '',
+    atom_feed_size integer
   ) strict;
 
   create table if not exists post (
