@@ -1,3 +1,4 @@
+-- kevinfiol: modified detectType to detect xml
 --
 -- ultralight webframework for [Redbean web server](https://redbean.dev/)
 -- Copyright 2021-23 Paul Kulchenko
@@ -259,7 +260,8 @@ local req
 local function getRequest() return req end
 local function detectType(s)
   local ch = s:match("^%s*(%S)")
-  return ch and (ch == "<" and "text/html" or ch == "{" and "application/json") or "text/plain"
+  local second = s:match("^%s*%S%s*(%S)")
+  return ch and (ch == "<" and second == "?" and "text/xml") or (ch == "<" and "text/html" or ch == "{" and "application/json") or "text/plain"
 end
 
 local function serveResponse(status, headers, body)
