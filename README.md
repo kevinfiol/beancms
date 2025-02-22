@@ -21,3 +21,10 @@ make run
 # or start service and watch for changes
 make watch
 ```
+
+## TODO
+
+- [ ] fix image drag styles in dark mode
+- [ ] fix atom feed properties
+- [ ] audit themes and remove problematic ones
+- [ ] audit themes and fix broken ones
