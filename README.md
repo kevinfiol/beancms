@@ -28,3 +28,5 @@ make watch
 - [ ] fix atom feed properties
 - [ ] audit themes and remove problematic ones
 - [ ] audit themes and fix broken ones
+- [ ] add artist "feed" mode"
+- [ ] add archive page
