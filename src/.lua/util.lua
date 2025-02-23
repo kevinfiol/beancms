@@ -29,15 +29,15 @@ return {
     local xml = {
       '<?xml version="1.0" encoding="utf-8"?>'
       , '<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">'
-      , f'  <id>{host}{username}/feed</id>'
+      , f'  <id>{host}/{username}/feed</id>'
       , f'  <title>{username}\'s feed</title>'
-      , f'  <link rel="self" type="application/atom+xml" href="{host}{username}/feed"/>'
-      , f'  <link rel="alternate" type="text/html" href="{host}{username}"/>'
+      , f'  <link rel="self" type="application/atom+xml" href="{host}/{username}/feed"/>'
+      , f'  <link rel="alternate" type="text/html" href="{host}/{username}"/>'
       , f'  <updated>{updated_iso_timestamp}</updated>'
     }
 
     for _, post in ipairs(posts) do
-      local post_url = f'{host}{username}/{post.slug}'
+      local post_url = f'{host}/{username}/{post.slug}'
 
       table.insert(xml, f'  <entry>')
       table.insert(xml, f'    <title>{post.title}</title>')

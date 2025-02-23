@@ -24,12 +24,15 @@ make watch
 
 ## TODO
 
-- [ ] fix image drag styles in dark mode
+- [x] fix image drag styles in dark mode
+- [x] add .env file parsing
 - [ ] fix atom feed properties
-- [ ] audit themes and remove problematic ones
-- [ ] audit themes and fix broken ones
-- [ ] add artist "feed" mode"
-- [ ] add archive page
-- [ ] add .env file parsing
 - [ ] update dockerfile to account for env variables
 - [ ] create docker compose file
+- [ ] audit themes and remove problematic ones
+- [ ] audit themes and fix broken ones
+- [ ] add artist "feed" mode
+- [ ] add archive page
+- [ ] fix mobile styles
+- [ ] add buttons to editor for mobile/accessibility reasons
+- [ ] highlightjs audit

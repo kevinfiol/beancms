@@ -18,8 +18,12 @@ return {
   POST_DOES_NOT_EXIST = 'post_does_not_exist',
   WRONG_CHALLENGE_ANSWER = 'wrong_challenge_answer',
   SESSION_TOKEN_NAME = 'beancms',
-  SESSION_MAX_AGE = 604800, -- 7 days,
-  MAX_IMAGE_SIZE = 8000000, -- 8MB
+  SESSION_MAX_AGE = ENV.SESSION_MAX_AGE
+    and tonumber(ENV.SESSION_MAX_AGE)
+    or 604800, -- 7 days
+  MAX_IMAGE_SIZE = ENV.MAX_IMAGE_SIZE
+    and tonumber(ENV.MAX_IMAGE_SIZE)
+    or 8000000, -- 8MB
   RESERVED_USERNAMES = { 'login', 'logout', 'register' },
   RESERVED_SLUGS = { 'feed', 'archive' },
   SECURE_HEADERS = {

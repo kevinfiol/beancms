@@ -5,7 +5,11 @@ f = require 'lib.f-strings'
 local inspect = require 'lib.inspect'
 
 local function log(level)
-  return function (message) Log(level, inspect(message)) end
+  return function (message)
+    local info = debug.getinfo(2, 'Sl')
+    local source = info.short_src:match("/zip/(.*)") or info.short_src
+    Log(level, '[/' .. source .. ':' .. info.currentline .. ']: ' .. inspect(message))
+  end
 end
 
 LogDebug = log(kLogDebug)
@@ -16,7 +20,6 @@ p = LogDebug
 
 -- load environment variables
 ENV = {}
-local env_vars = unix.environ()
 
 local function trim(s)
   s = s:match('^%s*(.-)%s*$')
@@ -36,9 +39,31 @@ end
 
 local function setEnv(line)
   local key, value = line:match('([^=]+)=(.*)') -- split line by first '='
-  ENV[trim(key)] = trim(value)
+  value = trim(value)
+  ENV[trim(key)] = value ~= '' and value or nil
 end
 
+-- load from system first
+local env_vars = unix.environ()
 for _, v in ipairs(env_vars) do
   setEnv(v)
+end
+
+-- load from env file
+local env_file_path = path.join(unix.getcwd(), '.env')
+local fd = unix.open(env_file_path, unix.O_RDONLY)
+local env_file = nil
+local env_file_err = nil
+
+if fd then
+  env_file, env_file_err = unix.read(fd)
+end
+
+if env_file and not env_file_err then
+  for line in env_file:gmatch("[^\n]+") do
+    -- ignore commented out lines (aka lines that start with a #)
+    if not line:match("^%s*#") then
+      setEnv(line)
+    end
+  end
 end

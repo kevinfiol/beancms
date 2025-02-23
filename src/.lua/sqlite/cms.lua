@@ -13,6 +13,7 @@ local SCHEMA = [[
     theme text default '',
     max_display_posts integer default 50,
     enable_toc integer default 1,
+    enable_feed_mode integer default 0,
     stale_feed integer default 1,
     atom_feed text default '',
     atom_feed_size integer

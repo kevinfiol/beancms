@@ -333,7 +333,7 @@ moon.get('/:_username/feed(/)', function(r)
   end
 
   local updated_iso_timestamp = db.getDBCurrentTime()
-  local feed = util.buildAtomFeed(ENV.HOSTNAME, username, posts, updated_iso_timestamp)
+  local feed = util.buildAtomFeed(ENV.SITE_DOMAIN, username, posts, updated_iso_timestamp)
   local ok, err = db.updateUserFeed(username, feed)
 
   if not ok or err then
