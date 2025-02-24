@@ -28,14 +28,17 @@ moon.setSchedule(f'0 */{SESSION_CLEAN_INTERVAL_HOURS} * * *', function()
   end
 end)
 
--- helper functions
-moon.get = function(route, handler)
-  return moon.setRoute({ route, method = 'GET' }, handler)
-end
+-- fullmoon shortcut functions (moon.get, moon.post)
+_.each({ 'get', 'post' }, function (method)
+  moon[method] = function(route, opts, handler)
+    handler = type(opts) == 'function' and opts or handler
+    opts = type(opts) == 'table' and opts or {}
 
-moon.post = function(route, handler)
-  return moon.setRoute({ route, method = 'POST' }, handler)
-end
+    local route_opts = { route, method = string.upper(method) }
+    for k, v in pairs(opts) do route_opts[k] = v end
+    return moon.setRoute(route_opts, handler)
+  end
+end)
 
 local function checkSession(r, username)
   local token = r.cookies[constant.SESSION_TOKEN_NAME]
@@ -135,6 +138,8 @@ moon.setRoute({
     return moon.serveContent('admin', { nonce = nonce })
   end
 )
+
+-- moon.get('/admin', { clientAddr = adminFilter })
 
 moon.get('/login', function(r)
   local user_session = checkSession(r)
