@@ -1,3 +1,5 @@
+local _ = require 'lib.lume'
+
 local function stripTrailingDots(path)
   return path:match("^(.-)%.*$") or path
 end
@@ -18,6 +20,9 @@ return {
   POST_DOES_NOT_EXIST = 'post_does_not_exist',
   WRONG_CHALLENGE_ANSWER = 'wrong_challenge_answer',
   SESSION_TOKEN_NAME = 'beancms',
+  ADMIN_IPS = ENV.ADMIN_IPS
+    and _.split(ENV.ADMIN_IPS, ',')
+    or {},
   SESSION_MAX_AGE = ENV.SESSION_MAX_AGE
     and tonumber(ENV.SESSION_MAX_AGE)
     or 604800, -- 7 days

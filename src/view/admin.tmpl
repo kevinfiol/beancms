@@ -1,0 +1,21 @@
+{% function block.head() %}
+  <link rel="stylesheet" type="text/css" href="/static/theme/default.css">
+{% end %}
+
+{% function block.content() %}
+  <nav>
+    <a href="/">← home</a>
+  </nav>
+
+  <main class="admin-page">
+    hi
+  </main>
+
+  <script src="/static/lib/umai.min.js"></script>
+  <script nonce="{%= nonce %}">
+    const { m, mount } = window.umai;
+    console.log({m, mount});
+  </script>
+{% end %}
+
+{% render('layout', { title = 'admin' }) %}

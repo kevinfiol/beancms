@@ -118,13 +118,23 @@ moon.setRoute({ '*', method = {'GET', 'POST'} }, function(r)
 end)
 
 moon.get('/', function(r)
-  local ip, port = GetRemoteAddr()
-  p(CategorizeIp(ip))
-  p(IsPublicIp(ip))
-  p(FormatIp(ip))
   local user_session = checkSession(r)
   return moon.serveContent('home', { logged_in = user_session.is_valid })
 end)
+
+moon.setRoute({
+  '/admin',
+  method = 'GET',
+  clientAddr = function (ip)
+    return IsLoopbackIp(ip) or _.find(constant.ADMIN_IPS, FormatIp(ip))
+  end
+},
+  function(r)
+    local nonce = util.generateNonce()
+    setNonce(r, nonce)
+    return moon.serveContent('admin', { nonce = nonce })
+  end
+)
 
 moon.get('/login', function(r)
   local user_session = checkSession(r)
