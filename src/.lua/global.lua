@@ -18,6 +18,20 @@ LogError = log(kLogError)
 LogFatal = log(kLogFatal)
 p = LogDebug
 
+-- shortcut helpers for fullmoon
+local moon = require 'lib.fullmoon'
+
+for _, method in ipairs({ 'get', 'post', 'delete', 'put', 'options', 'patch' }) do
+  moon[method] = function(route, opts, handler)
+    handler = type(opts) == 'function' and opts or handler
+    opts = type(opts) == 'table' and opts or {}
+
+    local route_opts = { route, method = string.upper(method) }
+    for k, v in pairs(opts) do route_opts[k] = v end
+    return moon.setRoute(route_opts, handler)
+  end
+end
+
 -- load environment variables
 ENV = {}
 
