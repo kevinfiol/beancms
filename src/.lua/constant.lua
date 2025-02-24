@@ -23,7 +23,7 @@ return {
     or 604800, -- 7 days
   MAX_IMAGE_SIZE = ENV.MAX_IMAGE_SIZE
     and tonumber(ENV.MAX_IMAGE_SIZE)
-    or 8000000, -- 8MB
+    or 4000000, -- 4MB
   RESERVED_USERNAMES = { 'login', 'logout', 'register' },
   RESERVED_SLUGS = { 'feed', 'archive' },
   SECURE_HEADERS = {
