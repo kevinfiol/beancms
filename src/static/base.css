@@ -22,7 +22,7 @@ img {
 figure.error {
   margin: 1rem 0;
   padding: 18px;
-  border: 1px solid black;
+  border: 1px solid;
 }
 
 main.user-page,
@@ -37,8 +37,11 @@ main.register-page {
   input[type="text"],
   input[type="password"] {
     padding: 0.5rem 0.25rem;
-    width: 94%;
+    width: 100%;
     margin-bottom: 0.5rem;
+    box-sizing: border-box;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing: border-box;
   }
 }
 
