@@ -54,7 +54,8 @@ local function checkSession(r, username)
       path = '/',
       secure = true,
       httponly = true,
-      maxage = constant.SESSION_MAX_AGE,
+      -- this allows the client to send expired cookies, notifying the backend to remove them
+      maxage = constant.SESSION_MAX_AGE * 2,
       samesite = 'Strict',
     }
 
@@ -117,6 +118,8 @@ moon.setRoute({ '*', method = {'GET', 'POST'} }, function(r)
 end)
 
 moon.get('/', function(r)
+  local ip, port = GetRemoteAddr()
+  p({ ip, port })
   local user_session = checkSession(r)
   return moon.serveContent('home', { logged_in = user_session.is_valid })
 end)

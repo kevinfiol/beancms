@@ -67,3 +67,5 @@ if env_file and not env_file_err then
     end
   end
 end
+
+LogDebug(ENV)

@@ -64,6 +64,7 @@ docker-run:
 		--name=beancms \
 		--publish ${PORT}:80 \
 		--restart unless-stopped \
+		--env-file .env \
 		--mount type=bind,source=./${DATA_DIR},target=/app/data/ \
 		--mount type=bind,source=./${LOG_FILE},target=/app/redbean.log \
 		beancms
