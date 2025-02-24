@@ -1,5 +1,6 @@
 services:
   beancms:
+    container_name: beancms
     build:
       context: .
       dockerfile: Dockerfile
