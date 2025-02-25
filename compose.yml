@@ -16,4 +16,6 @@ services:
       - SESSION_MAX_AGE=604800
       # 4 MB
       - MAX_IMAGE_SIZE=4000000
+      # IPs that can access admin panel
+      - ADMIN_IPS=127.0.0.1
     restart: unless-stopped
