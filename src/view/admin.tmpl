@@ -94,6 +94,7 @@
                 if (ok) {
                   state.users = state.users.filter((x) => x.user_id !== state.selectedUser.user_id);
                   state.selectedUser = {};
+                  state.userText = '';
                 }
 
                 ref.userDialog.close();
