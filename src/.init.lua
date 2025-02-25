@@ -91,8 +91,9 @@ local function setNonce(r, nonce)
   return r
 end
 
-local function adminFilter(ip)
-  p({ ip = FormatIp(ip), found = (_.find(constant.ADMIN_IPS, FormatIp(ip)) or 'NOT FOUND') })
+local function adminFilter(ip, abc)
+  local remote = FormatIp(GetRemoteAddr())
+  p({ ip = FormatIp(ip), found = (_.find(constant.ADMIN_IPS, FormatIp(ip)) or 'NOT FOUND'), remote = remote })
   return IsLoopbackIp(ip) or _.find(constant.ADMIN_IPS, FormatIp(ip))
 end
 
