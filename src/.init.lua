@@ -92,6 +92,7 @@ local function setNonce(r, nonce)
 end
 
 local function adminFilter(ip)
+  p({ ip = FormatIp(ip), found = _.find(constant.ADMIN_IPS, FormatIp(ip) or 'NOT FOUND' })
   return IsLoopbackIp(ip) or _.find(constant.ADMIN_IPS, FormatIp(ip))
 end
 
