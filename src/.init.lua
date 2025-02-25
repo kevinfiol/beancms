@@ -91,10 +91,10 @@ local function setNonce(r, nonce)
   return r
 end
 
-local function adminFilter(ip, abc)
-  local remote = FormatIp(GetRemoteAddr())
-  p({ ip = FormatIp(ip), found = (_.find(constant.ADMIN_IPS, FormatIp(ip)) or 'NOT FOUND'), remote = remote })
-  return IsLoopbackIp(ip) or _.find(constant.ADMIN_IPS, FormatIp(ip))
+local function adminFilter(ip)
+  return IsLoopbackIp(ip)
+    or _.find(constant.ADMIN_IPS, FormatIp(ip))
+    or _.find(constant.ADMIN_IPS, FormatIp(GetRemoteAddr()))
 end
 
 -- set templates and static asset paths
