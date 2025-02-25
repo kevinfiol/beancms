@@ -13,12 +13,6 @@ nav {
   display: none;
 }
 
-img {
-  height: auto !important;
-  max-width: 100% !important;
-  width: auto !important;
-}
-
 figure.error {
   margin: 1rem 0;
   padding: 18px;
@@ -30,6 +24,12 @@ main.post-page {
   text-rendering: optimizeLegibility;
   padding-top: 1rem;
   padding-bottom: 4rem;
+
+  img {
+    height: auto !important;
+    max-width: 100% !important;
+    width: auto !important;
+  }
 }
 
 main.login-page,
@@ -58,7 +58,11 @@ dialog {
     color: black;
     border: 1px solid black;
 
-    &:hover {
+    &[disabled] {
+      opacity: 0.5;
+    }
+
+    &:not([disabled]):hover {
       background: rgba(0, 0, 0, 0.15) !important;
     }
   }
@@ -67,6 +71,7 @@ dialog {
     display: flex;
     width: 100%;
     margin-bottom: 20px;
+    gap: 10px;
   }
 
   > ul.list {
@@ -250,5 +255,50 @@ form > label {
     &:hover {
       opacity: 1;
     }
+  }
+}
+
+/* admin page */
+main.admin-page {
+  table {
+    font-family: monospace;
+    width: 100%;
+  }
+
+  tr:nth-child(2n+1) {
+    background-color: rgb(0, 0, 0, 0.1);
+  }
+
+  .list-item {
+    font-family: monospace;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+
+    span.name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &:nth-child(2n+1) {
+      background-color: rgb(0, 0, 0, 0.1);
+    }
+  }
+
+  .images {
+    margin: 1rem 0;
+
+    .image {
+      img {
+        height: 50px;
+        width: 50px;
+      }
+    }
+  }
+
+  .sessions, .users {
+    font-size: 14px;
   }
 }

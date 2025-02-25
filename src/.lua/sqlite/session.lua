@@ -9,9 +9,7 @@ local SCHEMA = [[
   ) strict;
 ]]
 
-local filename = 'session.sqlite'
-local db_path = path.join(constant.DATA_DIR, filename)
-local sql = moon.makeStorage(db_path, SCHEMA)
+local sql = moon.makeStorage(constant.SESSION_DB_PATH, SCHEMA)
 
 sql:execute[[ pragma journal_mode = WAL; ]]
 sql:execute[[ pragma foreign_keys = true; ]]
@@ -24,7 +22,7 @@ if error then
 end
 
 if #changes > 0 then
-  moon.logWarn("Migrated " .. filename .. " DB to v%s\n%s",
+  moon.logWarn("Migrated session DB to v%s\n%s",
     sql:fetchOne("PRAGMA user_version").user_version,
     table.concat(changes, ";\n")
   )

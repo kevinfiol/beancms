@@ -8,7 +8,8 @@ local function log(level)
   return function (message)
     local info = debug.getinfo(2, 'Sl')
     local source = info.short_src:match("/zip/(.*)") or info.short_src
-    Log(level, '[/' .. source .. ':' .. info.currentline .. ']: ' .. inspect(message))
+    local prefix = level == kLogDebug and '___' or ''
+    Log(level, prefix .. '[/' .. source .. ':' .. info.currentline .. ']: ' .. inspect(message))
   end
 end
 

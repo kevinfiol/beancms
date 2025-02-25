@@ -99,5 +99,19 @@ return {
     end
 
     return pruned, err
+  end,
+
+  all = function()
+    local sessions, err = sql:fetchAll(
+      [[
+        select * from session
+      ]]
+    )
+
+    if err then
+      return {}, err
+    end
+
+    return sessions, nil
   end
 }

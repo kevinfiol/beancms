@@ -12,6 +12,8 @@ return {
   BIN_DIR = BIN_DIR,
   DATA_DIR = DATA_DIR,
   IMG_DIR = IMG_DIR,
+  CMS_DB_PATH = path.join(DATA_DIR, 'cms.sqlite'),
+  SESSION_DB_PATH = path.join(DATA_DIR, 'session.sqlite'),
   USER_DOES_NOT_EXIST = 'user_does_not_exist',
   USER_EXISTS = 'user_exists',
   PASSWORD_MISMATCH = 'password_mismatch',
@@ -28,8 +30,8 @@ return {
     or 604800, -- 7 days
   MAX_IMAGE_SIZE = ENV.MAX_IMAGE_SIZE
     and tonumber(ENV.MAX_IMAGE_SIZE)
-    or 4000000, -- 4MB
-  RESERVED_USERNAMES = { 'login', 'logout', 'register' },
+    or 4194304, -- 4MB
+  RESERVED_USERNAMES = { 'login', 'logout', 'register', 'admin' },
   RESERVED_SLUGS = { 'feed', 'archive' },
   SECURE_HEADERS = {
     -- https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html

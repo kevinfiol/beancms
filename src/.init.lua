@@ -91,6 +91,10 @@ local function setNonce(r, nonce)
   return r
 end
 
+local function adminFilter(ip)
+  return IsLoopbackIp(ip) or _.find(constant.ADMIN_IPS, FormatIp(ip))
+end
+
 -- set templates and static asset paths
 moon.setTemplate({ '/view/', tmpl = 'fmt' })
 moon.get('/static/*', moon.serveAsset)
@@ -108,26 +112,111 @@ moon.setRoute({ '*', method = {'GET', 'POST'} }, function(r)
   end
 end)
 
+moon.get('/admin', { clientAddr = adminFilter }, function(r)
+  local nonce = util.generateNonce()
+  setNonce(r, nonce)
+
+  -- get all storage data
+  local stats = assert(unix.stat(constant.CMS_DB_PATH))
+  local cms_db_size = stats:size()
+
+  stats = assert(unix.stat(constant.SESSION_DB_PATH))
+  local session_db_size = stats:size()
+
+  local total_usage = cms_db_size + session_db_size
+  local images = {}
+  local image_usage = 0
+
+  for name, kind, ino, off in assert(unix.opendir(constant.IMG_DIR)) do
+    if kind == unix.DT_REG then
+      stats = assert(unix.stat(path.join(constant.IMG_DIR, name)))
+      local size = stats:size()
+      image_usage = image_usage + size
+      table.insert(images, { name = name, size = util.formatBytes(size) })
+    end
+  end
+
+  total_usage = total_usage + image_usage
+
+  -- get session data
+  local sessions, err = session.all()
+
+  if err then
+    LogError(err)
+  end
+
+  -- get users stats
+  local users, err = db.getUsersStats()
+
+  if err then
+    LogError(err)
+  end
+
+  return moon.serveContent('admin', {
+    nonce = nonce,
+    images = EncodeJson(images),
+    sessions = EncodeJson(sessions),
+    users = EncodeJson(users),
+    cms_db_size = util.formatBytes(cms_db_size),
+    session_db_size = util.formatBytes(session_db_size),
+    total_usage = util.formatBytes(total_usage),
+    image_usage = util.formatBytes(image_usage),
+    max_image_size = util.formatBytes(constant.MAX_IMAGE_SIZE)
+  })
+end)
+
+moon.delete('/admin/image', { clientAddr = adminFilter }, function(r)
+  local filename = r.params.filename
+  local filepath = path.join(constant.IMG_DIR, filename)
+
+  if path.exists(filepath) then
+    local ok, err = unix.unlink(filepath)
+
+    if err then
+      LogError(err)
+      moon.setStatus(500)
+      return 'ERROR'
+    end
+  else
+    LogError('Attempted to delete non-existent file: ' .. filename)
+    moon.setStatus(500)
+    return 'ERROR'
+  end
+
+  return 'OK'
+end)
+
+moon.delete('/admin/session', { clientAddr = adminFilter }, function(r)
+  local token = r.params.token
+
+  local ok, err = session.delete(token)
+
+  if err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'ERROR'
+  end
+
+  return 'OK'
+end)
+
+moon.delete('/admin/user', { clientAddr = adminFilter }, function(r)
+  local user_id = r.params.user_id
+  local ok, err = db.deleteUser(user_id)
+
+  if err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'ERROR'
+  end
+
+  return 'OK'
+end)
+
 moon.get('/', function(r)
   local user_session = checkSession(r)
   return moon.serveContent('home', { logged_in = user_session.is_valid })
 end)
-
-moon.setRoute({
-  '/admin',
-  method = 'GET',
-  clientAddr = function (ip)
-    return IsLoopbackIp(ip) or _.find(constant.ADMIN_IPS, FormatIp(ip))
-  end
-},
-  function(r)
-    local nonce = util.generateNonce()
-    setNonce(r, nonce)
-    return moon.serveContent('admin', { nonce = nonce })
-  end
-)
-
--- moon.get('/admin', { clientAddr = adminFilter })
 
 moon.get('/login', function(r)
   local user_session = checkSession(r)

@@ -141,6 +141,53 @@ return {
     return user, err
   end,
 
+  deleteUser = function(user_id)
+    local err = nil
+    local ok, result = pcall(function ()
+      return sql:execute(
+        [[
+          begin immediate transaction;
+
+          delete from user
+          where user_id = :user_id;
+
+          delete from post
+          where user_id = :user_id;
+
+          commit;
+        ]],
+        {
+          user_id = user_id
+        }
+      )
+    end)
+
+
+    if not ok then
+      err = result
+    end
+
+    return ok, err
+  end,
+
+  getUsersStats = function()
+    local users, err = sql:fetchAll(
+      [[
+        select
+          username,
+          user_id,
+          strftime('%Y-%m-%dT%H:%M:%SZ', created_time) as created_time
+        from user
+      ]]
+    )
+
+    if err then
+      return {}, err
+    end
+
+    return users, nil
+  end,
+
   getPostId = function(slug)
     local err = nil
     local post_id = normalizePostId(slug)

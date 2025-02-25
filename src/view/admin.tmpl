@@ -8,13 +8,264 @@
   </nav>
 
   <main class="admin-page">
-    hi
+    <h1>Admin Panel</h1>
+
+    <section class="stats">
+      <table>
+        <tr>
+          <td>CMS Database Usage</td>
+          <td>{%& cms_db_size %}</td>
+        </tr>
+
+        <tr>
+          <td>Session Database Usage</td>
+          <td>{%& session_db_size %}</td>
+        </tr>
+
+        <tr>
+          <td>User Images Usage</td>
+          <td>{%& image_usage %}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Total Storage Usage</strong></td>
+          <td><strong>{%& total_usage %}</strong></td>
+        </tr>
+      </table>
+    </section>
+
+    <h2>User Images</h2>
+    <aside>
+      <em>The maximum allowed image size is: {%& max_image_size %}</em>
+    </aside>
+    <section class="images">
+    </section>
+
+    <h2>Active Sessions</h2>
+    <section class="sessions">
+    </section>
+
+    <h2>Users</h2>
+    <section class="users">
+    </section>
   </main>
 
   <script src="/static/lib/umai.min.js"></script>
   <script nonce="{%= nonce %}">
     const { m, mount } = window.umai;
-    console.log({m, mount});
+
+    const IMAGES = JSON.parse('{%= images %}');
+    const IMAGES_CONTAINER = document.querySelector('.images');
+
+    const SESSIONS = JSON.parse('{%= sessions %}');
+    const SESSIONS_CONTAINER = document.querySelector('.sessions');
+
+    const USERS = JSON.parse('{%= users %}');
+    const USERS_CONTAINER = document.querySelector('.users');
+
+    const state = {
+      images: [ ...(Array.isArray(IMAGES) ? IMAGES : []) ],
+      sessions: [ ...(Array.isArray(SESSIONS) ? SESSIONS : []) ],
+      users: [ ...(Array.isArray(USERS) ? USERS : []) ],
+      selectedImage: null,
+      selectedUser: {},
+      userText: ''
+    };
+
+    const ref = { imageDialog: null, userDialog: null };
+
+    const Users = () => (
+      m('div',
+        m('dialog', { dom: (node) => ref.userDialog = node },
+          m('p', `Are you sure you want to delete the user ${state.selectedUser.username}? This will delete all of their posts as well.`),
+          m('p', 'To delete, type in the username below and click "Delete"'),
+          m('input', {
+            style: { margin: '0.5rem 0', padding: '5px', width: '50%' },
+            type: 'text',
+            value: state.userText,
+            oninput: (ev) => state.userText = ev.target.value
+          }),
+          m('div.controls',
+            m('button', {
+              disabled: state.userText !== state.selectedUser.username,
+              onclick: async () => {
+                const { ok } = await deleteUser(state.selectedUser.user_id);
+
+                if (ok) {
+                  state.users = state.users.filter((x) => x.user_id !== state.selectedUser.user_id);
+                  state.selectedUser = {};
+                }
+
+                ref.userDialog.close();
+              }
+            }, 'Delete'),
+
+            m('button', {
+              onclick: () => {
+                state.userText = '';
+                state.selectedUser = {};
+                ref.userDialog.close();
+              }
+            }, 'Cancel')
+          )
+        ),
+
+        m('table',
+          m('tr',
+            m('th', 'User ID'),
+            m('th', 'Username'),
+            m('th', 'User Since'),
+            m('th', '')
+          ),
+
+          state.users.map((user) => 
+            m('tr',
+              m('td', user.user_id),
+              m('td', user.username),
+              m('td', `${new Date(user.created_time)}`),
+              m('td',
+                m('button', {
+                  onclick: () => {
+                    state.selectedUser = user;
+                    ref.userDialog.showModal();
+                  }
+                }, 'Delete')
+              )
+            )
+          )
+        )
+      )
+    );
+
+    const Sessions = () => (
+      m('div',
+        m('table',
+          m('tr',
+            m('th', 'Token'),
+            m('th', 'User'),
+            m('th', 'Expiration'),
+            m('th', '')
+          ),
+
+          state.sessions.map((session) =>
+            m('tr.session', { key: session.token },
+              m('td.name', session.token),
+              m('td.username', session.username),
+              m('td.expires', `${new Date(session.expires_at)}`),
+              m('td', m('button', {
+                onclick: async () => {
+                  const { ok } = await deleteSession(session.token);
+                  if (!ok) return;
+                  state.sessions = state.sessions.filter((x) => x.token !== session.token);
+                }
+              }, 'Delete'))
+            )
+          )
+        )
+      )
+    );
+
+    const Images = () => (
+      m('div',
+        m('dialog', { dom: (node) => ref.imageDialog = node },
+          m('p', 'Delete image?'),
+          m('div.controls',
+            m('button', {
+              onclick: async () => {
+                const { ok, err } = await deleteImage(state.selectedImage.name);
+
+                if (ok) {
+                  state.images = state.images.filter((x) => x.name !== state.selectedImage.name);
+                  state.selectedImage = null;
+                }
+
+                ref.imageDialog.close();
+              }
+            }, 'Confirm'),
+            m('button', { onclick: () => ref.imageDialog.close() }, 'Cancel')
+          )
+        ),
+
+        m('div',
+          state.images.map((image) =>
+            m('div.image.list-item', { key: image.name },
+              m('header',
+                m('img', { src: `/data/img/${image.name}` })
+              ),
+              m('span.name', image.name),
+              m('span.size', image.size),
+              m('button', {
+                onclick: () => {
+                  state.selectedImage = image;
+                  ref.imageDialog.showModal()
+                }
+              }, 'Delete')
+            )
+          )
+        )
+      )
+    );
+
+    mount(IMAGES_CONTAINER, Images);
+    mount(SESSIONS_CONTAINER, Sessions);
+    mount(USERS_CONTAINER, Users);
+
+    async function deleteImage(filename) {
+      let ok = true;
+      let err = undefined;
+
+      try {
+        const res = await fetch(`/admin/image?filename=${filename}`, {
+          method: 'DELETE'
+        });
+
+        if (!res.ok) throw Error(`${res.status}: ${res.statusText}`);
+      } catch (e) {
+        ok = false;
+        console.error(e);
+        err = e;
+      }
+
+      return { ok, err };
+    }
+
+    async function deleteSession(token) {
+      let ok = true;
+      let err = undefined;
+
+      try {
+        const res = await fetch(`/admin/session?token=${token}`, {
+          method: 'DELETE'
+        });
+
+        if (!res.ok) throw Error(`${res.status}: ${res.statusText}`);
+      } catch (e) {
+        ok = false;
+        console.error(e);
+        err = e;
+      }
+
+      return { ok, err };
+    }
+
+    async function deleteUser(userId) {
+      let ok = true;
+      let err = undefined;
+
+      try {
+        const res = await fetch(`/admin/user?user_id=${userId}`, {
+          method: 'DELETE'
+        });
+
+        if (!res.ok) throw Error(`${res.status}: ${res.statusText}`);
+      } catch (e) {
+        ok = false;
+        console.error(e);
+        err = e;
+      }
+
+      return { ok, err };
+    }
   </script>
 {% end %}
 

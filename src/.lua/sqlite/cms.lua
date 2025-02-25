@@ -16,7 +16,8 @@ local SCHEMA = [[
     enable_feed_mode integer default 0,
     stale_feed integer default 1,
     atom_feed text default '',
-    atom_feed_size integer
+    atom_feed_size integer,
+    created_time text not null default CURRENT_TIMESTAMP
   ) strict;
 
   create table if not exists post (
@@ -32,9 +33,7 @@ local SCHEMA = [[
   ) strict;
 ]]
 
-local filename = 'cms.sqlite'
-local db_path = path.join(constant.DATA_DIR, filename)
-local sql = moon.makeStorage(db_path, SCHEMA)
+local sql = moon.makeStorage(constant.CMS_DB_PATH, SCHEMA)
 
 sql:execute[[ pragma journal_mode = WAL; ]]
 sql:execute[[ pragma foreign_keys = true; ]]
@@ -47,7 +46,7 @@ if error then
 end
 
 if #changes > 0 then
-  moon.logWarn("Migrated " .. filename .. " DB to v%s\n%s",
+  moon.logWarn("Migrated cms DB to v%s\n%s",
     sql:fetchOne("PRAGMA user_version").user_version,
     table.concat(changes, ";\n")
   )
