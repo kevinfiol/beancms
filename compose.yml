@@ -18,4 +18,6 @@ services:
       - MAX_IMAGE_SIZE=4194304
       # IPs that can access admin panel
       - ADMIN_IPS=127.0.0.1
+    env_file:
+      - .env
     restart: unless-stopped
