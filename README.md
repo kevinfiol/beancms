@@ -30,7 +30,14 @@ make watch
 - [x] update dockerfile to account for env variables
 - [x] create docker compose file
 - [ ] audit themes and remove problematic ones
-- [ ] audit themes and fix broken ones
+  - [ ] audit themes and fix broken ones
+    - [ ] tufte (dialog text, formatting, post lists)
+    - [ ] concrete codeblocks
+    - [ ] magick codeblocks
+    - [ ] tiny-brutalism weird spacing
+    - [ ] terminal drafts dialog, weird `-` char in TOC
+    - [ ] new.css dialog button
+    - [ ] retro codeblocks
 - [ ] implement export option
   - [ ] this should be non-blocking; maybe fork a worker
 - [x] admin panel (use umhi?)

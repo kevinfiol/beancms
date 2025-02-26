@@ -63,8 +63,6 @@ return {
   THEME = {
     CONCRETE = 'concrete',
     MAGICK = 'magick',
-    MATCHA = 'matcha',
-    MERCURY = 'mercury',
     NEW = 'new',
     RETRO = 'retro',
     SAKURA_DARK = 'sakura-dark',
