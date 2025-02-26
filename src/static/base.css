@@ -1,3 +1,17 @@
+:root {
+  --button-bg: rgb(43, 42, 51);
+  --button-hover-bg: rgb(82, 82, 94);
+  --button-color: rgb(251, 251, 254);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --button-bg: rgb(233, 233, 237);
+    --button-hover-bg: rgb(208, 208, 215);
+    --button-color: rgb(0, 0, 0);
+  }
+}
+
 nav {
   text-align: left;
   display: inline-block;
@@ -194,6 +208,7 @@ form > label {
 
 /* editor */
 #editor {
+  background-color: rgba(0, 0, 0, 0);
   padding: 1rem 10%;
   font-family: monospace;
   line-height: 1.25em;
@@ -256,6 +271,25 @@ form > label {
       opacity: 1;
     }
   }
+}
+
+label[for="image-upload"] {
+  border: 0;
+  font-size: 0.8em;
+  font-family: serif;
+  padding: 0.5rem;
+  font-family: monospace;
+  background-blend-mode: normal;
+  background-color: var(--button-bg);
+  color: var(--button-color);
+
+  &:hover {
+    background-color: var(--button-hover-bg)
+  }
+}
+
+input[type="file"] {
+  display: none;
 }
 
 /* admin page */

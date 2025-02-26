@@ -26,7 +26,7 @@ make watch
 
 - [x] fix image drag styles in dark mode
 - [x] add .env file parsing
-- [ ] fix atom feed properties
+- [x] fix atom feed properties
 - [x] update dockerfile to account for env variables
 - [x] create docker compose file
 - [ ] audit themes and remove problematic ones
@@ -43,3 +43,5 @@ make watch
 - [ ] highlightjs audit
 - [ ] option for date in post
 - [ ] keep track of who uploaded what image
+- [ ] fullmoon: report bug about xml responses
+- [ ] redbean: WSL, need to clear /WSLInterop-late as well 

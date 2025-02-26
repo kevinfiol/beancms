@@ -9,6 +9,9 @@
 {% function block.content() %}
   <div class="editor-btns">
     <button class="view-help">Help</button>
+    <button class="save-changes">Save</button>
+    <label for="image-upload">Upload Image</label>
+    <input id="image-upload" name="image-upload" type="file" accept="image/*" />
   </div>
 
   <dialog class="help-dialog">
@@ -57,6 +60,8 @@
     const HelpBtn = $('.view-help');
     const HelpDialog = $('.help-dialog');
     const HelpDialogCloseBtn = $('.help-dialog button.close');
+    const ImageUploadInput = $('#image-upload');
+    const SaveChangesBtn = $('.save-changes');
 
     const State = {
       slug: SLUG,
@@ -247,6 +252,10 @@
       }
     });
 
+    SaveChangesBtn.addEventListener('click', () => {
+      if (!State.pending) saveChanges(Editor.value.trim());
+    });
+
     // drop images
     let isDraggingFile = false;
 
@@ -295,6 +304,29 @@
             }
           })();
         }
+      }
+    });
+
+    ImageUploadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+
+      if (file && file.type.startsWith('image/')) {
+        if (file.size > MAX_IMAGE_SIZE) {
+          showAlert('Image size too large (> 8MB)');
+          return;
+        }
+
+        (async () => {
+          try {
+            const imagePath = '/' + (await uploadImage(file));
+            insertTextAtCursor(`![${file.name}](${imagePath})`);
+          } catch (e) {
+            console.error('Failed to upload image: ', e);
+            showAlert('Failed to upload image.')
+          } finally {
+            ImageUploadInput.value = '';
+          }
+        })();
       }
     });
 
