@@ -39,7 +39,7 @@ make watch
 - [ ] add artist "feed" mode
 - [ ] add archive page
 - [ ] fix mobile styles
-- [ ] add buttons to editor for mobile/accessibility reasons
+- [x] add buttons to editor for mobile/accessibility reasons
 - [ ] highlightjs audit
 - [ ] option for date in post
 - [ ] keep track of who uploaded what image
