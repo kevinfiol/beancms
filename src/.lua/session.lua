@@ -104,7 +104,10 @@ return {
   all = function()
     local sessions, err = sql:fetchAll(
       [[
-        select * from session
+        select
+          *,
+          strftime('%Y-%m-%dT%H:%M:%SZ', expires_at, 'unixepoch') as expires_at
+        from session
       ]]
     )
 

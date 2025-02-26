@@ -22,24 +22,22 @@ local function buildNestedList(headings, level)
   return html .. '</ul>'
 end
 
-local function formatBytes(bytes)
-  local kb = 1024
-  local mb = kb * 1024
-  local gb = mb * 1024
-
-  if bytes < kb then
-    return bytes .. ' B'
-  elseif bytes < mb then
-    return string.format("%.2f", (bytes / kb)) .. ' KB'
-  elseif bytes < gb then
-    return string.format("%.2f", (bytes / mb)) .. ' MB'
-  else
-    return string.format("%.2f", (bytes / gb)) .. ' GB'
-  end
-end
-
 return {
-  formatBytes = formatBytes,
+  formatBytes = function(bytes)
+    local kb = 1024
+    local mb = kb * 1024
+    local gb = mb * 1024
+  
+    if bytes < kb then
+      return bytes .. ' B'
+    elseif bytes < mb then
+      return string.format("%.2f", (bytes / kb)) .. ' KB'
+    elseif bytes < gb then
+      return string.format("%.2f", (bytes / mb)) .. ' MB'
+    else
+      return string.format("%.2f", (bytes / gb)) .. ' GB'
+    end
+  end,
 
   buildAtomFeed = function(host, username, posts, updated_iso_timestamp)
     host = host or '/'

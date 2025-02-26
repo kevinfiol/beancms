@@ -536,7 +536,9 @@ moon.get('/:_username/:slug/edit(/)', function(r)
     slug = slug,
     title = post.title,
     post_id = post_id,
-    content = content
+    content = content,
+    max_image_size = ENV.MAX_IMAGE_SIZE,
+    max_image_size_str = util.formatBytes(tonumber(ENV.MAX_IMAGE_SIZE))
   })
 end)
 

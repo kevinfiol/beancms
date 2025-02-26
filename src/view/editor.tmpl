@@ -50,7 +50,8 @@
     const POST_ID = '{%& post_id %}';
     const SLUG = '{%& slug or post_id or '' %}';
     const TITLE = '{%& title or slug or post_id or '' %}';
-    const MAX_IMAGE_SIZE = 8 * 1024 * 1024; // 8 MB
+    const MAX_IMAGE_SIZE = {%& max_image_size %};
+    const MAX_IMAGE_SIZE_STR = '{%& max_image_size_str %}';
     const RESERVED_SLUGS = ['feed', 'archive']
 
     const $ = document.querySelector.bind(document);
@@ -290,7 +291,7 @@
 
         if (file.type.startsWith('image/')) {
           if (file.size > MAX_IMAGE_SIZE) {
-            showAlert('Image size too large (> 8MB)');
+            showAlert(`Image size too large (> ${MAX_IMAGE_SIZE_STR})`);
             return;
           }
 
@@ -312,7 +313,7 @@
 
       if (file && file.type.startsWith('image/')) {
         if (file.size > MAX_IMAGE_SIZE) {
-          showAlert('Image size too large (> 8MB)');
+          showAlert(`Image size too large (> ${MAX_IMAGE_SIZE_STR})`);
           return;
         }
 
@@ -375,7 +376,7 @@
             if (!file) return;
 
             if (file.size > MAX_IMAGE_SIZE) {
-              showAlert('Image size too large (> 8MB)');
+              showAlert(`Image size too large (> ${MAX_IMAGE_SIZE_STR})`);
               return;
             }
 

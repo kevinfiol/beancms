@@ -297,6 +297,9 @@ main.admin-page {
   table {
     font-family: monospace;
     width: 100%;
+
+    th, td { text-align: left; padding: 0.25rem 0.5rem; }
+    th:last-child, td:last-child { text-align: right; }
   }
 
   tr:nth-child(2n+1) {

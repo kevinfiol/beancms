@@ -123,7 +123,7 @@
             m('tr',
               m('td', user.user_id),
               m('td', user.username),
-              m('td', `${new Date(user.created_time)}`),
+              m('td', `${(new Date(user.created_time)).toGMTString()}`),
               m('td',
                 m('button', {
                   onclick: () => {
@@ -143,7 +143,7 @@
         m('table',
           m('tr',
             m('th', 'Token'),
-            m('th', 'User'),
+            m('th', 'Username'),
             m('th', 'Expiration'),
             m('th', '')
           ),
@@ -152,7 +152,7 @@
             m('tr.session', { key: session.token },
               m('td.name', session.token),
               m('td.username', session.username),
-              m('td.expires', `${new Date(session.expires_at)}`),
+              m('td.expires', `${(new Date(session.expires_at)).toGMTString()}`),
               m('td', m('button', {
                 onclick: async () => {
                   const { ok } = await deleteSession(session.token);
@@ -190,10 +190,9 @@
         m('div',
           state.images.map((image) =>
             m('div.image.list-item', { key: image.name },
-              m('header',
-                m('img', { src: `/data/img/${image.name}` })
+              m('span.name',
+                m('a', { href: `/data/img/${image.name}` }, image.name)
               ),
-              m('span.name', image.name),
               m('span.size', image.size),
               m('button', {
                 onclick: () => {
