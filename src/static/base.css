@@ -206,22 +206,34 @@ form > label {
   }
 }
 
+.post-page {
+  pre, code {
+    tab-size: 2;
+  }
+}
+
 /* editor */
 #editor {
   background-color: rgba(0, 0, 0, 0);
-  padding: 1rem 10%;
+  padding: 5% 20%;
   font-family: monospace;
   line-height: 1.25em;
   font-size: 1em;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  border: 0;
   border: none;
   outline: none;
   box-shadow: none;
   resize: none;
-  overflow: hidden;
+  overflow: visible;
+  tab-size: 2;
+}
+
+@media (max-width: 900px) {
+  #editor {
+    padding: 5% 5%;
+  }
 }
 
 #toast {

@@ -38,7 +38,10 @@ local function checkSession(r, username)
   }
 
   if result.is_valid then
-    session.set(username, token) -- extend session
+    if username then
+      LogDebug('Extending session for ' .. username)
+      session.set(username, token) -- extend session
+    end
 
     r.cookies[constant.SESSION_TOKEN_NAME] = {
       token,
@@ -50,11 +53,14 @@ local function checkSession(r, username)
       samesite = 'Strict',
     }
 
+    LogDebug('Set cookie token: ' .. token)
     return result, nil
   elseif token then
+    LogDebug('Deleting ' .. username ' token: ' .. token)
     session.delete(token)
   end
 
+  LogDebug('Removing token from user cookie since it has expired or is invalid')
   -- invalidate user's expired token
   r.cookies[constant.SESSION_TOKEN_NAME] = false
   return result, 'Unauthorized'
@@ -62,11 +68,13 @@ end
 
 local function setSessionCookie(r, username)
   -- clear any existing sessions
+  LogDebug('Clearing session object for user ' .. username)
   r.session = nil
 
   -- create session and set cookie
   local token = UuidV4()
 
+  LogDebug('Creating new session for ' .. username)
   session.set(username, token)
   r.cookies[constant.SESSION_TOKEN_NAME] = {
     token,

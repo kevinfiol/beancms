@@ -2,7 +2,18 @@
   <link rel="stylesheet" type="text/css" href="/static/theme/default.css">
 
   <style>
-    body { max-width: 900px; } /* force larger body width in editor */
+    body {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    main {
+      height: 100vh;
+      width: 100%;
+    }
   </style>
 {% end %}
 
@@ -72,11 +83,40 @@
       changes: false
     };
 
+    // var autoExpand = function(field) {
+    //     // Get the computed styles for the element
+    //     var computed = window.getComputedStyle(field);
+    //     // Calculate the height
+    //     var height = parseInt(computed.getPropertyValue('border-top-width'), 10) +
+    //         parseInt(computed.getPropertyValue('padding-top'), 10) +
+    //         field.scrollHeight +
+    //         parseInt(computed.getPropertyValue('padding-bottom'), 10) +
+    //         parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+    //     if (field.style.height != height + 'px') {
+    //         // Reset field height
+    //         field.style.height = 'inherit';
+    //         field.style.height = height + 'px';
+    //     }
+    // };
+
     function resetEditorHeight(extra = 0) {
-      if (Editor.style.height !== Editor.scrollHeight + 'px') {
-        Editor.style.height = 'inherit';
-        Editor.style.height = Editor.scrollHeight + extra + 'px';
-      }
+      // if (Editor.style.height !== Editor.scrollHeight + 'px') {
+      //   Editor.style.height = 'inherit';
+      //   Editor.style.height = Editor.scrollHeight + extra + 'px';
+      // }
+
+      // const computed = window.getComputedStyle(Editor);
+
+      // const height = parseInt(computed.getPropertyValue('border-top-width'), 10) +
+      //   parseInt(computed.getPropertyValue('padding-top'), 10) +
+      //   Editor.scrollHeight +
+      //   parseInt(computed.getPropertyValue('padding-bottom'), 10) +
+      //   parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+
+      // if (Editor.style.height != height + 'px') {
+      //   Editor.style.height = 'inherit';
+      //   Editor.style.height = Editor.scrollHeight + 'px';
+      // }
     }
 
     async function wait(ms) {
