@@ -56,7 +56,7 @@ local function checkSession(r, username)
     LogDebug('Set cookie token: ' .. token)
     return result, nil
   elseif token then
-    LogDebug('Deleting ' .. username ' token: ' .. token)
+    LogDebug('Deleting token: ' .. token)
     session.delete(token)
   end
 
