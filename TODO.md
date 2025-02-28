@@ -8,6 +8,7 @@
 - [ ] remember cursor position on reload
 - [x] ctrl+z doesn't work with tabs in editor
 - [ ] custom css is sanitized when it shouldn't be (cant parse quotes for font family strings)
+- [ ] add a github workflow to automatically build the application into a release (use git hashes as release names)
 - [x] audit themes and remove problematic ones
   - [ ] audit themes and fix broken ones
     - [ ] tufte (dialog text, formatting, post lists)
