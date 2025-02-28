@@ -30,7 +30,7 @@ make watch
 - [x] update dockerfile to account for env variables
 - [x] create docker compose file
 - [ ] remember cursor position on reload
-- [ ] ctrl+z doesn't work with tabs in editor
+- [x] ctrl+z doesn't work with tabs in editor
 - [ ] audit themes and remove problematic ones
   - [ ] audit themes and fix broken ones
     - [ ] tufte (dialog text, formatting, post lists)

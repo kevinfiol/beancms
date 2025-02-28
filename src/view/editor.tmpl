@@ -83,42 +83,6 @@
       changes: false
     };
 
-    // var autoExpand = function(field) {
-    //     // Get the computed styles for the element
-    //     var computed = window.getComputedStyle(field);
-    //     // Calculate the height
-    //     var height = parseInt(computed.getPropertyValue('border-top-width'), 10) +
-    //         parseInt(computed.getPropertyValue('padding-top'), 10) +
-    //         field.scrollHeight +
-    //         parseInt(computed.getPropertyValue('padding-bottom'), 10) +
-    //         parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-    //     if (field.style.height != height + 'px') {
-    //         // Reset field height
-    //         field.style.height = 'inherit';
-    //         field.style.height = height + 'px';
-    //     }
-    // };
-
-    function resetEditorHeight(extra = 0) {
-      // if (Editor.style.height !== Editor.scrollHeight + 'px') {
-      //   Editor.style.height = 'inherit';
-      //   Editor.style.height = Editor.scrollHeight + extra + 'px';
-      // }
-
-      // const computed = window.getComputedStyle(Editor);
-
-      // const height = parseInt(computed.getPropertyValue('border-top-width'), 10) +
-      //   parseInt(computed.getPropertyValue('padding-top'), 10) +
-      //   Editor.scrollHeight +
-      //   parseInt(computed.getPropertyValue('padding-bottom'), 10) +
-      //   parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-
-      // if (Editor.style.height != height + 'px') {
-      //   Editor.style.height = 'inherit';
-      //   Editor.style.height = Editor.scrollHeight + 'px';
-      // }
-    }
-
     async function wait(ms) {
       await new Promise((resolve) =>
         setTimeout(resolve, ms)
@@ -198,23 +162,7 @@
     }
 
     function insertTextAtCursor(text) {
-      const start = Editor.selectionStart;
-      const end = Editor.selectionEnd;
-
-      const currentValue = Editor.value;
-      const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
-      Editor.value = newValue;
-
-      // update draft with new dynamically added text
-      saveDraft(newValue);
-      // flag that changes have been made
-      if (!State.changes) State.changes = true;
-
-      // update cursor position
-      const newCursorPos = start + text.length;
-      Editor.setSelectionRange(newCursorPos, newCursorPos);
-      Editor.focus();
-      resetEditorHeight();
+      document.execCommand('insertText', false, text);
     }
 
     const saveDraft = debounce((content) => {
@@ -377,14 +325,7 @@
 
       if (e.keyCode === 9 || e.which === 9 || e.key === 'Tab') {
         e.preventDefault();
-        const originalStart = editor.selectionStart;
-
-        editor.value =
-          editor.value.substring(0, editor.selectionStart) +
-          '\t' +
-          editor.value.substring(editor.selectionEnd);
-
-        editor.selectionEnd = originalStart + 1;
+        insertTextAtCursor('\t');
       }
     });
 
@@ -402,8 +343,6 @@
 
       if (currentLine > 1) saveDraft(content);
       else setTitle(content);
-
-      resetEditorHeight();
     });
 
     Editor.addEventListener('paste', async (e) => {
@@ -458,8 +397,6 @@
       Editor.textContent = content;
       State.changes = true;
       showAlert('Local draft loaded')
-    }).finally(() => {
-      resetEditorHeight(23);
     });
   </script>
 {% end %}
