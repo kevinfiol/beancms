@@ -10,14 +10,14 @@ RUN mkdir vendor && make download
 
 # build
 RUN mkdir bin && make build
-RUN chmod +x ./bin/redbean.com
+RUN chmod +x ./bin/beancms.com
 
 # assimilate executable into local format
-RUN sh ./vendor/assimilate ./bin/redbean.com
+RUN sh ./vendor/assimilate ./bin/beancms.com
 
 FROM scratch
 WORKDIR /app
 
-COPY --from=builder /app/bin/redbean.com /app/redbean.com
+COPY --from=builder /app/bin/beancms.com /app/beancms.com
 VOLUME ["/app/data", "/app/redbean.log"]
-ENTRYPOINT ["/app/redbean.com", "-vv", "-p", "80", "-L", "/app/redbean.log", "-D", "./"]
+ENTRYPOINT ["/app/beancms.com", "-vv", "-p", "80", "-L", "/app/redbean.log", "-D", "./"]

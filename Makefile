@@ -7,7 +7,7 @@ REDBEAN=vendor/redbean.com
 ASSIMILATE=vendor/assimilate
 
 # build
-BUILD=bin/redbean.com
+BUILD=bin/beancms.com
 DATA_DIR=bin/data
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log

@@ -27,7 +27,7 @@
   - [x] use trustedIp
   - [ ] add password protection
 - [ ] add artist "feed" mode
-- [ ] add archive page
+- [x] add archive page
 - [ ] fix mobile styles
 - [x] add buttons to editor for mobile/accessibility reasons
 - [ ] highlightjs audit
