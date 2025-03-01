@@ -516,6 +516,7 @@ moon.get('/:_username/:slug(/)', function(r)
 
   local parsed_md = djot.parse(post.content)
   local content_html = djot.render_html(parsed_md)
+  local formatted_created_time = util.formatPostDate(post.created_time)
 
   local toc_html = user.enable_toc == 1
     and util.generateTOC(parsed_md.references, 2)
@@ -533,6 +534,7 @@ moon.get('/:_username/:slug(/)', function(r)
     title = post.title,
     has_user_access = has_user_access,
     content = content_html,
+    formatted_created_time = formatted_created_time,
     toc = toc_html,
     custom_css_raw = util.escapeCSS(custom_css),
     theme = user.theme,

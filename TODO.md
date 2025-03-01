@@ -31,7 +31,9 @@
 - [ ] fix mobile styles
 - [x] add buttons to editor for mobile/accessibility reasons
 - [ ] highlightjs audit
-- [ ] option for date in post
+- [x] option for date in post
 - [ ] keep track of who uploaded what image
 - [ ] fullmoon: report bug about xml responses
 - [ ] redbean: WSL, need to clear /WSLInterop-late as well 
+- [ ] windows
+  - [ ] downloading the beancms.com from releases and running: images dont work

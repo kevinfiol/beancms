@@ -212,6 +212,13 @@ form > label {
   }
 }
 
+.post-date {
+  font-family: monospace;
+  opacity: 0.8;
+  display: block;
+  margin: 0.5rem 0;
+}
+
 /* editor */
 #editor {
   background-color: rgba(0, 0, 0, 0);

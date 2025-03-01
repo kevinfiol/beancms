@@ -230,7 +230,8 @@ return {
         select
           p.rowid,
           p.*,
-          strftime('%s', p.modified_time) as unix_modified_time
+          strftime('%s', p.modified_time) as unix_modified_time,
+          strftime('%Y-%m-%d', p.created_time) as created_time
         from post p
         join user u on p.user_id = u.user_id
         where u.username = :username

@@ -1,5 +1,20 @@
 local _ = require 'lib.lume'
 
+local FULL_MONTH = {
+  ["01"] = "January",
+  ["02"] = "February",
+  ["03"] = "March",
+  ["04"] = "April",
+  ["05"] = "May",
+  ["06"] = "June",
+  ["07"] = "July",
+  ["08"] = "August",
+  ["09"] = "September",
+  ["10"] = "October",
+  ["11"] = "November",
+  ["12"] = "December"
+}
+
 local function buildNestedList(headings, level)
   local html = '<ul>'
 
@@ -114,5 +129,18 @@ return {
   escapeCSS = function(s)
     -- escapes HTML characters except quotes/double quotes
     return string.gsub(s, "[&<>]", {["&"]="&amp;", ["<"]="&lt;", [">"]="&gt;"})
+  end,
+
+  formatPostDate = function(s)
+    -- expects date in 2023-03-31 format
+    local parts = _.split(s, '-')
+    local valid = _.all(parts, function(x) return x and x ~= '' end)
+    if not valid then return '' end
+
+    local full_month = FULL_MONTH[parts[2]]
+    local date = parts[3]
+    local year = parts[1]
+
+    return full_month .. ' ' .. date .. ', ' .. parts[1]
   end
 }

@@ -31,6 +31,10 @@
   {% end %}
 
   <main class="post-page">
+    {% if formatted_created_time ~= '' then %}
+      <small class="post-date">{%& formatted_created_time %}</small>
+    {% end %}
+    
     {%= content %}
   </main>
 
