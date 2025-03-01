@@ -108,5 +108,10 @@ return {
 
   generateNonce = function()
     return EncodeBase64(GetRandomBytes(16))
+  end,
+
+  escapeCSS = function(s)
+    -- escapes HTML characters except quotes/double quotes
+    return string.gsub(s, "[&<>]", {["&"]="&amp;", ["<"]="&lt;", [">"]="&gt;"})
   end
 }

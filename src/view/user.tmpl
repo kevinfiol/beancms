@@ -5,9 +5,9 @@
     <link rel="stylesheet" type="text/css" href="/static/theme/default.css">
   {% end %}
 
-  {% if custom_css and custom_css ~= '' then %}
+  {% if custom_css_raw and custom_css_raw ~= '' then %}
     <style>
-      {%& custom_css %}
+      {%= custom_css_raw %}
     </style>
   {% end %}
 {% end %}

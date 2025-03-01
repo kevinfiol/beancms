@@ -400,6 +400,7 @@ moon.get('/:_username(/)', function(r)
     intro = intro_html,
     intro_raw = user.intro,
     custom_css = user.custom_css,
+    custom_css_raw = util.escapeCSS(user.custom_css),
     custom_title = user.custom_title,
     max_display_posts = user.max_display_posts,
     enable_toc = user.enable_toc,
@@ -503,7 +504,7 @@ moon.get('/:_username/:slug(/)', function(r)
     has_user_access = has_user_access,
     content = content_html,
     toc = toc_html,
-    custom_css = custom_css,
+    custom_css_raw = util.escapeCSS(custom_css),
     theme = user.theme,
     themes = constant.THEME
   })
