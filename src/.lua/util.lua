@@ -24,6 +24,7 @@ end
 
 return {
   formatBytes = function(bytes)
+    bytes = bytes or 0
     local kb = 1024
     local mb = kb * 1024
     local gb = mb * 1024

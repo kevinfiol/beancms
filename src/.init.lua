@@ -17,7 +17,7 @@ local util = require 'util'
 local challenge = require 'challenge'
 
 -- schedule daily cleanup of session every 6 hours by default
-local SESSION_CLEAN_INTERVAL_HOURS = tonumber(ENV.SESSION_CLEAN_INTERVAL_HOURS) or 6
+local SESSION_CLEAN_INTERVAL_HOURS = constant.SESSION_CLEAN_INTERVAL_HOURS
 moon.setSchedule(f'0 */{SESSION_CLEAN_INTERVAL_HOURS} * * *', function()
   local pruned, err = session.prune()
 
@@ -471,7 +471,7 @@ moon.get('/:_username/feed(/)', function(r)
   end
 
   local updated_iso_timestamp = db.getDBCurrentTime()
-  local feed = util.buildAtomFeed(ENV.SITE_DOMAIN, username, posts, updated_iso_timestamp)
+  local feed = util.buildAtomFeed(constant.SITE_DOMAIN, username, posts, updated_iso_timestamp)
   local ok, err = db.updateUserFeed(username, feed)
 
   if not ok or err then
@@ -576,8 +576,8 @@ moon.get('/:_username/:slug/edit(/)', function(r)
     title = post.title,
     post_id = post_id,
     content = content,
-    max_image_size = ENV.MAX_IMAGE_SIZE,
-    max_image_size_str = util.formatBytes(tonumber(ENV.MAX_IMAGE_SIZE))
+    max_image_size = constant.MAX_IMAGE_SIZE,
+    max_image_size_str = util.formatBytes(tonumber(constant.MAX_IMAGE_SIZE))
   })
 end)
 

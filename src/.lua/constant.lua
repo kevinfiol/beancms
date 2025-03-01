@@ -22,6 +22,11 @@ return {
   POST_DOES_NOT_EXIST = 'post_does_not_exist',
   WRONG_CHALLENGE_ANSWER = 'wrong_challenge_answer',
   SESSION_TOKEN_NAME = 'beancms',
+    content = content,
+  SITE_DOMAIN = ENV.SITE_DOMAIN or '/',
+  SESSION_CLEAN_INTERVAL_HOURS = ENV.SESSION_CLEAN_INTERVAL_HOURS
+    and tonumber(ENV.SESSION_CLEAN_INTERVAL_HOURS)
+    or 6,
   ADMIN_IPS = ENV.ADMIN_IPS
     and _.split(ENV.ADMIN_IPS, ',')
     or {},
