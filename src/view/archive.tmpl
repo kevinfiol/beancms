@@ -1,0 +1,47 @@
+{% function block.head() %}
+  {% if theme and theme ~= '' then %}
+    <link rel="stylesheet" type="text/css" href="/static/theme/{%& themes[theme] %}.css">
+  {% else %}
+    <link rel="stylesheet" type="text/css" href="/static/theme/default.css">
+  {% end %}
+
+  {% if custom_css_raw and custom_css_raw ~= '' then %}
+    <style>
+      {%= custom_css_raw %}
+    </style>
+  {% end %}
+{% end %}
+
+{% function block.content() %}
+  <nav class="user-nav">
+    <a href="/{%& username %}">← {%& username %}</a>
+  </nav>
+
+  <main class="archive-page">
+    <h1 class="archive-heading">
+      Archive
+    </h1>
+
+    {% if #posts > 0 then %}
+      <section class="posts-container">
+        <div class="posts" role="list">
+          {% for _, post in pairs(posts) do %}
+            <div class="post" role="listitem">
+              <div class="title">
+                <a href="/{%& username %}/{%& post.slug or post.post_id %}">
+                  {%& post.title or post.slug or post.post_id %}
+                </a>
+              </div>
+              <div class="created-time">
+                <span>{%& post.created_time %}</span>
+              </div>
+            </div>
+          {% end %}
+        </div>
+      </section>
+    {% else %}
+      <p><em>User has not written any posts.</em></p>
+    {% end %}
+{% end %}
+
+{% render('layout', { title = username .. ' archive' }) %}

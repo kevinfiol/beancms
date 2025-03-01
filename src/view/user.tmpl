@@ -45,19 +45,26 @@
       <h2 class="posts-heading">Posts</h2>
       <section class="posts-container">
         <div class="posts" role="list">
-          {% for _, post in pairs(posts) do %}
+          {% for i = 1, math.min(#posts, max_display_posts) do %}
             <div class="post" role="listitem">
               <div class="title">
-                <a href="/{%& username %}/{%& post.slug or post.post_id %}">
-                  {%& post.title or post.slug or post.post_id %}
+                <a href="/{%& username %}/{%& posts[i].slug or posts[i].post_id %}">
+                  {%& posts[i].title or posts[i].slug or posts[i].post_id %}
                 </a>
               </div>
               <div class="created-time">
-                <span>{%& post.created_time %}</span>
+                <span>{%& posts[i].created_time %}</span>
               </div>
             </div>
           {% end %}
         </div>
+        {% if show_archive_link then %}
+          <nav>
+            <small>
+              <a href="/{%& username %}/archive">archive →</a>
+            </small>
+          </nav>
+        {% end %}
       </section>
     {% end %}
 

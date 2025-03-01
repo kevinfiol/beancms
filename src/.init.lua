@@ -360,7 +360,8 @@ moon.get('/:_username(/)', function(r)
 
   local user_session = checkSession(r, username)
   local has_user_access = user_session.is_valid and user_session.user_access
-  local posts, err = db.getPosts(username, user.max_display_posts)
+  local posts, err = db.getPosts(username, user.max_display_posts + 1)
+  local show_archive_link = #posts > user.max_display_posts
 
   if err then
     LogError(err)
@@ -404,6 +405,35 @@ moon.get('/:_username(/)', function(r)
     custom_title = user.custom_title,
     max_display_posts = user.max_display_posts,
     enable_toc = user.enable_toc,
+    theme = user.theme,
+    themes = constant.THEME,
+    show_archive_link = show_archive_link
+  })
+end)
+
+moon.get('/:_username/archive(/)', function(r)
+  local username = _.trim(r.params._username)
+  local user, err = db.getUser(username)
+
+  if err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'Could not find user: ' .. username
+  end
+
+  local posts, err = db.getPosts(username, 10000)
+
+  if err then
+    LogError(err)
+    moon.setStatus(500)
+    return 'An error occurred. Could not retrieve archive'
+  end
+
+  r.headers.CacheControl = 'public, max-age=3600, must-revalidate'
+  return moon.serveContent('archive', {
+    username = username,
+    custom_css_raw = util.escapeCSS(user.custom_css),
+    posts = posts,
     theme = user.theme,
     themes = constant.THEME
   })

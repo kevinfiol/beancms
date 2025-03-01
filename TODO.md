@@ -7,7 +7,7 @@
 - [x] create docker compose file
 - [ ] remember cursor position on reload
 - [x] ctrl+z doesn't work with tabs in editor
-- [ ] custom css is sanitized when it shouldn't be (cant parse quotes for font family strings)
+- [x] custom css is sanitized when it shouldn't be (cant parse quotes for font family strings)
 - [ ] add a github workflow to automatically build the application into a release (use git hashes as release names)
 - [x] audit themes and remove problematic ones
   - [ ] audit themes and fix broken ones
@@ -18,6 +18,9 @@
     - [ ] terminal drafts dialog, weird `-` char in TOC
     - [ ] new.css dialog button
     - [ ] retro codeblocks
+- [ ] mobile issues
+  - [ ] codeblocks go past 100% on mobile
+  - [ ] upload image button doesn't work on mobile (because of execCommand?)
 - [ ] implement export option
   - [ ] this should be non-blocking; maybe fork a worker
 - [x] admin panel (use umhi?)
