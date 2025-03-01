@@ -13,26 +13,30 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install dependencies
+      - name: install dependencies
         run: |
           sudo apt update
           sudo apt install -y zip make curl
 
-      - name: Build application
+      - name: build application
         run: |
           make download
           make build
 
+      - name: get short commit hash
+        id: get_hash
+        run: echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: release-${{ github.sha }}
-          name: ${{ github.sha }}
+          tag_name: release-${{ steps.get_hash.outputs.commit_hash }}
+          name: ${{ steps.get_hash.outputs.commit_hash }}
           files: bin/beancms.com
           draft: false
           prerelease: false
