@@ -165,6 +165,7 @@
 
     function insertTextAtCursor(text) {
       if (!IS_MOBILE_DEVICE && document.execCommand) {
+        Editor.focus();
         document.execCommand('insertText', false, text);
         return;
       }
@@ -322,6 +323,7 @@
       const file = e.target.files[0];
 
       if (file && file.type.startsWith('image/')) {
+        console.log({file});
         if (file.size > MAX_IMAGE_SIZE) {
           showAlert(`Image size too large (> ${MAX_IMAGE_SIZE_STR})`);
           return;
