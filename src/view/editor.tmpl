@@ -36,6 +36,7 @@
     <p>To <strong>add images</strong>, drag them onto the page, or paste them from your clipboard.</p>
     <p>To <strong>delete a post</strong>, clear the post content, and save your changes.</p>
     <p>Unsaved changes are automatically stored as drafts on your local machine.</p>
+    <p>Raw versions of published posts can be viewed at <code>/username/post_id/raw</code></p>
   </dialog>
 
   <figure id="toast" role="alert" style="display:none">
@@ -63,7 +64,8 @@
     const TITLE = '{%& title or slug or post_id or '' %}';
     const MAX_IMAGE_SIZE = {%& max_image_size %};
     const MAX_IMAGE_SIZE_STR = '{%& max_image_size_str %}';
-    const RESERVED_SLUGS = ['feed', 'archive']
+    const RESERVED_SLUGS = ['feed', 'archive'];
+    const IS_MOBILE_DEVICE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     const $ = document.querySelector.bind(document);
     const Editor = $('#editor');
@@ -162,7 +164,28 @@
     }
 
     function insertTextAtCursor(text) {
-      document.execCommand('insertText', false, text);
+      if (!IS_MOBILE_DEVICE && document.execCommand) {
+        document.execCommand('insertText', false, text);
+        return;
+      }
+
+      alert('MOBILE');
+      const start = Editor.selectionStart;
+      const end = Editor.selectionEnd;
+
+      const currentValue = Editor.value;
+      const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
+      Editor.value = newValue;
+
+      // update draft with new dynamically added text
+      saveDraft(newValue);
+      // flag that changes have been made
+      if (!State.changes) State.changes = true;
+
+      // update cursor position
+      const newCursorPos = start + text.length;
+      Editor.setSelectionRange(newCursorPos, newCursorPos);
+      Editor.focus();
     }
 
     const saveDraft = debounce((content) => {
