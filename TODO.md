@@ -8,18 +8,18 @@
 - [ ] remember cursor position on reload
 - [x] ctrl+z doesn't work with tabs in editor
 - [x] custom css is sanitized when it shouldn't be (cant parse quotes for font family strings)
-- [ ] add a github workflow to automatically build the application into a release (use git hashes as release names)
+- [x] add a github workflow to automatically build the application into a release (use git hashes as release names)
 - [x] audit themes and remove problematic ones
-  - [ ] audit themes and fix broken ones
-    - [ ] tufte (dialog text, formatting, post lists)
-    - [ ] concrete codeblocks
-    - [ ] magick codeblocks
-    - [ ] tiny-brutalism weird spacing
-    - [ ] terminal drafts dialog, weird `-` char in TOC
-    - [ ] new.css dialog button
-    - [ ] retro codeblocks
+  - [x] audit themes and fix broken ones
+    - [x] tufte (dialog text, formatting, post lists)
+    - [x] concrete codeblocks
+    - [x] magick codeblocks
+    - [x] tiny-brutalism weird spacing
+    - [x] terminal drafts dialog, weird `-` char in TOC
+    - [x] new.css dialog button
+    - [x] retro codeblocks
 - [ ] mobile issues
-  - [ ] codeblocks go past 100% on mobile
+  - [x] codeblocks go past 100% on mobile
   - [ ] upload image button doesn't work on mobile (because of execCommand?)
 - [ ] implement export option
   - [ ] this should be non-blocking; maybe fork a worker
@@ -35,5 +35,4 @@
 - [ ] keep track of who uploaded what image
 - [ ] fullmoon: report bug about xml responses
 - [ ] redbean: WSL, need to clear /WSLInterop-late as well 
-- [ ] windows
-  - [ ] downloading the beancms.com from releases and running: images dont work
+- [x] downloading the beancms.com from releases and running: images dont work

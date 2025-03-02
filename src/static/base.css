@@ -79,6 +79,10 @@ dialog {
     &:not([disabled]):hover {
       background: rgba(0, 0, 0, 0.15) !important;
     }
+
+    &:focus {
+      background-color: white;
+    }
   }
 
   > div.controls {
