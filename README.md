@@ -22,7 +22,7 @@ Steps to run with Docker:
 ```bash
 git clone https://github.com/kevinfiol/beancms.git
 cd beancms
-docker compose up -d
+docker compose up -d --build beancms
 ```
 
 Note: Environment variables can be defined in `.env`. See `.env.defaults` for default values.
