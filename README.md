@@ -20,7 +20,7 @@ A Docker Compose file is included in the project. Currently, Bean CMS is not on 
 
 Steps to run with Docker:
 ```bash
-git clone https://github.com/kevinfiol/cms.git beancms
+git clone https://github.com/kevinfiol/beancms.git
 cd beancms
 docker compose up -d
 ```
