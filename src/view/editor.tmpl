@@ -64,7 +64,7 @@
     const TITLE = '{%& title or slug or post_id or '' %}';
     const MAX_IMAGE_SIZE = {%& max_image_size %};
     const MAX_IMAGE_SIZE_STR = '{%& max_image_size_str %}';
-    const RESERVED_SLUGS = ['feed', 'archive'];
+    const RESERVED_SLUGS = JSON.parse('{%= reserved_slugs %}');
     const IS_MOBILE_DEVICE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     const $ = document.querySelector.bind(document);
