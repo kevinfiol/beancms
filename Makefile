@@ -12,7 +12,7 @@ DATA_DIR=bin/data
 PID_FILE=bin/redbean.pid
 LOG_FILE=bin/redbean.log
 
-.PHONY: download run clean stop logs watch docker-build docker-run
+.PHONY: download run clean stop logs watch docker-build docker-run docker-stop
 
 # download dependencies
 download:
@@ -50,6 +50,7 @@ logs:
 
 clean:
 	rm -f ${REDBEAN}
+	rm -f ${ASSIMILATE}
 	rm -f ${BUILD}
 	rm -f ${LOG_FILE}
 	rm -f ${PID_FILE}
