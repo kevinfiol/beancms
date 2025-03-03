@@ -75,7 +75,7 @@
     const ref = { imageDialog: null, userDialog: null };
 
     const Users = () => (
-      m('div',
+      m('div', { style: { overflow: 'auto' } },
         m('dialog', { dom: (node) => ref.userDialog = node },
           m('p', `Are you sure you want to delete the user ${state.selectedUser.username}? This will delete all of their posts as well.`),
           m('p', 'To delete, type in the username below and click "Delete"'),
@@ -122,7 +122,7 @@
           state.users.map((user) => 
             m('tr',
               m('td', user.user_id),
-              m('td', user.username),
+              m('td', m('a', { href: `/${user.username}` }, user.username)),
               m('td', `${(new Date(user.created_time)).toGMTString()}`),
               m('td',
                 m('button', {
@@ -139,7 +139,7 @@
     );
 
     const Sessions = () => (
-      m('div',
+      m('div', { style: { overflow: 'auto' } },
         m('table',
           m('tr',
             m('th', 'Token'),
