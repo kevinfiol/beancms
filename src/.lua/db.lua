@@ -34,6 +34,8 @@ return {
   end,
 
   createUser = function(username, hashed, salt)
+    username = string.sub(username or '', 1, 35)
+
     local err = nil
     local ok, result = pcall(function ()
       return sql:execute(

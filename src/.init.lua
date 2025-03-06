@@ -251,7 +251,7 @@ moon.get('/login', function(r)
 end)
 
 moon.post('/login', function(r)
-  local username = _.trim(r.params.username)
+  local username = util.sanitizeUsername(r.params.username)
   local password = r.params.password
   local ok, err = db.validateUser(username, password)
 
@@ -298,7 +298,7 @@ moon.get('/register', function(r)
 end)
 
 moon.post('/register', function(r)
-  local username = _.trim(r.params.username)
+  local username = util.sanitizeUsername(r.params.username)
   local password = r.params.password
   local confirm = r.params.confirm
   local phone = r.params.phone

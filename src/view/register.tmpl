@@ -15,7 +15,17 @@
         <div>
           <label>
             Username
-            <input type="text" name="username" id="username" placeholder="Username" required>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              placeholder="Username"
+              pattern="[a-zA-Z0-9_\-~]+" 
+              title="Username can only contain letters, numbers, hyphens, underscores, and tildes"
+              minlength="1"
+              maxlength="35"
+              required
+            >
           </label>
 
           <label>
