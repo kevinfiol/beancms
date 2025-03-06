@@ -299,7 +299,7 @@ end)
 
 moon.post('/register', function(r)
   local username = util.sanitizeUsername(r.params.username)
-  local password = r.params.password
+  local password = util.sanitizePassword(r.params.password)
   local confirm = r.params.confirm
   local phone = r.params.phone
   local challenge_answer = _.trim(r.params.challenge_answer)

@@ -38,6 +38,10 @@ local function buildNestedList(headings, level)
 end
 
 return {
+  sanitizePassword = function(password)
+    return string.sub(password or '', 1, 100) -- limit to 100 characters
+  end,
+
   sanitizeUsername = function(username)
     -- replace any character that is not alphanumeric, hyphen, underscore, or tilde with empty string
     username = string.gsub(username or '', "[^%w%-%_~]", '')
