@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] sanitize usernames on intake
 - [x] fix image drag styles in dark mode
 - [x] add .env file parsing
 - [x] fix atom feed properties
