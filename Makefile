@@ -56,19 +56,5 @@ clean:
 	rm -f ${PID_FILE}
 	rm -rf ${DATA_DIR}
 
-docker-build:
-	docker build --tag=beancms .
-
 docker-run:
-	mkdir -p ${DATA_DIR}
-	docker run --detach \
-		--name=beancms \
-		--publish ${PORT}:80 \
-		--restart unless-stopped \
-		--env-file .env \
-		--mount type=bind,source=./${DATA_DIR},target=/app/data/ \
-		--mount type=bind,source=./${LOG_FILE},target=/app/redbean.log \
-		beancms
-
-docker-stop:
-	docker stop beancms && docker rm beancms
+	docker compose up -d --build beancms
