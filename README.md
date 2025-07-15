@@ -14,6 +14,8 @@ There are currently two ways to run Bean CMS.
 
 Note: The `-D` flag is required for Bean CMS to be able to serve user uploaded images from the current directory.
 
+On some Linux systems with Wine installed you might run into some issues running `beancms.com`. See [redbean.dev/#linux](https://redbean.dev/#linux).
+
 ### Docker
 
 A Docker Compose file is included in the project. Currently, Bean CMS is not on Docker Hub.
