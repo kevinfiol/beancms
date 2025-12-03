@@ -37,3 +37,4 @@
 - [ ] fullmoon: report bug about xml responses
 - [ ] redbean: WSL, need to clear /WSLInterop-late as well 
 - [x] downloading the beancms.com from releases and running: images dont work
+- [ ] optimize queries
