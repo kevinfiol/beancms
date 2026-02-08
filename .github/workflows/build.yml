@@ -39,6 +39,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: get short commit hash
+        id: get_hash
+        run: echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: build and push docker image
         uses: docker/build-push-action@v5
         with:
@@ -47,10 +51,6 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ steps.get_hash.outputs.commit_hash }}
-
-      - name: get short commit hash
-        id: get_hash
-        run: echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: create github release
         uses: softprops/action-gh-release@v2
